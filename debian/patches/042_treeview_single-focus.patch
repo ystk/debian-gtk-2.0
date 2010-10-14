@@ -1,0 +1,14 @@
+Index: b/gtk/gtktreeview.c
+===================================================================
+--- a/gtk/gtktreeview.c	2010-04-10 14:52:03.729940590 +0200
++++ b/gtk/gtktreeview.c	2010-04-10 14:52:11.345946704 +0200
+@@ -9570,7 +9570,8 @@
+ 
+       if (cursor_path)
+ 	{
+-	  if (tree_view->priv->selection->type == GTK_SELECTION_MULTIPLE)
++	  if (tree_view->priv->selection->type == GTK_SELECTION_MULTIPLE ||
++	      tree_view->priv->selection->type == GTK_SELECTION_SINGLE)
+ 	    gtk_tree_view_real_set_cursor (tree_view, cursor_path, FALSE, FALSE);
+ 	  else
+ 	    gtk_tree_view_real_set_cursor (tree_view, cursor_path, TRUE, FALSE);
