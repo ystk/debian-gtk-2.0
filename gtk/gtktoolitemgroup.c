@@ -1181,7 +1181,7 @@ gtk_tool_item_group_realize (GtkWidget *widget)
   widget->window = gdk_window_new (gtk_widget_get_parent_window (widget),
                                    &attributes, attributes_mask);
 
-  display = gdk_drawable_get_display (widget->window);
+  display = gdk_window_get_display (widget->window);
 
   if (gdk_display_supports_composite (display))
     gdk_window_set_composited (widget->window, TRUE);
@@ -1555,7 +1555,7 @@ gtk_tool_item_group_class_init (GtkToolItemGroupClass *cls)
   g_object_class_install_property (oclass, PROP_COLLAPSED,
                                    g_param_spec_boolean ("collapsed",
                                                          P_("Collapsed"),
-                                                         P_("Wether the group has been collapsed and items are hidden"),
+                                                         P_("Whether the group has been collapsed and items are hidden"),
                                                          DEFAULT_COLLAPSED,
                                                          GTK_PARAM_READWRITE));
 
@@ -1754,10 +1754,8 @@ gtk_tool_item_group_set_header_relief (GtkToolItemGroup *group,
 static gint64
 gtk_tool_item_group_get_animation_timestamp (GtkToolItemGroup *group)
 {
-  GTimeVal now;
-
-  g_source_get_current_time (group->priv->animation_timeout, &now);
-  return (now.tv_sec * G_USEC_PER_SEC + now.tv_usec - group->priv->animation_start) / 1000;
+  return (g_source_get_time (group->priv->animation_timeout) -
+          group->priv->animation_start) / 1000;
 }
 
 static void
@@ -1873,14 +1871,10 @@ gtk_tool_item_group_set_collapsed (GtkToolItemGroup *group,
     {
       if (priv->animation)
         {
-          GTimeVal now;
-
-          g_get_current_time (&now);
-
           if (priv->animation_timeout)
             g_source_destroy (priv->animation_timeout);
 
-          priv->animation_start = (now.tv_sec * G_USEC_PER_SEC + now.tv_usec);
+          priv->animation_start = g_get_monotonic_time ();
           priv->animation_timeout = g_timeout_source_new (ANIMATION_TIMEOUT);
 
           g_source_set_callback (priv->animation_timeout,
@@ -1936,7 +1930,7 @@ gtk_tool_item_group_set_ellipsize (GtkToolItemGroup   *group,
  *
  * Since: 2.20
  */
-G_CONST_RETURN gchar*
+const gchar*
 gtk_tool_item_group_get_label (GtkToolItemGroup *group)
 {
   GtkToolItemGroupPrivate *priv;
@@ -1958,7 +1952,7 @@ gtk_tool_item_group_get_label (GtkToolItemGroup *group)
  * Gets the label widget of @group.
  * See gtk_tool_item_group_set_label_widget().
  *
- * Returns: the label widget of @group
+ * Returns: (transfer none): the label widget of @group
  *
  * Since: 2.20
  */
@@ -2163,7 +2157,7 @@ gtk_tool_item_group_get_n_items (GtkToolItemGroup *group)
  *
  * Gets the tool item at @index in group.
  *
- * Returns: the #GtkToolItem at index
+ * Returns: (transfer none): the #GtkToolItem at index
  *
  * Since: 2.20
  */
@@ -2188,7 +2182,7 @@ gtk_tool_item_group_get_nth_item (GtkToolItemGroup *group,
  *
  * Gets the tool item at position (x, y).
  *
- * Returns: the #GtkToolItem at position (x, y)
+ * Returns: (transfer none): the #GtkToolItem at position (x, y)
  *
  * Since: 2.20
  */

@@ -26,6 +26,8 @@
 
 #include "config.h"
 
+#include "gtkmain.h"
+
 #include <glib.h>
 #include "gdkconfig.h"
 
@@ -52,7 +54,6 @@
 #include "gtkclipboard.h"
 #include "gtkdnd.h"
 #include "gtkversion.h"
-#include "gtkmain.h"
 #include "gtkmodules.h"
 #include "gtkrc.h"
 #include "gtkrecentmanager.h"
@@ -386,9 +387,9 @@ static gboolean do_setlocale = TRUE;
  * 
  * Prevents gtk_init(), gtk_init_check(), gtk_init_with_args() and
  * gtk_parse_args() from automatically
- * calling <literal>setlocale (LC_ALL, "")</literal>. You would 
- * want to use this function if you wanted to set the locale for 
- * your program to something other than the user's locale, or if 
+ * calling <literal>setlocale (LC_ALL, "")</literal>. You would
+ * want to use this function if you wanted to set the locale for
+ * your program to something other than the user's locale, or if
  * you wanted to set different values for different locale categories.
  *
  * Most programs should not need to call this function.
@@ -627,6 +628,32 @@ setlocale_initialization (void)
     }
 }
 
+/* Return TRUE if module_to_check causes version conflicts.
+ * If module_to_check is NULL, check the main module.
+ */
+gboolean
+_gtk_module_has_mixed_deps (GModule *module_to_check)
+{
+  GModule *module;
+  gpointer func;
+  gboolean result;
+
+  if (!module_to_check)
+    module = g_module_open (NULL, 0);
+  else
+    module = module_to_check;
+
+  if (g_module_symbol (module, "gtk_widget_device_is_shadowed", &func))
+    result = TRUE;
+  else
+    result = FALSE;
+
+  if (!module_to_check)
+    g_module_close (module);
+
+  return result;
+}
+
 static void
 do_pre_parse_initialization (int    *argc,
 			     char ***argv)
@@ -644,6 +671,9 @@ do_pre_parse_initialization (int    *argc,
     return;
 
   pre_initialized = TRUE;
+
+  if (_gtk_module_has_mixed_deps (NULL))
+    g_error ("GTK+ 2.x symbols detected. Using GTK+ 2.x and GTK+ 3 in the same process is not supported");
 
   gdk_pre_parse_libgtk_only ();
   gdk_event_handler_set ((GdkEventFunc)gtk_main_do_event, NULL, NULL);
@@ -825,12 +855,13 @@ gtk_get_option_group (gboolean open_default_display)
 /**
  * gtk_init_with_args:
  * @argc: a pointer to the number of command line arguments.
- * @argv: a pointer to the array of command line arguments.
+ * @argv: (inout) (array length=argc): a pointer to the array of
+ *    command line arguments.
  * @parameter_string: a string which is displayed in
  *    the first line of <option>--help</option> output, after 
  *    <literal><replaceable>programname</replaceable> [OPTION...]</literal>
- * @entries: a %NULL-terminated array of #GOptionEntry<!-- -->s
- *    describing the options of your program
+ * @entries: (array zero-terminated=1):  a %NULL-terminated array
+ *    of #GOptionEntry<!-- -->s describing the options of your program
  * @translation_domain: a translation domain to use for translating
  *    the <option>--help</option> output for the options in @entries
  *    with gettext(), or %NULL
@@ -884,8 +915,9 @@ gtk_init_with_args (int            *argc,
 
 /**
  * gtk_parse_args:
- * @argc: (inout): a pointer to the number of command line arguments.
- * @argv: (array) (inout): a pointer to the array of command line arguments.
+ * @argc: (inout): a pointer to the number of command line arguments
+ * @argv: (array length=argc) (inout): a pointer to the array of
+ *     command line arguments
  *
  * Parses command line arguments, and initializes global
  * attributes of GTK+, but does not actually open a connection
@@ -894,7 +926,7 @@ gtk_init_with_args (int            *argc,
  * Any arguments used by GTK+ or GDK are removed from the array and
  * @argc and @argv are updated accordingly.
  *
- * You shouldn't call this function explicitely if you are using
+ * There is no need to call this function explicitely if you are using
  * gtk_init(), or gtk_init_check().
  *
  * Return value: %TRUE if initialization succeeded, otherwise %FALSE.
@@ -968,27 +1000,30 @@ gtk_init_check (int	 *argc,
 
 /**
  * gtk_init:
- * @argc: (inout): Address of the <parameter>argc</parameter> parameter of your
- *   main() function. Changed if any arguments were handled.
- * @argv: (array length=argc) (inout) (allow-none): Address of the <parameter>argv</parameter> parameter of main().
- *   Any parameters understood by gtk_init() are stripped before return.
+ * @argc: (inout): Address of the <parameter>argc</parameter> parameter of
+ *     your main() function. Changed if any arguments were handled
+ * @argv: (array length=argc) (inout) (allow-none): Address of the
+ *     <parameter>argv</parameter> parameter of main(). Any options
+ *     understood by GTK+ are stripped before return.
  *
  * Call this function before using any other GTK+ functions in your GUI
  * applications.  It will initialize everything needed to operate the
- * toolkit and parses some standard command line options. @argc and 
- * @argv are adjusted accordingly so your own code will 
- * never see those standard arguments. 
+ * toolkit and parses some standard command line options.
  *
- * Note that there are some alternative ways to initialize GTK+: 
- * if you are calling gtk_parse_args(), gtk_init_check(), 
- * gtk_init_with_args() or g_option_context_parse() with 
- * the option group returned by gtk_get_option_group(), you 
- * <emphasis>don't</emphasis> have to call gtk_init().
+ * @argc and @argv are adjusted accordingly so your own code will
+ * never see those standard arguments.
+ *
+ * Note that there are some alternative ways to initialize GTK+:
+ * if you are calling gtk_parse_args(), gtk_init_check(),
+ * gtk_init_with_args() or g_option_context_parse() with
+ * the option group returned by gtk_get_option_group(),
+ * you <emphasis>don't</emphasis> have to call gtk_init().
  *
  * <note><para>
- * This function will terminate your program if it was unable to initialize 
- * the GUI for some reason. If you want your program to fall back to a 
- * textual interface you want to call gtk_init_check() instead.
+ * This function will terminate your program if it was unable to
+ * initialize the windowing system for some reason. If you want
+ * your program to fall back to a textual interface you want to
+ * call gtk_init_check() instead.
  * </para></note>
  *
  * <note><para>
@@ -999,7 +1034,7 @@ gtk_init_check (int	 *argc,
  * but notice that other libraries (e.g. libdbus or gvfs) might do
  * similar things.
  * </para></note>
- **/
+ */
 void
 gtk_init (int *argc, char ***argv)
 {
@@ -1099,6 +1134,8 @@ gtk_exit (gint errorcode)
  * result of the setlocale(); it is also used on other machines, such as 
  * Windows, where the C library returns a different result. The string is 
  * owned by GTK+ and should not be modified or freed.
+ *
+ * Deprecated: 2.24: Use setlocale() directly
  **/
 gchar *
 gtk_set_locale (void)
@@ -1419,7 +1456,7 @@ rewrite_event_for_grabs (GdkEvent *event)
     case GDK_MOTION_NOTIFY:
     case GDK_PROXIMITY_IN:
     case GDK_PROXIMITY_OUT:
-      display = gdk_drawable_get_display (event->proximity.window);
+      display = gdk_window_get_display (event->proximity.window);
       if (!gdk_pointer_grab_info_libgtk_only (display, &grab_window, &owner_events) ||
 	  !owner_events)
 	return NULL;
@@ -1427,7 +1464,7 @@ rewrite_event_for_grabs (GdkEvent *event)
 
     case GDK_KEY_PRESS:
     case GDK_KEY_RELEASE:
-      display = gdk_drawable_get_display (event->key.window);
+      display = gdk_window_get_display (event->key.window);
       if (!gdk_keyboard_grab_info_libgtk_only (display, &grab_window, &owner_events) ||
 	  !owner_events)
 	return NULL;
@@ -1829,7 +1866,7 @@ gtk_grab_add (GtkWidget *widget)
   
   if (!gtk_widget_has_grab (widget) && gtk_widget_is_sensitive (widget))
     {
-      GTK_WIDGET_SET_FLAGS (widget, GTK_HAS_GRAB);
+      _gtk_widget_set_has_grab (widget, TRUE);
       
       group = gtk_main_get_window_group (widget);
 
@@ -1845,6 +1882,14 @@ gtk_grab_add (GtkWidget *widget)
     }
 }
 
+/**
+ * gtk_grab_get_current:
+ *
+ * Queries the current grab of the default window group.
+ *
+ * Return value: (transfer none): The widget which currently
+ *     has the grab or %NULL if no grab is active
+ */
 GtkWidget*
 gtk_grab_get_current (void)
 {
@@ -1867,7 +1912,7 @@ gtk_grab_remove (GtkWidget *widget)
   
   if (gtk_widget_has_grab (widget))
     {
-      GTK_WIDGET_UNSET_FLAGS (widget, GTK_HAS_GRAB);
+      _gtk_widget_set_has_grab (widget, FALSE);
 
       group = gtk_main_get_window_group (widget);
       group->grabs = g_slist_remove (group->grabs, widget);
@@ -2253,7 +2298,8 @@ gtk_invoke_input (gpointer	    data,
  * signal. The returned event must be freed with gdk_event_free().
  * If there is no current event, the function returns %NULL.
  * 
- * Return value: a copy of the current event, or %NULL if no current event.
+ * Return value: (transfer full): a copy of the current event, or %NULL if no
+ *     current event.
  **/
 GdkEvent*
 gtk_get_current_event (void)
@@ -2283,7 +2329,7 @@ gtk_get_current_event_time (void)
 
 /**
  * gtk_get_current_event_state:
- * @state: a location to store the state of the current event
+ * @state: (out): a location to store the state of the current event
  * 
  * If there is a current event and it has a state field, place
  * that state field in @state and return %TRUE, otherwise return
@@ -2313,7 +2359,8 @@ gtk_get_current_event_state (GdkModifierType *state)
  * returns %NULL, otherwise returns the widget that received the event
  * originally.
  * 
- * Return value: the widget that originally received @event, or %NULL
+ * Return value: (transfer none): the widget that originally
+ *     received @event, or %NULL
  **/
 GtkWidget*
 gtk_get_event_widget (GdkEvent *event)
@@ -2583,6 +2630,71 @@ _gtk_boolean_handled_accumulator (GSignalInvocationHint *ihint,
   continue_emission = !signal_handled;
   
   return continue_emission;
+}
+
+gboolean
+_gtk_button_event_triggers_context_menu (GdkEventButton *event)
+{
+  if (event->type == GDK_BUTTON_PRESS)
+    {
+      if (event->button == 3 &&
+          ! (event->state & (GDK_BUTTON1_MASK | GDK_BUTTON2_MASK)))
+        return TRUE;
+
+#ifdef GDK_WINDOWING_QUARTZ
+      if (event->button == 1 &&
+          ! (event->state & (GDK_BUTTON2_MASK | GDK_BUTTON3_MASK)) &&
+          (event->state & GDK_CONTROL_MASK))
+        return TRUE;
+#endif
+    }
+
+  return FALSE;
+}
+
+gboolean
+_gtk_translate_keyboard_accel_state (GdkKeymap       *keymap,
+                                     guint            hardware_keycode,
+                                     GdkModifierType  state,
+                                     GdkModifierType  accel_mask,
+                                     gint             group,
+                                     guint           *keyval,
+                                     gint            *effective_group,
+                                     gint            *level,
+                                     GdkModifierType *consumed_modifiers)
+{
+  gboolean group_mask_disabled = FALSE;
+  gboolean retval;
+
+  /* if the group-toggling modifier is part of the accel mod mask, and
+   * it is active, disable it for matching
+   */
+  if (accel_mask & state & GTK_TOGGLE_GROUP_MOD_MASK)
+    {
+      state &= ~GTK_TOGGLE_GROUP_MOD_MASK;
+      group = 0;
+      group_mask_disabled = TRUE;
+    }
+
+  retval = gdk_keymap_translate_keyboard_state (keymap,
+                                                hardware_keycode, state, group,
+                                                keyval,
+                                                effective_group, level,
+                                                consumed_modifiers);
+
+  /* add back the group mask, we want to match against the modifier,
+   * but not against the keyval from its group
+   */
+  if (group_mask_disabled)
+    {
+      if (effective_group)
+        *effective_group = 1;
+
+      if (consumed_modifiers)
+        *consumed_modifiers &= ~GTK_TOGGLE_GROUP_MOD_MASK;
+    }
+
+  return retval;
 }
 
 #define __GTK_MAIN_C__

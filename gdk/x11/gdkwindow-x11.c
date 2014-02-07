@@ -867,17 +867,44 @@ x_event_mask_to_gdk_event_mask (long mask)
  * For example in the X backend, a native window handle is an Xlib
  * <type>XID</type>.
  * 
- * Return value: a #GdkWindow wrapper for the native window or 
+ * Return value: a #GdkWindow wrapper for the native window or
  *   %NULL if the window has been destroyed. The wrapper will be
  *   newly created, if one doesn't exist already.
  *
  * Since: 2.2
+ *
+ * Deprecated:2.24: Use gdk_x11_window_foreign_new_for_display() or
+ *     equivalent backend-specific API instead
  **/
 GdkWindow *
 gdk_window_foreign_new_for_display (GdkDisplay     *display,
 				    GdkNativeWindow anid)
 {
-  GdkWindow *window;
+  return gdk_x11_window_foreign_new_for_display (display, anid);
+}
+
+/**
+ * gdk_x11_window_foreign_new_for_display:
+ * @display: the #GdkDisplay where the window handle comes from.
+ * @window: an XLib <type>Window</type>
+ *
+ * Wraps a native window in a #GdkWindow.
+ *
+ * This may fail if the window has been destroyed. If the window
+ * was already known to GDK, a new reference to the existing
+ * #GdkWindow is returned.
+ *
+ * Return value: a #GdkWindow wrapper for the native window or
+ *   %NULL if the window has been destroyed. The wrapper will be
+ *   newly created, if one doesn't exist already.
+ *
+ * Since: 2.24
+ */
+GdkWindow *
+gdk_x11_window_foreign_new_for_display (GdkDisplay *display,
+                                        Window      window)
+{
+  GdkWindow *win;
   GdkWindowObject *private;
   GdkWindowImplX11 *impl;
   GdkDrawableImplX11 *draw_impl;
@@ -892,33 +919,33 @@ gdk_window_foreign_new_for_display (GdkDisplay     *display,
 
   display_x11 = GDK_DISPLAY_X11 (display);
 
-  if ((window = gdk_xid_table_lookup_for_display (display, anid)) != NULL)
-    return g_object_ref (window);
+  if ((win = gdk_xid_table_lookup_for_display (display, window)) != NULL)
+    return g_object_ref (win);
 
   gdk_error_trap_push ();
-  result = XGetWindowAttributes (display_x11->xdisplay, anid, &attrs);
+  result = XGetWindowAttributes (display_x11->xdisplay, window, &attrs);
   if (gdk_error_trap_pop () || !result)
     return NULL;
 
   /* FIXME: This is pretty expensive. Maybe the caller should supply
    *        the parent */
   gdk_error_trap_push ();
-  result = XQueryTree (display_x11->xdisplay, anid, &root, &parent, &children, &nchildren);
+  result = XQueryTree (display_x11->xdisplay, window, &root, &parent, &children, &nchildren);
   if (gdk_error_trap_pop () || !result)
     return NULL;
 
   if (children)
     XFree (children);
   
-  window = g_object_new (GDK_TYPE_WINDOW, NULL);
+  win = g_object_new (GDK_TYPE_WINDOW, NULL);
 
-  private = (GdkWindowObject *) window;
+  private = (GdkWindowObject *) win;
   private->impl = g_object_new (_gdk_window_impl_get_type (), NULL);
   private->impl_window = private;
 
   impl = GDK_WINDOW_IMPL_X11 (private->impl);
   draw_impl = GDK_DRAWABLE_IMPL_X11 (private->impl);
-  draw_impl->wrapper = GDK_DRAWABLE (window);
+  draw_impl->wrapper = GDK_DRAWABLE (win);
   draw_impl->screen = _gdk_x11_display_screen_for_xrootwin (display, root);
   
   private->parent = gdk_xid_table_lookup_for_display (display, parent);
@@ -926,9 +953,9 @@ gdk_window_foreign_new_for_display (GdkDisplay     *display,
   if (!private->parent || GDK_WINDOW_TYPE (private->parent) == GDK_WINDOW_FOREIGN)
     private->parent = (GdkWindowObject *) gdk_screen_get_root_window (draw_impl->screen);
   
-  private->parent->children = g_list_prepend (private->parent->children, window);
+  private->parent->children = g_list_prepend (private->parent->children, win);
 
-  draw_impl->xid = anid;
+  draw_impl->xid = window;
 
   private->x = attrs.x;
   private->y = attrs.y;
@@ -947,13 +974,13 @@ gdk_window_foreign_new_for_display (GdkDisplay     *display,
 
   private->depth = attrs.depth;
   
-  g_object_ref (window);
-  _gdk_xid_table_insert (display, &GDK_WINDOW_XID (window), window);
+  g_object_ref (win);
+  _gdk_xid_table_insert (display, &GDK_WINDOW_XID (win), win);
 
   /* Update the clip region, etc */
-  _gdk_window_update_size (window);
+  _gdk_window_update_size (win);
 
-  return window;
+  return win;
 }
 
 /**
@@ -966,15 +993,37 @@ gdk_window_foreign_new_for_display (GdkDisplay     *display,
  * For example in the X backend, a native window handle is an Xlib
  * <type>XID</type>.
  *
- * Return value: the #GdkWindow wrapper for the native window, 
+ * Return value: the #GdkWindow wrapper for the native window,
  *    or %NULL if there is none.
  *
  * Since: 2.2
+ *
+ * Deprecated:2.24: Use gdk_x11_window_lookup_for_display() instead
  **/
 GdkWindow *
-gdk_window_lookup_for_display (GdkDisplay *display, GdkNativeWindow anid)
+gdk_window_lookup_for_display (GdkDisplay      *display,
+                               GdkNativeWindow  anid)
 {
-  return (GdkWindow*) gdk_xid_table_lookup_for_display (display, anid);
+  return gdk_x11_window_lookup_for_display (display, anid);
+}
+
+/**
+ * gdk_x11_window_lookup_for_display:
+ * @display: the #GdkDisplay corresponding to the window handle
+ * @window: an XLib <type>Window</type>
+ *
+ * Looks up the #GdkWindow that wraps the given native window handle.
+ *
+ * Return value: the #GdkWindow wrapper for the native window,
+ *    or %NULL if there is none.
+ *
+ * Since: 2.24
+ */
+GdkWindow *
+gdk_x11_window_lookup_for_display (GdkDisplay *display,
+                                   Window       window)
+{
+  return (GdkWindow*) gdk_xid_table_lookup_for_display (display, window);
 }
 
 /**
@@ -986,8 +1035,11 @@ gdk_window_lookup_for_display (GdkDisplay *display, GdkNativeWindow anid)
  * For example in the X backend, a native window handle is an Xlib
  * <type>XID</type>.
  *
- * Return value: the #GdkWindow wrapper for the native window, 
+ * Return value: the #GdkWindow wrapper for the native window,
  *    or %NULL if there is none.
+ *
+ * Deprecated: 2.24: Use gdk_x11_window_lookup_for_display() or equivalent
+ *    backend-specific functionality instead
  **/
 GdkWindow *
 gdk_window_lookup (GdkNativeWindow anid)
@@ -3707,7 +3759,8 @@ gdk_x11_window_set_user_time (GdkWindow *window,
 /**
  * gdk_window_set_icon_list:
  * @window: The #GdkWindow toplevel window to set the icon of.
- * @pixbufs: A list of pixbufs, of different sizes.
+ * @pixbufs: (transfer none) (element-type GdkPixbuf):
+ *     A list of pixbufs, of different sizes.
  *
  * Sets a list of icons for the window. One of these will be used
  * to represent the window when it has been iconified. The icon is
@@ -4606,17 +4659,24 @@ _xwindow_get_shape (Display *xdisplay,
   shape = NULL;
   rn = 0;
 
-  xrl = XShapeGetRectangles (xdisplay,
-			     window,
-			     shape_type, &rn, &ord);
+  /* Note that XShapeGetRectangles returns NULL in two situations:
+   * - the server doesn't support the SHAPE extension
+   * - the shape is empty
+   *
+   * Since we can't discriminate these here, we always return
+   * an empty shape. It is the callers responsibility to check
+   * whether the server supports the SHAPE extensions beforehand.
+   */
+  xrl = XShapeGetRectangles (xdisplay, window, shape_type, &rn, &ord);
 
-  if (xrl == NULL || rn == 0)
+  if (rn == 0)
     return gdk_region_new (); /* Empty */
 
   if (ord != YXBanded)
     {
       /* This really shouldn't happen with any xserver, as they
-	 generally convert regions to YXBanded internally */
+       * generally convert regions to YXBanded internally
+       */
       g_warning ("non YXBanded shape masks not supported");
       XFree (xrl);
       return NULL;
@@ -4631,10 +4691,10 @@ _xwindow_get_shape (Display *xdisplay,
       rl[i].height = xrl[i].height;
     }
   XFree (xrl);
-  
+
   shape = _gdk_region_new_from_yxbanded_rects (rl, rn);
   g_free (rl);
-  
+
   return shape;
 }
 
@@ -4683,10 +4743,10 @@ _gdk_windowing_window_get_input_shape (GdkWindow *window)
 {
 #if defined(ShapeInput)
   if (!GDK_WINDOW_DESTROYED (window) &&
-      gdk_display_supports_shapes (GDK_WINDOW_DISPLAY (window)))
+      gdk_display_supports_input_shapes (GDK_WINDOW_DISPLAY (window)))
     return _xwindow_get_shape (GDK_WINDOW_XDISPLAY (window),
-			      GDK_WINDOW_XID (window),
-			      ShapeInput);
+                              GDK_WINDOW_XID (window),
+                              ShapeInput);
 #endif
 
   return NULL;

@@ -35,6 +35,7 @@
 #include "gtkmain.h"		/* For _gtk_boolean_handled_accumulator */
 #include "gdk/gdkkeysyms.h"
 #include "gtkmarshalers.h"
+#include "gtkprivate.h"
 #include "gtkalias.h"
 
 /**
@@ -370,8 +371,8 @@ gtk_accel_groups_from_object (GObject *object)
  * @accel_group: a #GtkAccelGroup
  * @find_func: a function to filter the entries of @accel_group with
  * @data: data to pass to @find_func
- * @returns: the key of the first entry passing @find_func. The key is 
- * owned by GTK+ and must not be freed.
+ * @returns: (transfer none): the key of the first entry passing
+ *    @find_func. The key is owned by GTK+ and must not be freed.
  *
  * Finds the first entry in an accelerator group for which 
  * @find_func returns %TRUE and returns its #GtkAccelKey.
@@ -832,7 +833,8 @@ gtk_accel_group_query (GtkAccelGroup  *accel_group,
 /**
  * gtk_accel_group_from_accel_closure:
  * @closure: a #GClosure
- * @returns: (allow-none): the #GtkAccelGroup to which @closure is connected, or %NULL.
+ * @returns: (transfer none): the #GtkAccelGroup to which @closure
+ *     is connected, or %NULL.
  *
  * Finds the #GtkAccelGroup to which @closure is connected; 
  * see gtk_accel_group_connect().
@@ -1120,17 +1122,34 @@ is_hyper (const gchar *string)
 	  (string[6] == '>'));
 }
 
+static inline gboolean
+is_primary (const gchar *string)
+{
+  return ((string[0] == '<') &&
+	  (string[1] == 'p' || string[1] == 'P') &&
+	  (string[2] == 'r' || string[2] == 'R') &&
+	  (string[3] == 'i' || string[3] == 'I') &&
+	  (string[4] == 'm' || string[4] == 'M') &&
+	  (string[5] == 'a' || string[5] == 'A') &&
+	  (string[6] == 'r' || string[6] == 'R') &&
+	  (string[7] == 'y' || string[7] == 'Y') &&
+	  (string[8] == '>'));
+}
+
 /**
  * gtk_accelerator_parse:
  * @accelerator:      string representing an accelerator
- * @accelerator_key:  return location for accelerator keyval
- * @accelerator_mods: return location for accelerator modifier mask
+ * @accelerator_key: (out) (allow-none): return location for accelerator keyval
+ * @accelerator_mods: (out) (allow-none): return location for accelerator modifier mask
  *
  * Parses a string representing an accelerator. The
  * format looks like "&lt;Control&gt;a" or "&lt;Shift&gt;&lt;Alt&gt;F1" or
  * "&lt;Release&gt;z" (the last one is for key release).
  * The parser is fairly liberal and allows lower or upper case,
  * and also abbreviations such as "&lt;Ctl&gt;" and "&lt;Ctrl&gt;".
+ * Key names are parsed using gdk_keyval_from_name(). For character keys the
+ * name is not the symbol, but the lowercase name, e.g. one would use
+ * "&lt;Ctrl&gt;minus" instead of "&lt;Ctrl&gt;-".
  *
  * If the parse fails, @accelerator_key and @accelerator_mods will
  * be set to 0 (zero).
@@ -1162,6 +1181,12 @@ gtk_accelerator_parse (const gchar     *accelerator,
 	      accelerator += 9;
 	      len -= 9;
 	      mods |= GDK_RELEASE_MASK;
+	    }
+	  else if (len >= 9 && is_primary (accelerator))
+	    {
+	      accelerator += 9;
+	      len -= 9;
+	      mods |= GTK_DEFAULT_ACCEL_MOD_MASK_VIRTUAL;
 	    }
 	  else if (len >= 9 && is_control (accelerator))
 	    {
@@ -1276,6 +1301,7 @@ gtk_accelerator_name (guint           accelerator_key,
 		      GdkModifierType accelerator_mods)
 {
   static const gchar text_release[] = "<Release>";
+  static const gchar text_primary[] = "<Primary>";
   static const gchar text_shift[] = "<Shift>";
   static const gchar text_control[] = "<Control>";
   static const gchar text_mod1[] = "<Alt>";
@@ -1286,6 +1312,7 @@ gtk_accelerator_name (guint           accelerator_key,
   static const gchar text_meta[] = "<Meta>";
   static const gchar text_super[] = "<Super>";
   static const gchar text_hyper[] = "<Hyper>";
+  GdkModifierType saved_mods;
   guint l;
   gchar *keyval_name;
   gchar *accelerator;
@@ -1296,9 +1323,15 @@ gtk_accelerator_name (guint           accelerator_key,
   if (!keyval_name)
     keyval_name = "";
 
+  saved_mods = accelerator_mods;
   l = 0;
   if (accelerator_mods & GDK_RELEASE_MASK)
     l += sizeof (text_release) - 1;
+  if (accelerator_mods & GTK_DEFAULT_ACCEL_MOD_MASK_VIRTUAL)
+    {
+      l += sizeof (text_primary) - 1;
+      accelerator_mods &= ~GTK_DEFAULT_ACCEL_MOD_MASK_VIRTUAL; /* consume the default accel */
+    }
   if (accelerator_mods & GDK_SHIFT_MASK)
     l += sizeof (text_shift) - 1;
   if (accelerator_mods & GDK_CONTROL_MASK)
@@ -1323,12 +1356,19 @@ gtk_accelerator_name (guint           accelerator_key,
 
   accelerator = g_new (gchar, l + 1);
 
+  accelerator_mods = saved_mods;
   l = 0;
   accelerator[l] = 0;
   if (accelerator_mods & GDK_RELEASE_MASK)
     {
       strcpy (accelerator + l, text_release);
       l += sizeof (text_release) - 1;
+    }
+  if (accelerator_mods & GTK_DEFAULT_ACCEL_MOD_MASK_VIRTUAL)
+    {
+      strcpy (accelerator + l, text_primary);
+      l += sizeof (text_primary) - 1;
+      accelerator_mods &= ~GTK_DEFAULT_ACCEL_MOD_MASK_VIRTUAL; /* consume the default accel */
     }
   if (accelerator_mods & GDK_SHIFT_MASK)
     {

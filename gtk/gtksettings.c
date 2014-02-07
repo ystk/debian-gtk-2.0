@@ -292,7 +292,11 @@ gtk_settings_class_init (GtkSettingsClass *class)
                                              g_param_spec_string ("gtk-theme-name",
 								   P_("Theme Name"),
 								   P_("Name of theme RC file to load"),
+#ifdef G_OS_WIN32
+								  "MS-Windows",
+#else
 								  "Raleigh",
+#endif
 								  GTK_PARAM_READWRITE),
                                              NULL);
   g_assert (result == PROP_THEME_NAME);
@@ -1040,11 +1044,11 @@ gtk_settings_finalize (GObject *object)
 
 /**
  * gtk_settings_get_for_screen:
- * @screen : a #GdkScreen.
- * 
+ * @screen: a #GdkScreen.
+ *
  * Gets the #GtkSettings object for @screen, creating it if necessary.
  *
- * Return value: a #GtkSettings object.
+ * Return value: (transfer none): a #GtkSettings object.
  *
  * Since: 2.2
  */
@@ -1052,9 +1056,9 @@ GtkSettings*
 gtk_settings_get_for_screen (GdkScreen *screen)
 {
   GtkSettings *settings;
-  
+
   g_return_val_if_fail (GDK_IS_SCREEN (screen), NULL);
-  
+
   settings = g_object_get_data (G_OBJECT (screen), "gtk-settings");
   if (!settings)
     {
@@ -1943,7 +1947,7 @@ _gtk_settings_handle_event (GdkEventSetting *event)
   GParamSpec *pspec;
   guint property_id;
 
-  settings = gtk_settings_get_for_screen (gdk_drawable_get_screen (event->window));
+  settings = gtk_settings_get_for_screen (gdk_window_get_screen (event->window));
   pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (settings), event->name);
  
   if (pspec) 

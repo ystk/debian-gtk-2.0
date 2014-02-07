@@ -48,6 +48,44 @@ gtk_accessible_class_init (GtkAccessibleClass *klass)
 }
 
 /**
+ * gtk_accessible_set_widget:
+ * @accessible: a #GtkAccessible
+ * @widget: a #GtkWidget
+ *
+ * Sets the #GtkWidget corresponding to the #GtkAccessible.
+ *
+ * Since: 2.22
+ **/
+void
+gtk_accessible_set_widget (GtkAccessible *accessible,
+                           GtkWidget     *widget)
+{
+  g_return_if_fail (GTK_IS_ACCESSIBLE (accessible));
+
+  accessible->widget = widget;
+}
+
+/**
+ * gtk_accessible_get_widget:
+ * @accessible: a #GtkAccessible
+ *
+ * Gets the #GtkWidget corresponding to the #GtkAccessible. The returned widget
+ * does not have a reference added, so you do not need to unref it.
+ *
+ * Returns: (transfer none): pointer to the #GtkWidget corresponding to
+ *   the #GtkAccessible, or %NULL.
+ *
+ * Since: 2.22
+ **/
+GtkWidget*
+gtk_accessible_get_widget (GtkAccessible *accessible)
+{
+  g_return_val_if_fail (GTK_IS_ACCESSIBLE (accessible), NULL);
+
+  return accessible->widget;
+}
+
+/**
  * gtk_accessible_connect_widget_destroyed
  * @accessible: a #GtkAccessible
  *

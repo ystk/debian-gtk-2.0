@@ -3,11 +3,10 @@ include $(top_srcdir)/Makefile.decl
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
 INTROSPECTION_SCANNER_ARGS = \
-   --add-include-path=../gdk-pixbuf
+   --add-include-path=../gdk
 INTROSPECTION_COMPILER_ARGS = \
    --includedir=$(srcdir) \
-   --includedir=. \
-   --includedir=../gdk-pixbuf
+   --includedir=.
 
 SUBDIRS = $(gdktarget) . tests
 DIST_SUBDIRS = win32 x11 quartz directfb tests
@@ -37,8 +36,8 @@ INCLUDES =                              \
 	-DG_LOG_DOMAIN=\"Gdk\"		\
 	-DGDK_COMPILATION		\
 	-I$(top_srcdir)			\
+	-I$(top_builddir)		\
 	-I$(top_builddir)/gdk		\
-	-I$(top_srcdir)/gdk-pixbuf 	\
 	$(GTK_DEBUG_FLAGS) 		\
 	$(GDK_DEP_CFLAGS)
 
@@ -52,6 +51,7 @@ endif
 # since automake doesn't support conditionalized libsomething_la_LDFLAGS
 # we use the general approach here
 LDADD = \
+	$(GTK_LINK_FLAGS)						\
 	-version-info $(LT_VERSION_INFO)		 		\
 	-export-dynamic 						\
 	-rpath $(libdir) 						\
@@ -89,6 +89,7 @@ gdk_public_h_sources =				\
 	gdkinput.h				\
 	gdkkeys.h				\
 	gdkkeysyms.h				\
+	gdkkeysyms-compat.h			\
 	gdkpango.h				\
 	gdkpixbuf.h				\
 	gdkpixmap.h				\
@@ -171,52 +172,94 @@ common_sources =                \
 	gdkmarshalers.c		\
 	gdkmarshalers.h
 
-libgdk_directfb_2_0_la_SOURCES = $(common_sources) 
-libgdk_directfb_2_0_la_LIBADD = directfb/libgdk-directfb.la $(GDK_DEP_LIBS) \
-  $(top_builddir)/gdk-pixbuf/libgdk_pixbuf-$(GTK_API_VERSION).la
+libgdk_directfb_2_0_la_SOURCES = $(common_sources)
+libgdk_directfb_2_0_la_LIBADD = directfb/libgdk-directfb.la $(GDK_DEP_LIBS)
 libgdk_directfb_2_0_la_LDFLAGS = $(LDADD)
 
 libgdk_x11_2_0_la_SOURCES = $(common_sources)
-libgdk_x11_2_0_la_LIBADD = x11/libgdk-x11.la $(GDK_DEP_LIBS) \
-  $(top_builddir)/gdk-pixbuf/libgdk_pixbuf-$(GTK_API_VERSION).la
+libgdk_x11_2_0_la_LIBADD = x11/libgdk-x11.la $(GDK_DEP_LIBS)
 libgdk_x11_2_0_la_LDFLAGS = $(LDADD)
 
 libgdk_quartz_2_0_la_SOURCES = $(common_sources) gdkkeynames.c
-libgdk_quartz_2_0_la_LIBADD = quartz/libgdk-quartz.la $(GDK_DEP_LIBS) \
-  $(top_builddir)/gdk-pixbuf/libgdk_pixbuf-$(GTK_API_VERSION).la
+libgdk_quartz_2_0_la_LIBADD = quartz/libgdk-quartz.la $(GDK_DEP_LIBS)
 libgdk_quartz_2_0_la_LDFLAGS = $(LDADD)
 
 libgdk_win32_2_0_la_SOURCES = $(common_sources) gdkkeynames.c
-libgdk_win32_2_0_la_LIBADD = win32/libgdk-win32.la $(GDK_DEP_LIBS) \
-  $(top_builddir)/gdk-pixbuf/libgdk_pixbuf-$(GTK_API_VERSION).la
+libgdk_win32_2_0_la_LIBADD = win32/libgdk-win32.la $(GDK_DEP_LIBS)
 libgdk_win32_2_0_la_DEPENDENCIES = win32/libgdk-win32.la win32/rc/gdk-win32-res.o gdk.def
 libgdk_win32_2_0_la_LDFLAGS = -Wl,win32/rc/gdk-win32-res.o -export-symbols $(srcdir)/gdk.def $(LDADD)
 
 if HAVE_INTROSPECTION
 
-introspection_files = \
-		$(gdk_public_h_sources) \
-		$(gdk_c_sources) \
-        gdkenumtypes.c \
-        gdkenumtypes.h \
-        $(srcdir)/x11/*.c
+introspection_files = 		\
+	$(filter-out gdkkeysyms-compat.h, $(gdk_public_h_sources))	\
+	$(gdk_c_sources)	\
+	gdkkeynames.c		\
+        gdkenumtypes.c		\
+        gdkenumtypes.h
 
 Gdk-2.0.gir: $(gdktargetlib) Makefile
-Gdk_2_0_gir_SCANNERFLAGS = --strip-prefix=Gdk --add-include-path=../gdk-pixbuf
-Gdk_2_0_gir_INCLUDES = Gio-2.0 GdkPixbuf-2.0 Pango-1.0
+Gdk_2_0_gir_SCANNERFLAGS = --warn-all
+Gdk_2_0_gir_INCLUDES = Gio-2.0 GdkPixbuf-2.0 Pango-1.0 cairo-1.0
 Gdk_2_0_gir_LIBS = $(gdktargetlib)
-Gdk_2_0_gir_FILES = $(addprefix $(srcdir)/,$(introspection_files))
+Gdk_2_0_gir_FILES = $(introspection_files)
 Gdk_2_0_gir_CFLAGS = $(INCLUDES)
 INTROSPECTION_GIRS += Gdk-2.0.gir
 
+if USE_X11
+x11_introspection_files = 		\
+	x11/checksettings.c		\
+	x11/gdkapplaunchcontext-x11.c	\
+	x11/gdkasync.c			\
+	x11/gdkcolor-x11.c		\
+	x11/gdkcursor-x11.c		\
+	x11/gdkdisplay-x11.c		\
+	x11/gdkdnd-x11.c		\
+	x11/gdkdrawable-x11.c		\
+	x11/gdkgc-x11.c			\
+	x11/gdkgeometry-x11.c		\
+	x11/gdkglobals-x11.c		\
+	x11/gdkimage-x11.c		\
+	x11/gdkim-x11.c			\
+	x11/gdkinput.c			\
+	x11/gdkkeys-x11.c		\
+	x11/gdkmain-x11.c		\
+	x11/gdkpixmap-x11.c		\
+	x11/gdkproperty-x11.c		\
+	x11/gdkscreen-x11.c		\
+	x11/gdkselection-x11.c		\
+	x11/gdksettings.c		\
+	x11/gdkspawn-x11.c		\
+	x11/gdktestutils-x11.c		\
+	x11/gdkvisual-x11.c		\
+	x11/gdkwindow-x11.c		\
+	x11/gdkxftdefaults.c		\
+	x11/gdkxid.c			\
+	x11/xsettings-client.c		\
+	x11/xsettings-common.c		\
+        x11/gdkx.h
+
+GdkX11-2.0.gir: $(gdktargetlib) Gdk-2.0.gir Makefile
+GdkX11_2_0_gir_SCANNERFLAGS = --warn-all --strip-prefix=Gdk
+GdkX11_2_0_gir_INCLUDES = Gio-2.0 Gdk-2.0 GdkPixbuf-2.0 Pango-1.0 xlib-2.0
+GdkX11_2_0_gir_LIBS = $(gdktargetlib)
+GdkX11_2_0_gir_FILES = $(x11_introspection_files)
+GdkX11_2_0_gir_CFLAGS = $(INCLUDES) -L$(top_builddir)/gdk
+INTROSPECTION_GIRS += GdkX11-2.0.gir
+
+introspection_files += $(filter-out x11/gdkx.h, $(x11_introspection_files))
+
+endif # USE_X11
+
 girdir = $(datadir)/gir-1.0
-dist_gir_DATA = $(INTROSPECTION_GIRS)
+gir_DATA = $(INTROSPECTION_GIRS)
 
 typelibsdir = $(libdir)/girepository-1.0
 typelibs_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-CLEANFILES += $(dist_gir_DATA) $(typelibs_DATA)
-endif
+CLEANFILES += $(gir_DATA) $(typelibs_DATA)
+
+endif # HAVE_INTROSPECTION
 
 if OS_WIN32
 install-def-file: gdk.def
@@ -322,6 +365,38 @@ gdkconfig.h: stamp-gc-h
 stamp-gc-h: $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status gdk/gdkconfig.h
 	echo timestamp > stamp-gc-h
+
+dist-hook: ../build/win32/vs9/gdk.vcproj ../build/win32/vs10/gdk.vcxproj ../build/win32/vs10/gdk.vcxproj.filters
+
+../build/win32/vs9/gdk.vcproj: ../build/win32/vs9/gdk.vcprojin
+	for F in $(libgdk_win32_2_0_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '   <File RelativePath="..\..\..\gdk\'$$F'" />' \
+		     ;; \
+		esac; \
+	done >libgdk.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs9/gdk.vcprojin >$@
+	rm libgdk.sourcefiles
+	
+../build/win32/vs10/gdk.vcxproj: ../build/win32/vs10/gdk.vcxprojin
+	for F in $(libgdk_win32_2_0_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '   <ClCompile Include="..\..\..\gdk\'$$F'" />' \
+		     ;; \
+		esac; \
+	done >libgdk.vs10.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/gdk.vcxprojin >$@
+	rm libgdk.vs10.sourcefiles
+	
+../build/win32/vs10/gdk.vcxproj.filters: ../build/win32/vs10/gdk.vcxproj.filtersin
+	for F in $(libgdk_win32_2_0_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '   <ClCompile Include="..\..\..\gdk\'$$F'"><Filter>Source Files</Filter></ClCompile>' \
+		     ;; \
+		esac; \
+	done >libgdk.vs10.sourcefiles.filters
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/gdk.vcxproj.filtersin >$@
+	rm libgdk.vs10.sourcefiles.filters
 
 DISTCLEANFILES = gdkconfig.h stamp-gc-h
 

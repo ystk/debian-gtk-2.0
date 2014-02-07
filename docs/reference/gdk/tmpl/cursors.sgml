@@ -39,7 +39,6 @@ gdk_window_set_cursor() or by setting the cursor member of the
 A <type>GdkCursor</type> structure represents a cursor.
 </para>
 
-@type: the #GdkCursorType of the cursor
 
 <!-- ##### ENUM GdkCursorType ##### -->
 <para>
@@ -192,6 +191,15 @@ The standard cursors available.
 
 
 <!-- ##### FUNCTION gdk_cursor_get_image ##### -->
+<para>
+
+</para>
+
+@cursor: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gdk_cursor_get_cursor_type ##### -->
 <para>
 
 </para>

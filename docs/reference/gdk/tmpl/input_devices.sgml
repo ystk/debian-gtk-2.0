@@ -100,15 +100,6 @@ to configure various aspects of the device.
 </para>
 
 @parent_instance: the parent instance
-@name: the name of this device.
-@source: the type of this device.
-@mode: the mode of this device
-@has_cursor: %TRUE if the pointer follows device motion.
-@num_axes: the length of the @axes array.
-@axes: an array of #GdkDeviceAxis, describing the axes of this device.
-@num_keys: the length of the @keys array.
-@keys: an array of #GdkDeviceKey, describing the mapped macro buttons 
-  of this device.
 
 <!-- ##### ENUM GdkInputSource ##### -->
 <para>
@@ -181,6 +172,15 @@ types that GTK+ understands.
 @Returns: 
 
 
+<!-- ##### FUNCTION gdk_device_get_name ##### -->
+<para>
+
+</para>
+
+@device: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gdk_device_set_source ##### -->
 <para>
 Sets the source type for an input device.
@@ -188,6 +188,15 @@ Sets the source type for an input device.
 
 @device: a #GdkDevice.
 @source: the source type.
+
+
+<!-- ##### FUNCTION gdk_device_get_source ##### -->
+<para>
+
+</para>
+
+@device: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gdk_device_set_mode ##### -->
@@ -202,6 +211,15 @@ entire screen or to a single window.
 @Returns: %TRUE if the mode was successfully changed.
 
 
+<!-- ##### FUNCTION gdk_device_get_mode ##### -->
+<para>
+
+</para>
+
+@device: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gdk_device_set_key ##### -->
 <para>
 Specifies the X key event to generate when a macro button of a device
@@ -214,6 +232,17 @@ is pressed.
 @modifiers: the modifiers to set.
 
 
+<!-- ##### FUNCTION gdk_device_get_key ##### -->
+<para>
+
+</para>
+
+@device: 
+@index: 
+@keyval: 
+@modifiers: 
+
+
 <!-- ##### FUNCTION gdk_device_set_axis_use ##### -->
 <para>
 Specifies how an axis of a device is used.
@@ -222,6 +251,16 @@ Specifies how an axis of a device is used.
 @device: a #GdkDevice.
 @index_: the index of the axis.
 @use: specifies how the axis is used.
+
+
+<!-- ##### FUNCTION gdk_device_get_axis_use ##### -->
+<para>
+
+</para>
+
+@device: 
+@index: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gdk_device_get_core_pointer ##### -->
@@ -282,6 +321,15 @@ motion history. It contains the following fields:
 @axes: 
 @use: 
 @value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gdk_device_get_n_axes ##### -->
+<para>
+
+</para>
+
+@device: 
 @Returns: 
 
 

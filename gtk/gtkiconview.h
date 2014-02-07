@@ -107,6 +107,9 @@ gint           gtk_icon_view_get_pixbuf_column (GtkIconView    *icon_view);
 void           gtk_icon_view_set_orientation   (GtkIconView    *icon_view,
 	   			                GtkOrientation  orientation);
 GtkOrientation gtk_icon_view_get_orientation   (GtkIconView    *icon_view);
+void           gtk_icon_view_set_item_orientation (GtkIconView    *icon_view,
+	   			                   GtkOrientation  orientation);
+GtkOrientation gtk_icon_view_get_item_orientation (GtkIconView    *icon_view);
 void           gtk_icon_view_set_columns       (GtkIconView    *icon_view,
 		 			        gint            columns);
 gint           gtk_icon_view_get_columns       (GtkIconView    *icon_view);
@@ -154,6 +157,10 @@ void             gtk_icon_view_unselect_path      (GtkIconView            *icon_
 						   GtkTreePath            *path);
 gboolean         gtk_icon_view_path_is_selected   (GtkIconView            *icon_view,
 						   GtkTreePath            *path);
+gint             gtk_icon_view_get_item_row       (GtkIconView            *icon_view,
+                                                   GtkTreePath            *path);
+gint             gtk_icon_view_get_item_column    (GtkIconView            *icon_view,
+                                                   GtkTreePath            *path);
 GList           *gtk_icon_view_get_selected_items (GtkIconView            *icon_view);
 void             gtk_icon_view_select_all         (GtkIconView            *icon_view);
 void             gtk_icon_view_unselect_all       (GtkIconView            *icon_view);

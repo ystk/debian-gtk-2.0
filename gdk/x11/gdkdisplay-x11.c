@@ -502,7 +502,7 @@ gdk_internal_connection_watch (Display  *display,
  * 
  * Since: 2.2
  */
-G_CONST_RETURN gchar *
+const gchar *
 gdk_display_get_name (GdkDisplay *display)
 {
   g_return_val_if_fail (GDK_IS_DISPLAY (display), NULL);
@@ -690,7 +690,11 @@ gdk_display_beep (GdkDisplay *display)
 {
   g_return_if_fail (GDK_IS_DISPLAY (display));
 
+#ifdef HAVE_XKB
   XkbBell (GDK_DISPLAY_XDISPLAY (display), None, 0, None);
+#else
+  XBell (GDK_DISPLAY_XDISPLAY (display), 0);
+#endif
 }
 
 /**
@@ -920,7 +924,8 @@ gdk_x11_lookup_xdisplay (Display *xdisplay)
  * Given the root window ID of one of the screen's of a #GdkDisplay,
  * finds the screen.
  * 
- * Return value: the #GdkScreen corresponding to @xrootwin, or %NULL.
+ * Return value: (transfer none): the #GdkScreen corresponding to
+ *     @xrootwin, or %NULL.
  **/
 GdkScreen *
 _gdk_x11_display_screen_for_xrootwin (GdkDisplay *display,
@@ -1445,7 +1450,7 @@ gdk_display_supports_input_shapes (GdkDisplay *display)
  *
  * Since: 2.12
  */
-G_CONST_RETURN gchar *
+const gchar *
 gdk_x11_display_get_startup_notification_id (GdkDisplay *display)
 {
   return GDK_DISPLAY_X11 (display)->startup_notification_id;

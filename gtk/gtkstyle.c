@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gobject/gvaluecollector.h>
+#undef GDK_DISABLE_DEPRECATED
 #include "gtkgc.h"
 #include "gtkmarshalers.h"
 #undef GTK_DISABLE_DEPRECATED
@@ -644,7 +645,7 @@ gtk_style_finalize (GObject *object)
  *
  * Creates a copy of the passed in #GtkStyle object.
  *
- * Returns: a copy of @style
+ * Returns: (transfer full): a copy of @style
  */
 GtkStyle*
 gtk_style_copy (GtkStyle *style)
@@ -702,12 +703,12 @@ gtk_style_new (void)
  *
  * Attaches a style to a window; this process allocates the
  * colors and creates the GC's for the style - it specializes
- * it to a particular visual and colormap. The process may 
- * involve the creation of a new style if the style has already 
+ * it to a particular visual and colormap. The process may
+ * involve the creation of a new style if the style has already
  * been attached to a window with a different style and colormap.
  *
- * Since this function may return a new object, you have to use it 
- * in the following way: 
+ * Since this function may return a new object, you have to use it
+ * in the following way:
  * <literal>style = gtk_style_attach (style, window)</literal>
  *
  * Returns: Either @style, or a newly-created #GtkStyle.
@@ -876,7 +877,7 @@ gtk_style_realize (GtkStyle    *style,
  * and the default icon factory, returning an icon set if found,
  * otherwise %NULL.
  *
- * Return value: icon set of @stock_id
+ * Return value: (transfer none): icon set of @stock_id
  */
 GtkIconSet*
 gtk_style_lookup_icon_set (GtkStyle   *style,
@@ -905,7 +906,7 @@ gtk_style_lookup_icon_set (GtkStyle   *style,
  * gtk_style_lookup_color:
  * @style: a #GtkStyle
  * @color_name: the name of the logical color to look up
- * @color: the #GdkColor to fill in
+ * @color: (out): the #GdkColor to fill in
  *
  * Looks up @color_name in the style's logical color mappings,
  * filling in @color and returning %TRUE if found, otherwise
@@ -2172,11 +2173,13 @@ gtk_style_real_set_background (GtkStyle    *style,
  *     don't scale.
  * @widget: (allow-none): the widget
  * @detail: (allow-none): a style detail
- * @returns: a newly-created #GdkPixbuf containing the rendered icon
  *
  * Renders the icon specified by @source at the given @size
  * according to the given parameters and returns the result in a
  * pixbuf.
+ *
+ * Return value: (transfer full): a newly-created #GdkPixbuf
+ *     containing the rendered icon
  */
 GdkPixbuf *
 gtk_style_render_icon (GtkStyle            *style,

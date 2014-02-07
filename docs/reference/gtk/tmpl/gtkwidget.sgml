@@ -9,10 +9,12 @@ GtkWidget
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -39,7 +41,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::button-release-event ##### -->
@@ -48,7 +50,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::can-activate-accel ##### -->
@@ -74,7 +76,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::composited-changed ##### -->
@@ -90,7 +92,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::damage-event ##### -->
@@ -99,7 +101,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::delete-event ##### -->
@@ -108,7 +110,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::destroy-event ##### -->
@@ -117,7 +119,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::direction-changed ##### -->
@@ -134,7 +136,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::drag-data-delete ##### -->
 <para>
@@ -142,7 +144,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::drag-data-get ##### -->
 <para>
@@ -150,10 +152,10 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
-@data: 
-@info: 
-@time: 
+@arg1: 
+@arg2: 
+@arg3: 
+@arg4: 
 
 <!-- ##### SIGNAL GtkWidget::drag-data-received ##### -->
 <para>
@@ -161,12 +163,12 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
-@x: 
-@y: 
-@data: 
-@info: 
-@time: 
+@arg1: 
+@arg2: 
+@arg3: 
+@arg4: 
+@arg5: 
+@arg6: 
 
 <!-- ##### SIGNAL GtkWidget::drag-drop ##### -->
 <para>
@@ -174,10 +176,10 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
-@x: 
-@y: 
-@time: 
+@arg1: 
+@arg2: 
+@arg3: 
+@arg4: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::drag-end ##### -->
@@ -186,7 +188,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::drag-failed ##### -->
 <para>
@@ -204,8 +206,8 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
-@time: 
+@arg1: 
+@arg2: 
 
 <!-- ##### SIGNAL GtkWidget::drag-motion ##### -->
 <para>
@@ -213,10 +215,10 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@drag_context: 
-@x: 
-@y: 
-@time: 
+@arg1: 
+@arg2: 
+@arg3: 
+@arg4: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::enter-notify-event ##### -->
@@ -225,7 +227,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::event ##### -->
@@ -234,7 +236,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::event-after ##### -->
@@ -243,7 +245,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::expose-event ##### -->
 <para>
@@ -251,7 +253,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::focus ##### -->
@@ -269,7 +271,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::focus-out-event ##### -->
@@ -278,7 +280,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::grab-broken-event ##### -->
@@ -287,7 +289,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::grab-focus ##### -->
@@ -326,7 +328,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::key-release-event ##### -->
@@ -335,7 +337,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::keynav-failed ##### -->
@@ -353,7 +355,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::map ##### -->
@@ -369,7 +371,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::mnemonic-activate ##### -->
@@ -387,7 +389,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::move-focus ##### -->
@@ -404,7 +406,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::parent-set ##### -->
@@ -413,7 +415,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@old_parent: 
+@widget2: 
 
 <!-- ##### SIGNAL GtkWidget::popup-menu ##### -->
 <para>
@@ -429,7 +431,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::proximity-in-event ##### -->
@@ -438,7 +440,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::proximity-out-event ##### -->
@@ -447,7 +449,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::query-tooltip ##### -->
@@ -483,7 +485,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::selection-clear-event ##### -->
@@ -492,7 +494,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::selection-get ##### -->
@@ -501,9 +503,9 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@data: 
-@info: 
-@time: 
+@arg1: 
+@arg2: 
+@arg3: 
 
 <!-- ##### SIGNAL GtkWidget::selection-notify-event ##### -->
 <para>
@@ -511,7 +513,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::selection-received ##### -->
@@ -520,8 +522,8 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@data: 
-@time: 
+@arg1: 
+@arg2: 
 
 <!-- ##### SIGNAL GtkWidget::selection-request-event ##### -->
 <para>
@@ -529,7 +531,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::show ##### -->
@@ -554,7 +556,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@allocation: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::size-request ##### -->
 <para>
@@ -562,7 +564,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@requisition: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::state-changed ##### -->
 <para>
@@ -570,7 +572,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@state: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::style-set ##### -->
 <para>
@@ -578,7 +580,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@previous_style: 
+@arg1: 
 
 <!-- ##### SIGNAL GtkWidget::unmap ##### -->
 <para>
@@ -593,7 +595,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::unrealize ##### -->
@@ -609,7 +611,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### SIGNAL GtkWidget::window-state-event ##### -->
@@ -618,7 +620,7 @@ GtkWidget
 </para>
 
 @widget: the object which received the signal.
-@event: 
+@arg1: 
 @Returns: 
 
 <!-- ##### ARG GtkWidget:app-paintable ##### -->
@@ -1061,8 +1063,6 @@ GtkWidget
 
 </para>
 
-@width: 
-@height: 
 
 <!-- ##### STRUCT GtkAllocation ##### -->
 <para>
@@ -1116,7 +1116,7 @@ GtkWidget
 
 @type: 
 @first_property_name: 
-@Varargs: 
+@...: 
 @Returns: 
 
 
@@ -1161,7 +1161,7 @@ GtkWidget
 
 @widget: 
 @first_property_name: 
-@Varargs: 
+@...: 
 
 
 <!-- ##### FUNCTION gtk_widget_unparent ##### -->
@@ -2126,6 +2126,16 @@ GtkWidget
 @Returns: 
 
 
+<!-- ##### FUNCTION gtk_widget_send_focus_change ##### -->
+<para>
+
+</para>
+
+@widget: 
+@event: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gtk_widget_style_get ##### -->
 <para>
 
@@ -2133,7 +2143,7 @@ GtkWidget
 
 @widget: 
 @first_property_name: 
-@Varargs: 
+@...: 
 
 
 <!-- ##### FUNCTION gtk_widget_style_get_property ##### -->

@@ -141,7 +141,7 @@ struct _GtkIconViewPrivate
 
   gint cursor_cell;
 
-  GtkOrientation orientation;
+  GtkOrientation item_orientation;
 
   gint columns;
   gint item_width;
@@ -183,8 +183,8 @@ struct _GtkIconViewPrivate
   guint reorderable : 1;
   guint empty_view_drop :1;
 
-  guint ctrl_pressed : 1;
-  guint shift_pressed : 1;
+  guint modify_selection_pressed : 1;
+  guint extend_selection_pressed : 1;
 
   guint draw_focus : 1;
 };
@@ -212,6 +212,7 @@ enum
   PROP_MARKUP_COLUMN,  
   PROP_SELECTION_MODE,
   PROP_ORIENTATION,
+  PROP_ITEM_ORIENTATION,
   PROP_MODEL,
   PROP_COLUMNS,
   PROP_ITEM_WIDTH,
@@ -722,6 +723,8 @@ gtk_icon_view_class_init (GtkIconViewClass *klass)
    * the text) of the item are positioned relative to each other.
    *
    * Since: 2.6
+   *
+   * Deprecated: 2.22: Use the #GtkIconView::item-orientation property
    */
   g_object_class_install_property (gobject_class,
 				   PROP_ORIENTATION,
@@ -730,7 +733,24 @@ gtk_icon_view_class_init (GtkIconViewClass *klass)
 						      P_("How the text and icon of each item are positioned relative to each other"),
 						      GTK_TYPE_ORIENTATION,
 						      GTK_ORIENTATION_VERTICAL,
-						      GTK_PARAM_READWRITE));
+						      GTK_PARAM_READWRITE | G_PARAM_DEPRECATED));
+
+  /**
+   * GtkIconView:item-orientation:
+   *
+   * The item-orientation property specifies how the cells (i.e. the icon and
+   * the text) of the item are positioned relative to each other.
+   *
+   * Since: 2.22
+   */
+  g_object_class_install_property (gobject_class,
+                                   PROP_ITEM_ORIENTATION,
+                                   g_param_spec_enum ("item-orientation",
+                                                      P_("Item Orientation"),
+                                                      P_("How the text and icon of each item are positioned relative to each other"),
+                                                      GTK_TYPE_ORIENTATION,
+                                                      GTK_ORIENTATION_VERTICAL,
+                                                      GTK_PARAM_READWRITE));
 
   /**
    * GtkIconView:reorderable:
@@ -1114,7 +1134,7 @@ gtk_icon_view_init (GtkIconView *icon_view)
   icon_view->priv->n_cells = 0;
   icon_view->priv->cursor_cell = -1;
 
-  icon_view->priv->orientation = GTK_ORIENTATION_VERTICAL;
+  icon_view->priv->item_orientation = GTK_ORIENTATION_VERTICAL;
 
   icon_view->priv->columns = -1;
   icon_view->priv->item_width = -1;
@@ -1205,7 +1225,8 @@ gtk_icon_view_set_property (GObject      *object,
       gtk_icon_view_set_model (icon_view, g_value_get_object (value));
       break;
     case PROP_ORIENTATION:
-      gtk_icon_view_set_orientation (icon_view, g_value_get_enum (value));
+    case PROP_ITEM_ORIENTATION:
+      gtk_icon_view_set_item_orientation (icon_view, g_value_get_enum (value));
       break;
     case PROP_COLUMNS:
       gtk_icon_view_set_columns (icon_view, g_value_get_int (value));
@@ -1271,7 +1292,8 @@ gtk_icon_view_get_property (GObject      *object,
       g_value_set_object (value, icon_view->priv->model);
       break;
     case PROP_ORIENTATION:
-      g_value_set_enum (value, icon_view->priv->orientation);
+    case PROP_ITEM_ORIENTATION:
+      g_value_set_enum (value, icon_view->priv->item_orientation);
       break;
     case PROP_COLUMNS:
       g_value_set_int (value, icon_view->priv->columns);
@@ -2155,7 +2177,7 @@ gtk_icon_view_button_press (GtkWidget      *widget,
 	      gtk_icon_view_set_cursor_item (icon_view, item, cursor_cell);
 	    }
 	  else if (icon_view->priv->selection_mode == GTK_SELECTION_MULTIPLE &&
-		   (event->state & GDK_SHIFT_MASK))
+		   (event->state & GTK_EXTEND_SELECTION_MOD_MASK))
 	    {
 	      gtk_icon_view_unselect_all_internal (icon_view);
 
@@ -2172,7 +2194,7 @@ gtk_icon_view_button_press (GtkWidget      *widget,
 	    {
 	      if ((icon_view->priv->selection_mode == GTK_SELECTION_MULTIPLE ||
 		  ((icon_view->priv->selection_mode == GTK_SELECTION_SINGLE) && item->selected)) &&
-		  (event->state & GDK_CONTROL_MASK))
+		  (event->state & GTK_MODIFY_SELECTION_MOD_MASK))
 		{
 		  item->selected = !item->selected;
 		  gtk_icon_view_queue_draw_item (icon_view, item);
@@ -2217,7 +2239,7 @@ gtk_icon_view_button_press (GtkWidget      *widget,
       else
 	{
 	  if (icon_view->priv->selection_mode != GTK_SELECTION_BROWSE &&
-	      !(event->state & GDK_CONTROL_MASK))
+	      !(event->state & GTK_MODIFY_SELECTION_MOD_MASK))
 	    {
 	      dirty = gtk_icon_view_unselect_all_internal (icon_view);
 	    }
@@ -2885,7 +2907,7 @@ gtk_icon_view_get_cell_area (GtkIconView         *icon_view,
 {
   g_return_if_fail (info->position < item->n_cells);
 
-  if (icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+  if (icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
     {
       cell_area->x = item->box[info->position].x - item->before[info->position];
       cell_area->y = item->y + icon_view->priv->item_padding;
@@ -2946,7 +2968,7 @@ adjust_wrap_width (GtkIconView     *icon_view,
       else
 	item_width = item->width;
 
-      if (icon_view->priv->orientation == GTK_ORIENTATION_VERTICAL)
+      if (icon_view->priv->item_orientation == GTK_ORIENTATION_VERTICAL)
         wrap_width = item_width;
       else {
         if (item->width == -1 && item_width <= 0)
@@ -3003,7 +3025,7 @@ gtk_icon_view_calculate_item_size (GtkIconView     *icon_view,
 				  &item->box[info->position].width, 
 				  &item->box[info->position].height);
 
-      if (icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+      if (icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
 	{
 	  item->width += item->box[info->position].width 
 	    + (info->position > 0 ? spacing : 0);
@@ -3040,7 +3062,7 @@ gtk_icon_view_calculate_item_size2 (GtkIconView     *icon_view,
   item->height = 0;
   for (i = 0; i < icon_view->priv->n_cells; i++)
     {
-      if (icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+      if (icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
 	item->height = MAX (item->height, max_height[i]);
       else
 	item->height += max_height[i] + (i > 0 ? spacing : 0);
@@ -3060,7 +3082,7 @@ gtk_icon_view_calculate_item_size2 (GtkIconView     *icon_view,
 	if (!info->cell->visible)
 	  continue;
 
-	if (icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+	if (icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
 	  {
             /* We should not subtract icon_view->priv->item_padding from item->height,
              * because item->height is recalculated above using
@@ -3085,7 +3107,7 @@ gtk_icon_view_calculate_item_size2 (GtkIconView     *icon_view,
 	
 	item->box[info->position].x += cell_area.x;
 	item->box[info->position].y += cell_area.y;
-	if (icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+	if (icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
 	  {
 	    item->before[info->position] = item->box[info->position].x - cell_area.x;
 	    item->after[info->position] = cell_area.width - item->box[info->position].width - item->before[info->position];
@@ -3104,7 +3126,7 @@ gtk_icon_view_calculate_item_size2 (GtkIconView     *icon_view,
 	  }
       }
   
-  if (rtl && icon_view->priv->orientation == GTK_ORIENTATION_HORIZONTAL)
+  if (rtl && icon_view->priv->item_orientation == GTK_ORIENTATION_HORIZONTAL)
     {
       for (i = 0; i < icon_view->priv->n_cells; i++)
 	{
@@ -3834,10 +3856,10 @@ gtk_icon_view_real_move_cursor (GtkIconView     *icon_view,
 
   if (gtk_get_current_event_state (&state))
     {
-      if ((state & GDK_CONTROL_MASK) == GDK_CONTROL_MASK)
-        icon_view->priv->ctrl_pressed = TRUE;
-      if ((state & GDK_SHIFT_MASK) == GDK_SHIFT_MASK)
-        icon_view->priv->shift_pressed = TRUE;
+      if ((state & GTK_MODIFY_SELECTION_MOD_MASK) == GTK_MODIFY_SELECTION_MOD_MASK)
+        icon_view->priv->modify_selection_pressed = TRUE;
+      if ((state & GTK_EXTEND_SELECTION_MOD_MASK) == GTK_EXTEND_SELECTION_MOD_MASK)
+        icon_view->priv->extend_selection_pressed = TRUE;
     }
   /* else we assume not pressed */
 
@@ -3860,8 +3882,8 @@ gtk_icon_view_real_move_cursor (GtkIconView     *icon_view,
       g_assert_not_reached ();
     }
 
-  icon_view->priv->ctrl_pressed = FALSE;
-  icon_view->priv->shift_pressed = FALSE;
+  icon_view->priv->modify_selection_pressed = FALSE;
+  icon_view->priv->extend_selection_pressed = FALSE;
 
   icon_view->priv->draw_focus = TRUE;
 
@@ -3907,7 +3929,7 @@ find_cell (GtkIconView     *icon_view,
   gint i, k;
   GList *l;
 
-  if (icon_view->priv->orientation != orientation)
+  if (icon_view->priv->item_orientation != orientation)
     return cell;
 
   gtk_icon_view_set_cell_data (icon_view, item);
@@ -4080,10 +4102,13 @@ gtk_icon_view_move_cursor_up_down (GtkIconView *icon_view,
   gint cell;
   gboolean dirty = FALSE;
   gint step;
+  GtkDirectionType direction;
   
   if (!gtk_widget_has_focus (GTK_WIDGET (icon_view)))
     return;
-  
+
+  direction = count < 0 ? GTK_DIR_UP : GTK_DIR_DOWN;
+
   if (!icon_view->priv->cursor_item)
     {
       GList *list;
@@ -4116,19 +4141,28 @@ gtk_icon_view_move_cursor_up_down (GtkIconView *icon_view,
 
   if (!item)
     {
-      gtk_widget_error_bell (GTK_WIDGET (icon_view));
+      if (!gtk_widget_keynav_failed (GTK_WIDGET (icon_view), direction))
+        {
+          GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (icon_view));
+          if (toplevel)
+            gtk_widget_child_focus (toplevel,
+                                    direction == GTK_DIR_UP ?
+                                    GTK_DIR_TAB_BACKWARD :
+                                    GTK_DIR_TAB_FORWARD);
+        }
+
       return;
     }
 
-  if (icon_view->priv->ctrl_pressed ||
-      !icon_view->priv->shift_pressed ||
+  if (icon_view->priv->modify_selection_pressed ||
+      !icon_view->priv->extend_selection_pressed ||
       !icon_view->priv->anchor_item ||
       icon_view->priv->selection_mode != GTK_SELECTION_MULTIPLE)
     icon_view->priv->anchor_item = item;
 
   gtk_icon_view_set_cursor_item (icon_view, item, cell);
 
-  if (!icon_view->priv->ctrl_pressed &&
+  if (!icon_view->priv->modify_selection_pressed &&
       icon_view->priv->selection_mode != GTK_SELECTION_NONE)
     {
       dirty = gtk_icon_view_unselect_all_internal (icon_view);
@@ -4175,15 +4209,15 @@ gtk_icon_view_move_cursor_page_up_down (GtkIconView *icon_view,
   if (!item)
     return;
 
-  if (icon_view->priv->ctrl_pressed ||
-      !icon_view->priv->shift_pressed ||
+  if (icon_view->priv->modify_selection_pressed ||
+      !icon_view->priv->extend_selection_pressed ||
       !icon_view->priv->anchor_item ||
       icon_view->priv->selection_mode != GTK_SELECTION_MULTIPLE)
     icon_view->priv->anchor_item = item;
 
   gtk_icon_view_set_cursor_item (icon_view, item, -1);
 
-  if (!icon_view->priv->ctrl_pressed &&
+  if (!icon_view->priv->modify_selection_pressed &&
       icon_view->priv->selection_mode != GTK_SELECTION_NONE)
     {
       dirty = gtk_icon_view_unselect_all_internal (icon_view);
@@ -4206,10 +4240,13 @@ gtk_icon_view_move_cursor_left_right (GtkIconView *icon_view,
   gint cell = -1;
   gboolean dirty = FALSE;
   gint step;
-  
+  GtkDirectionType direction;
+
   if (!gtk_widget_has_focus (GTK_WIDGET (icon_view)))
     return;
-  
+
+  direction = count < 0 ? GTK_DIR_LEFT : GTK_DIR_RIGHT;
+
   if (!icon_view->priv->cursor_item)
     {
       GList *list;
@@ -4241,19 +4278,28 @@ gtk_icon_view_move_cursor_left_right (GtkIconView *icon_view,
 
   if (!item)
     {
-      gtk_widget_error_bell (GTK_WIDGET (icon_view));
+      if (!gtk_widget_keynav_failed (GTK_WIDGET (icon_view), direction))
+        {
+          GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (icon_view));
+          if (toplevel)
+            gtk_widget_child_focus (toplevel,
+                                    direction == GTK_DIR_LEFT ?
+                                    GTK_DIR_TAB_BACKWARD :
+                                    GTK_DIR_TAB_FORWARD);
+        }
+
       return;
     }
 
-  if (icon_view->priv->ctrl_pressed ||
-      !icon_view->priv->shift_pressed ||
+  if (icon_view->priv->modify_selection_pressed ||
+      !icon_view->priv->extend_selection_pressed ||
       !icon_view->priv->anchor_item ||
       icon_view->priv->selection_mode != GTK_SELECTION_MULTIPLE)
     icon_view->priv->anchor_item = item;
 
   gtk_icon_view_set_cursor_item (icon_view, item, cell);
 
-  if (!icon_view->priv->ctrl_pressed &&
+  if (!icon_view->priv->modify_selection_pressed &&
       icon_view->priv->selection_mode != GTK_SELECTION_NONE)
     {
       dirty = gtk_icon_view_unselect_all_internal (icon_view);
@@ -4292,15 +4338,15 @@ gtk_icon_view_move_cursor_start_end (GtkIconView *icon_view,
   if (!item)
     return;
 
-  if (icon_view->priv->ctrl_pressed ||
-      !icon_view->priv->shift_pressed ||
+  if (icon_view->priv->modify_selection_pressed ||
+      !icon_view->priv->extend_selection_pressed ||
       !icon_view->priv->anchor_item ||
       icon_view->priv->selection_mode != GTK_SELECTION_MULTIPLE)
     icon_view->priv->anchor_item = item;
 
   gtk_icon_view_set_cursor_item (icon_view, item, -1);
 
-  if (!icon_view->priv->ctrl_pressed &&
+  if (!icon_view->priv->modify_selection_pressed &&
       icon_view->priv->selection_mode != GTK_SELECTION_NONE)
     {
       dirty = gtk_icon_view_unselect_all_internal (icon_view);
@@ -4421,8 +4467,8 @@ gtk_icon_view_scroll_to_item (GtkIconView     *icon_view,
 			"focus-line-width", &focus_width,
 			NULL);
 
-  gdk_drawable_get_size (GDK_DRAWABLE (icon_view->priv->bin_window), 
-			 &width, &height);
+  width = gdk_window_get_width (icon_view->priv->bin_window);
+  height = gdk_window_get_height (icon_view->priv->bin_window);
   gdk_window_get_position (icon_view->priv->bin_window, &x, &y);
   
   if (y + item->y - focus_width < 0)
@@ -4755,8 +4801,8 @@ gtk_icon_view_new_with_model (GtkTreeModel *model)
  * @icon_view: a #GtkIconView 
  * @wx: X coordinate relative to the widget
  * @wy: Y coordinate relative to the widget
- * @bx: return location for bin_window X coordinate
- * @by: return location for bin_window Y coordinate
+ * @bx: (out): return location for bin_window X coordinate
+ * @by: (out): return location for bin_window Y coordinate
  * 
  * Converts widget coordinates to coordinates for the bin_window,
  * as expected by e.g. gtk_icon_view_get_path_at_pos(). 
@@ -4961,12 +5007,12 @@ gtk_icon_view_set_tooltip_cell (GtkIconView     *icon_view,
 /**
  * gtk_icon_view_get_tooltip_context:
  * @icon_view: an #GtkIconView
- * @x: the x coordinate (relative to widget coordinates)
- * @y: the y coordinate (relative to widget coordinates)
+ * @x: (inout): the x coordinate (relative to widget coordinates)
+ * @y: (inout): the y coordinate (relative to widget coordinates)
  * @keyboard_tip: whether this is a keyboard tooltip or not
- * @model: (allow-none): a pointer to receive a #GtkTreeModel or %NULL
- * @path: (allow-none): a pointer to receive a #GtkTreePath or %NULL
- * @iter: (allow-none): a pointer to receive a #GtkTreeIter or %NULL
+ * @model: (out) (allow-none): a pointer to receive a #GtkTreeModel or %NULL
+ * @path: (out) (allow-none): a pointer to receive a #GtkTreePath or %NULL
+ * @iter: (out) (allow-none): a pointer to receive a #GtkTreeIter or %NULL
  *
  * This function is supposed to be used in a #GtkWidget::query-tooltip
  * signal handler for #GtkIconView.  The @x, @y and @keyboard_tip values
@@ -5192,7 +5238,7 @@ gtk_icon_view_get_visible_range (GtkIconView  *icon_view,
 /**
  * gtk_icon_view_selected_foreach:
  * @icon_view: A #GtkIconView.
- * @func: The funcion to call for each selected icon.
+ * @func: (scope call): The function to call for each selected icon.
  * @data: User data to pass to the function.
  * 
  * Calls a function for each selected icon. Note that the model or
@@ -5393,7 +5439,8 @@ gtk_icon_view_set_model (GtkIconView *icon_view,
  * Returns the model the #GtkIconView is based on.  Returns %NULL if the
  * model is unset.
  *
- * Return value: A #GtkTreeModel, or %NULL if none is currently being used.
+ * Return value: (transfer none): A #GtkTreeModel, or %NULL if none is
+ *     currently being used.
  *
  * Since: 2.6 
  **/
@@ -5462,7 +5509,7 @@ update_text_cell (GtkIconView *icon_view)
 					"text", icon_view->priv->text_column, 
 					NULL);
 
-      if (icon_view->priv->orientation == GTK_ORIENTATION_VERTICAL)
+      if (icon_view->priv->item_orientation == GTK_ORIENTATION_VERTICAL)
 	g_object_set (info->cell,
                       "alignment", PANGO_ALIGN_CENTER,
 		      "wrap-mode", PANGO_WRAP_WORD_CHAR,
@@ -5530,7 +5577,7 @@ update_pixbuf_cell (GtkIconView *icon_view)
 					"pixbuf", icon_view->priv->pixbuf_column, 
 					NULL);
 
-	if (icon_view->priv->orientation == GTK_ORIENTATION_VERTICAL)
+	if (icon_view->priv->item_orientation == GTK_ORIENTATION_VERTICAL)
 	  g_object_set (info->cell,
 			"xalign", 0.5,
 			"yalign", 1.0,
@@ -5918,6 +5965,68 @@ gtk_icon_view_path_is_selected (GtkIconView *icon_view,
 }
 
 /**
+ * gtk_icon_view_get_item_row:
+ * @icon_view: a #GtkIconView
+ * @path: the #GtkTreePath of the item
+ *
+ * Gets the row in which the item @path is currently
+ * displayed. Row numbers start at 0.
+ *
+ * Returns: The row in which the item is displayed
+ *
+ * Since: 2.22
+ */
+gint
+gtk_icon_view_get_item_row (GtkIconView *icon_view,
+                            GtkTreePath *path)
+{
+  GtkIconViewItem *item;
+
+  g_return_val_if_fail (GTK_IS_ICON_VIEW (icon_view), FALSE);
+  g_return_val_if_fail (icon_view->priv->model != NULL, FALSE);
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  item = g_list_nth_data (icon_view->priv->items,
+                          gtk_tree_path_get_indices(path)[0]);
+
+  if (!item)
+    return -1;
+
+  return item->row;
+}
+
+/**
+ * gtk_icon_view_get_item_column:
+ * @icon_view: a #GtkIconView
+ * @path: the #GtkTreePath of the item
+ *
+ * Gets the column in which the item @path is currently
+ * displayed. Column numbers start at 0.
+ *
+ * Returns: The column in which the item is displayed
+ *
+ * Since: 2.22
+ */
+gint
+gtk_icon_view_get_item_column (GtkIconView *icon_view,
+                               GtkTreePath *path)
+{
+  GtkIconViewItem *item;
+
+  g_return_val_if_fail (GTK_IS_ICON_VIEW (icon_view), FALSE);
+  g_return_val_if_fail (icon_view->priv->model != NULL, FALSE);
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  item = g_list_nth_data (icon_view->priv->items,
+                          gtk_tree_path_get_indices(path)[0]);
+
+  if (!item)
+    return -1;
+
+  return item->col;
+}
+
+/**
  * gtk_icon_view_item_activated:
  * @icon_view: A #GtkIconView
  * @path: The #GtkTreePath to be activated
@@ -5937,24 +6046,24 @@ gtk_icon_view_item_activated (GtkIconView      *icon_view,
 }
 
 /**
- * gtk_icon_view_set_orientation:
+ * gtk_icon_view_set_item_orientation:
  * @icon_view: a #GtkIconView
  * @orientation: the relative position of texts and icons 
  * 
- * Sets the ::orientation property which determines whether the labels 
- * are drawn beside the icons instead of below.
+ * Sets the ::item-orientation property which determines whether
+ * the labels are drawn beside the icons instead of below.
  *
- * Since: 2.6
+ * Since: 2.22
  **/
 void 
-gtk_icon_view_set_orientation (GtkIconView    *icon_view,
-			       GtkOrientation  orientation)
+gtk_icon_view_set_item_orientation (GtkIconView    *icon_view,
+                                    GtkOrientation  orientation)
 {
   g_return_if_fail (GTK_IS_ICON_VIEW (icon_view));
 
-  if (icon_view->priv->orientation != orientation)
+  if (icon_view->priv->item_orientation != orientation)
     {
-      icon_view->priv->orientation = orientation;
+      icon_view->priv->item_orientation = orientation;
 
       gtk_icon_view_stop_editing (icon_view, TRUE);
       gtk_icon_view_invalidate_sizes (icon_view);
@@ -5963,8 +6072,48 @@ gtk_icon_view_set_orientation (GtkIconView    *icon_view,
       update_text_cell (icon_view);
       update_pixbuf_cell (icon_view);
       
+      g_object_notify (G_OBJECT (icon_view), "item-orientation");
       g_object_notify (G_OBJECT (icon_view), "orientation");
     }
+}
+
+/**
+ * gtk_icon_view_set_orientation:
+ * @icon_view: a #GtkIconView
+ * @orientation: the relative position of texts and icons 
+ * 
+ * Sets the ::orientation property which determines whether the labels 
+ * are drawn beside the icons instead of below.
+ *
+ * Since: 2.6
+ *
+ * Deprecated: 2.22: Use gtk_icon_view_set_item_orientation()
+ **/
+void 
+gtk_icon_view_set_orientation (GtkIconView    *icon_view,
+                               GtkOrientation  orientation)
+{
+  gtk_icon_view_set_item_orientation (icon_view, orientation);
+}
+
+/**
+ * gtk_icon_view_get_item_orientation:
+ * @icon_view: a #GtkIconView
+ *
+ * Returns the value of the ::item-orientation property which determines
+ * whether the labels are drawn beside the icons instead of below.
+ *
+ * Return value: the relative position of texts and icons
+ *
+ * Since: 2.22
+ */
+GtkOrientation
+gtk_icon_view_get_item_orientation (GtkIconView *icon_view)
+{
+  g_return_val_if_fail (GTK_IS_ICON_VIEW (icon_view),
+			GTK_ORIENTATION_VERTICAL);
+
+  return icon_view->priv->item_orientation;
 }
 
 /**
@@ -5977,14 +6126,13 @@ gtk_icon_view_set_orientation (GtkIconView    *icon_view,
  * Return value: the relative position of texts and icons 
  *
  * Since: 2.6
+ *
+ * Deprecated: 2.22: Use gtk_icon_view_get_item_orientation()
  **/
 GtkOrientation
 gtk_icon_view_get_orientation (GtkIconView *icon_view)
 {
-  g_return_val_if_fail (GTK_IS_ICON_VIEW (icon_view), 
-			GTK_ORIENTATION_VERTICAL);
-
-  return icon_view->priv->orientation;
+  return gtk_icon_view_get_item_orientation (icon_view);
 }
 
 /**
@@ -6616,7 +6764,7 @@ out:
     {
       GtkWidget *source_widget;
 
-      *suggested_action = context->suggested_action;
+      *suggested_action = gdk_drag_context_get_suggested_action (context);
       source_widget = gtk_drag_get_source_widget (context);
 
       if (source_widget == widget)
@@ -6624,7 +6772,7 @@ out:
           /* Default to MOVE, unless the user has
            * pressed ctrl or shift to affect available actions
            */
-          if ((context->actions & GDK_ACTION_MOVE) != 0)
+          if ((gdk_drag_context_get_actions (context) & GDK_ACTION_MOVE) != 0)
             *suggested_action = GDK_ACTION_MOVE;
         }
 
@@ -7077,7 +7225,7 @@ gtk_icon_view_drag_data_received (GtkWidget        *widget,
 
   gtk_drag_finish (context,
                    accepted,
-                   (context->action == GDK_ACTION_MOVE),
+                   (gdk_drag_context_get_selected_action (context) == GDK_ACTION_MOVE),
                    time);
 
   gtk_tree_path_free (dest_row);
@@ -7354,10 +7502,10 @@ gtk_icon_view_get_dest_item_at_pos (GtkIconView              *icon_view,
  * @icon_view: a #GtkIconView
  * @path: a #GtkTreePath in @icon_view
  *
- * Creates a #GdkPixmap representation of the item at @path.  
+ * Creates a #GdkPixmap representation of the item at @path.
  * This image is used for a drag icon.
  *
- * Return value: a newly-allocated pixmap of the drag icon.
+ * Return value: (transfer full): a newly-allocated pixmap of the drag icon.
  * 
  * Since: 2.8
  **/
@@ -8661,26 +8809,6 @@ gtk_icon_view_item_accessible_finalize (GObject *object)
   G_OBJECT_CLASS (accessible_item_parent_class)->finalize (object);
 }
 
-static G_CONST_RETURN gchar*
-gtk_icon_view_item_accessible_get_name (AtkObject *obj)
-{
-  if (obj->name)
-    return obj->name;
-  else
-    {
-      GtkIconViewItemAccessible *item;
-      GtkTextIter start_iter;
-      GtkTextIter end_iter;
-
-      item = GTK_ICON_VIEW_ITEM_ACCESSIBLE (obj);
- 
-      gtk_text_buffer_get_start_iter (item->text_buffer, &start_iter); 
-      gtk_text_buffer_get_end_iter (item->text_buffer, &end_iter); 
-
-      return gtk_text_buffer_get_text (item->text_buffer, &start_iter, &end_iter, FALSE);
-    }
-}
-
 static AtkObject*
 gtk_icon_view_item_accessible_get_parent (AtkObject *obj)
 {
@@ -8742,10 +8870,9 @@ gtk_icon_view_item_accessible_class_init (AtkObjectClass *klass)
 
   gobject_class->finalize = gtk_icon_view_item_accessible_finalize;
 
-  klass->get_index_in_parent = gtk_icon_view_item_accessible_get_index_in_parent; 
-  klass->get_name = gtk_icon_view_item_accessible_get_name; 
-  klass->get_parent = gtk_icon_view_item_accessible_get_parent; 
-  klass->ref_state_set = gtk_icon_view_item_accessible_ref_state_set; 
+  klass->get_index_in_parent = gtk_icon_view_item_accessible_get_index_in_parent;
+  klass->get_parent = gtk_icon_view_item_accessible_get_parent;
+  klass->ref_state_set = gtk_icon_view_item_accessible_ref_state_set;
 }
 
 static GType
@@ -9102,7 +9229,7 @@ gtk_icon_view_accessible_model_row_changed (GtkTreeModel *tree_model,
       icon_view = GTK_ICON_VIEW (widget);
       item = a11y_item->item;
 
-      name = gtk_icon_view_item_accessible_get_name (ATK_OBJECT (a11y_item));
+      name = atk_object_get_name (ATK_OBJECT (a11y_item));
 
       if (!name || strcmp (name, "") == 0)
         {

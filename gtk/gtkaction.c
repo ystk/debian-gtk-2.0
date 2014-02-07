@@ -28,6 +28,45 @@
  * GTK+ at ftp://ftp.gtk.org/pub/gtk/. 
  */
 
+/**
+ * SECTION:gtkaction
+ * @Short_description: An action which can be triggered by a menu or toolbar item
+ * @Title: GtkAction
+ * @See_also: #GtkActionGroup, #GtkUIManager
+ *
+ * Actions represent operations that the user can be perform, along with
+ * some information how it should be presented in the interface. Each action
+ * provides methods to create icons, menu items and toolbar items
+ * representing itself.
+ *
+ * As well as the callback that is called when the action gets activated,
+ * the following also gets associated with the action:
+ * <itemizedlist>
+ *   <listitem><para>a name (not translated, for path lookup)</para></listitem>
+ *   <listitem><para>a label (translated, for display)</para></listitem>
+ *   <listitem><para>an accelerator</para></listitem>
+ *   <listitem><para>whether label indicates a stock id</para></listitem>
+ *   <listitem><para>a tooltip (optional, translated)</para></listitem>
+ *   <listitem><para>a toolbar label (optional, shorter than label)</para></listitem>
+ * </itemizedlist>
+ * The action will also have some state information:
+ * <itemizedlist>
+ *   <listitem><para>visible (shown/hidden)</para></listitem>
+ *   <listitem><para>sensitive (enabled/disabled)</para></listitem>
+ * </itemizedlist>
+ * Apart from regular actions, there are <link linkend="GtkToggleAction">toggle
+ * actions</link>, which can be toggled between two states and <link
+ * linkend="GtkRadioAction">radio actions</link>, of which only one in a group
+ * can be in the "active" state. Other actions can be implemented as #GtkAction
+ * subclasses.
+ *
+ * Each action can have one or more proxy menu item, toolbar button or
+ * other proxy widgets.  Proxies mirror the state of the action (text
+ * label, tooltip, icon, visible, sensitive, etc), and should change when
+ * the action's state changes. When the proxy is activated, it should
+ * activate its action.
+ */
+
 #include "config.h"
 
 #include "gtkaction.h"
@@ -830,7 +869,7 @@ gtk_action_unblock_activate (GtkAction *action)
  * This function is intended for use by action implementations to
  * create icons displayed in the proxy widgets.
  *
- * Returns: a widget that displays the icon for this action.
+ * Returns: (transfer none): a widget that displays the icon for this action.
  *
  * Since: 2.4
  */
@@ -856,7 +895,7 @@ gtk_action_create_icon (GtkAction *action, GtkIconSize icon_size)
  *
  * Creates a menu item widget that proxies for the given action.
  *
- * Returns: a menu item connected to the action.
+ * Returns: (transfer none): a menu item connected to the action.
  *
  * Since: 2.4
  */
@@ -881,7 +920,7 @@ gtk_action_create_menu_item (GtkAction *action)
  *
  * Creates a toolbar item widget that proxies for the given action.
  *
- * Returns: a toolbar item connected to the action.
+ * Returns: (transfer none): a toolbar item connected to the action.
  *
  * Since: 2.4
  */
@@ -1029,7 +1068,7 @@ gtk_widget_get_action (GtkWidget *widget)
  *
  * Since: 2.4
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_action_get_name (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1326,7 +1365,7 @@ gtk_action_set_label (GtkAction	  *action,
  *
  * Since: 2.16
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_action_get_label (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1372,7 +1411,7 @@ gtk_action_set_short_label (GtkAction   *action,
  *
  * Since: 2.16
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_action_get_short_label (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1389,7 +1428,7 @@ gtk_action_get_short_label (GtkAction *action)
  *
  * Since: 2.16
  */
-void 
+void
 gtk_action_set_visible_horizontal (GtkAction *action,
 				   gboolean   visible_horizontal)
 {
@@ -1504,7 +1543,7 @@ gtk_action_set_tooltip (GtkAction   *action,
  *
  * Since: 2.16
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_action_get_tooltip (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1562,7 +1601,7 @@ gtk_action_set_stock_id (GtkAction   *action,
  *
  * Since: 2.16
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_action_get_stock_id (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1604,7 +1643,7 @@ gtk_action_set_icon_name (GtkAction   *action,
  *
  * Since: 2.16
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_action_get_icon_name (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1644,7 +1683,7 @@ gtk_action_set_gicon (GtkAction *action,
  *
  * Gets the gicon of @action.
  *
- * Returns: The action's #GIcon if one is set.
+ * Returns: (transfer none): The action's #GIcon if one is set.
  *
  * Since: 2.16
  */
@@ -1777,7 +1816,7 @@ gtk_action_set_accel_path (GtkAction   *action,
  *   if none is set. The returned string is owned by GTK+ 
  *   and must not be freed or modified.
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_action_get_accel_path (GtkAction *action)
 {
   g_return_val_if_fail (GTK_IS_ACTION (action), NULL);
@@ -1796,8 +1835,9 @@ gtk_action_get_accel_path (GtkAction *action)
  *
  * Since: 2.8
  *
- * Returns: the accel closure for this action. The returned closure is
- *          owned by GTK+ and must not be unreffed or modified.
+ * Returns: (transfer none): the accel closure for this action. The
+ *          returned closure is owned by GTK+ and must not be unreffed
+ *          or modified.
  */
 GClosure *
 gtk_action_get_accel_closure (GtkAction *action)
@@ -1902,7 +1942,8 @@ gtk_action_disconnect_accelerator (GtkAction *action)
  * item or the toolbar item it creates, this function returns an
  * instance of that menu.
  *
- * Return value: the menu item provided by the action, or %NULL.
+ * Return value: (transfer none): the menu item provided by the
+ *               action, or %NULL.
  *
  * Since: 2.12
  */

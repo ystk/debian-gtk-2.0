@@ -297,7 +297,6 @@ static void     gtk_text_view_set_attributes_from_style (GtkTextView        *tex
 static void     gtk_text_view_ensure_layout          (GtkTextView        *text_view);
 static void     gtk_text_view_destroy_layout         (GtkTextView        *text_view);
 static void     gtk_text_view_check_keymap_direction (GtkTextView        *text_view);
-static void     gtk_text_view_reset_im_context       (GtkTextView        *text_view);
 static void     gtk_text_view_start_selection_drag   (GtkTextView        *text_view,
                                                       const GtkTextIter  *iter,
                                                       GdkEventButton     *event);
@@ -1549,7 +1548,7 @@ gtk_text_view_get_buffer (GtkTextView *text_view)
 /**
  * gtk_text_view_get_iter_at_location:
  * @text_view: a #GtkTextView
- * @iter: a #GtkTextIter
+ * @iter: (out): a #GtkTextIter
  * @x: x position, in buffer coordinates
  * @y: y position, in buffer coordinates
  *
@@ -1577,8 +1576,8 @@ gtk_text_view_get_iter_at_location (GtkTextView *text_view,
 /**
  * gtk_text_view_get_iter_at_position:
  * @text_view: a #GtkTextView
- * @iter: a #GtkTextIter
- * @trailing: if non-%NULL, location to store an integer indicating where
+ * @iter: (out): a #GtkTextIter
+ * @trailing: (out) (allow-none): if non-%NULL, location to store an integer indicating where
  *    in the grapheme the user clicked. It will either be
  *    zero, or the number of characters in the grapheme. 
  *    0 represents the trailing edge of the grapheme.
@@ -1618,7 +1617,7 @@ gtk_text_view_get_iter_at_position (GtkTextView *text_view,
  * gtk_text_view_get_iter_location:
  * @text_view: a #GtkTextView
  * @iter: a #GtkTextIter
- * @location: bounds of the character at @iter
+ * @location: (out): bounds of the character at @iter
  *
  * Gets a rectangle which roughly contains the character at @iter.
  * The rectangle position is in buffer coordinates; use
@@ -1642,8 +1641,8 @@ gtk_text_view_get_iter_location (GtkTextView       *text_view,
  * gtk_text_view_get_line_yrange:
  * @text_view: a #GtkTextView
  * @iter: a #GtkTextIter
- * @y: return location for a y coordinate
- * @height: return location for a height
+ * @y: (out): return location for a y coordinate
+ * @height: (out): return location for a height
  *
  * Gets the y coordinate of the top of the line containing @iter,
  * and the height of the line. The coordinate is a buffer coordinate;
@@ -1669,9 +1668,9 @@ gtk_text_view_get_line_yrange (GtkTextView       *text_view,
 /**
  * gtk_text_view_get_line_at_y:
  * @text_view: a #GtkTextView
- * @target_iter: a #GtkTextIter
+ * @target_iter: (out): a #GtkTextIter
  * @y: a y coordinate
- * @line_top: return location for top coordinate of the line
+ * @line_top: (out): return location for top coordinate of the line
  *
  * Gets the #GtkTextIter at the start of the line containing
  * the coordinate @y. @y is in buffer coordinates, convert from
@@ -2282,7 +2281,7 @@ gtk_text_view_move_mark_onscreen (GtkTextView *text_view,
 /**
  * gtk_text_view_get_visible_rect:
  * @text_view: a #GtkTextView
- * @visible_rect: rectangle to fill
+ * @visible_rect: (out): rectangle to fill
  *
  * Fills @visible_rect with the currently-visible
  * region of the buffer, in buffer coordinates. Convert to window coordinates
@@ -2924,10 +2923,11 @@ gtk_text_view_finalize (GObject *object)
   text_view = GTK_TEXT_VIEW (object);
   priv = GTK_TEXT_VIEW_GET_PRIVATE (text_view);
 
-  g_assert (text_view->buffer == NULL);
-
   gtk_text_view_destroy_layout (text_view);
   gtk_text_view_set_buffer (text_view, NULL);
+
+  /* at this point, no "notify::buffer" handler should recreate the buffer. */
+  g_assert (text_view->buffer == NULL);
   
   cancel_pending_scroll (text_view);
 
@@ -4047,7 +4047,7 @@ set_invisible_cursor (GdkWindow *window)
   GdkDisplay *display;
   GdkCursor *cursor;
 
-  display = gdk_drawable_get_display (window);
+  display = gdk_window_get_display (window);
   cursor = gdk_cursor_new_for_display (display, GDK_BLANK_CURSOR);
  
   gdk_window_set_cursor (window, cursor);
@@ -4352,7 +4352,12 @@ gtk_text_view_button_press_event (GtkWidget *widget, GdkEventButton *event)
     {
       gtk_text_view_reset_im_context (text_view);
 
-      if (event->button == 1)
+      if (_gtk_button_event_triggers_context_menu (event))
+        {
+	  gtk_text_view_do_popup (text_view, event);
+	  return TRUE;
+        }
+      else if (event->button == 1)
         {
           /* If we're in the selection, start a drag copy/move of the
            * selection; otherwise, start creating a new selection.
@@ -4368,7 +4373,7 @@ gtk_text_view_button_press_event (GtkWidget *widget, GdkEventButton *event)
           if (gtk_text_buffer_get_selection_bounds (get_buffer (text_view),
                                                     &start, &end) &&
               gtk_text_iter_in_range (&iter, &start, &end) &&
-              !(event->state & GDK_SHIFT_MASK))
+              !(event->state & GTK_EXTEND_SELECTION_MOD_MASK))
             {
               text_view->drag_start_x = event->x;
               text_view->drag_start_y = event->y;
@@ -4401,11 +4406,6 @@ gtk_text_view_button_press_event (GtkWidget *widget, GdkEventButton *event)
 					   &iter,
 					   text_view->editable);
           return TRUE;
-        }
-      else if (event->button == 3)
-        {
-	  gtk_text_view_do_popup (text_view, event);
-	  return TRUE;
         }
     }
   else if ((event->type == GDK_2BUTTON_PRESS ||
@@ -6079,7 +6079,8 @@ drag_scan_timeout (gpointer data)
   text_view = GTK_TEXT_VIEW (data);
 
   get_iter_at_pointer (text_view, &newplace, &x, &y);
-  gdk_drawable_get_size (text_view->text_window->bin_window, &width, &height);
+  width = gdk_window_get_width (text_view->text_window->bin_window);
+  height = gdk_window_get_height (text_view->text_window->bin_window);
 
   gtk_text_buffer_move_mark (get_buffer (text_view),
                              text_view->dnd_mark,
@@ -6294,7 +6295,7 @@ gtk_text_view_start_selection_drag (GtkTextView       *text_view,
   orig_start = ins;
   orig_end = bound;
 
-  if (button->state & GDK_SHIFT_MASK)
+  if (button->state & GTK_EXTEND_SELECTION_MOD_MASK)
     {
       /* Extend selection */
       GtkTextIter old_ins, old_bound;
@@ -6574,14 +6575,72 @@ gtk_text_view_destroy_layout (GtkTextView *text_view)
     }
 }
 
-static void
+/**
+ * gtk_text_view_reset_im_context:
+ * @text_view: a #GtkTextView
+ *
+ * Reset the input method context of the text view if needed.
+ *
+ * This can be necessary in the case where modifying the buffer
+ * would confuse on-going input method behavior.
+ *
+ * Since: 2.22
+ */
+void
 gtk_text_view_reset_im_context (GtkTextView *text_view)
 {
+  g_return_if_fail (GTK_IS_TEXT_VIEW (text_view));
+
   if (text_view->need_im_reset)
     {
       text_view->need_im_reset = FALSE;
       gtk_im_context_reset (text_view->im_context);
     }
+}
+
+/**
+ * gtk_text_view_im_context_filter_keypress:
+ * @text_view: a #GtkTextView
+ * @event: the key event
+ *
+ * Allow the #GtkTextView input method to internally handle key press
+ * and release events. If this function returns %TRUE, then no further
+ * processing should be done for this key event. See
+ * gtk_im_context_filter_keypress().
+ *
+ * Note that you are expected to call this function from your handler
+ * when overriding key event handling. This is needed in the case when
+ * you need to insert your own key handling between the input method
+ * and the default key event handling of the #GtkTextView.
+ *
+ * |[
+ * static gboolean
+ * gtk_foo_bar_key_press_event (GtkWidget   *widget,
+ *                              GdkEventKey *event)
+ * {
+ *   if ((key->keyval == GDK_Return || key->keyval == GDK_KP_Enter))
+ *     {
+ *       if (gtk_text_view_im_context_filter_keypress (GTK_TEXT_VIEW (view), event))
+ *         return TRUE;
+ *     }
+ *
+ *     /&ast; Do some stuff &ast;/
+ *
+ *   return GTK_WIDGET_CLASS (gtk_foo_bar_parent_class)->key_press_event (widget, event);
+ * }
+ * ]|
+ *
+ * Return value: %TRUE if the input method handled the key event.
+ *
+ * Since: 2.22
+ */
+gboolean
+gtk_text_view_im_context_filter_keypress (GtkTextView  *text_view,
+                                          GdkEventKey  *event)
+{
+  g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), FALSE);
+
+  return gtk_im_context_filter_keypress (text_view->im_context, event);
 }
 
 /*
@@ -6795,7 +6854,7 @@ gtk_text_view_drag_motion (GtkWidget        *widget,
         {
           GtkWidget *source_widget;
           
-          suggested_action = context->suggested_action;
+          suggested_action = gdk_drag_context_get_suggested_action (context);
           
           source_widget = gtk_drag_get_source_widget (context);
           
@@ -6804,7 +6863,7 @@ gtk_text_view_drag_motion (GtkWidget        *widget,
               /* Default to MOVE, unless the user has
                * pressed ctrl or alt to affect available actions
                */
-              if ((context->actions & GDK_ACTION_MOVE) != 0)
+              if ((gdk_drag_context_get_actions (context) & GDK_ACTION_MOVE) != 0)
                 suggested_action = GDK_ACTION_MOVE;
             }
         }
@@ -6955,7 +7014,7 @@ gtk_text_view_drag_data_received (GtkWidget        *widget,
 
           atoms = gtk_text_buffer_get_deserialize_formats (buffer, &n_atoms);
 
-          for (list = context->targets; list; list = g_list_next (list))
+          for (list = gdk_drag_context_list_targets (context); list; list = g_list_next (list))
             {
               gint i;
 
@@ -7023,7 +7082,7 @@ gtk_text_view_drag_data_received (GtkWidget        *widget,
 
  done:
   gtk_drag_finish (context, success,
-		   success && context->action == GDK_ACTION_MOVE,
+		   success && gdk_drag_context_get_selected_action (context) == GDK_ACTION_MOVE,
 		   time);
 
   if (success)
@@ -7035,6 +7094,42 @@ gtk_text_view_drag_data_received (GtkWidget        *widget,
 
       gtk_text_buffer_end_user_action (buffer);
     }
+}
+
+/**
+ * gtk_text_view_get_hadjustment:
+ * @text_view: a #GtkTextView
+ *
+ * Gets the horizontal-scrolling #GtkAdjustment.
+ *
+ * Returns: (transfer none): pointer to the horizontal #GtkAdjustment
+ *
+ * Since: 2.22
+ **/
+GtkAdjustment*
+gtk_text_view_get_hadjustment (GtkTextView *text_view)
+{
+  g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
+
+  return get_hadjustment (text_view);
+}
+
+/**
+ * gtk_text_view_get_vadjustment:
+ * @text_view: a #GtkTextView
+ *
+ * Gets the vertical-scrolling #GtkAdjustment.
+ *
+ * Returns: (transfer none): pointer to the vertical #GtkAdjustment
+ *
+ * Since: 2.22
+ **/
+GtkAdjustment*
+gtk_text_view_get_vadjustment (GtkTextView *text_view)
+{
+  g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
+
+  return get_vadjustment (text_view);
 }
 
 static GtkAdjustment*
@@ -8055,7 +8150,7 @@ text_window_realize (GtkTextWindow *win,
       if (gtk_widget_is_sensitive (widget))
         {
           /* I-beam cursor */
-          cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window),
+          cursor = gdk_cursor_new_for_display (gdk_window_get_display (widget->window),
 					       GDK_XTERM);
           gdk_window_set_cursor (win->bin_window, cursor);
           gdk_cursor_unref (cursor);
@@ -8441,8 +8536,8 @@ buffer_to_text_window (GtkTextView   *text_view,
  * @win: a #GtkTextWindowType except #GTK_TEXT_WINDOW_PRIVATE
  * @buffer_x: buffer x coordinate
  * @buffer_y: buffer y coordinate
- * @window_x: window x coordinate return location
- * @window_y: window y coordinate return location
+ * @window_x: (out) (allow-none): window x coordinate return location or %NULL
+ * @window_y: (out) (allow-none): window y coordinate return location or %NULL
  *
  * Converts coordinate (@buffer_x, @buffer_y) to coordinates for the window
  * @win, and stores the result in (@window_x, @window_y). 
@@ -8581,8 +8676,8 @@ text_window_to_buffer (GtkTextView   *text_view,
  * @win: a #GtkTextWindowType except #GTK_TEXT_WINDOW_PRIVATE
  * @window_x: window x coordinate
  * @window_y: window y coordinate
- * @buffer_x: buffer x coordinate return location
- * @buffer_y: buffer y coordinate return location
+ * @buffer_x: (out) (allow-none): buffer x coordinate return location or %NULL
+ * @buffer_y: (out) (allow-none): buffer y coordinate return location or %NULL
  *
  * Converts coordinates on the window identified by @win to buffer
  * coordinates, storing the result in (@buffer_x,@buffer_y).

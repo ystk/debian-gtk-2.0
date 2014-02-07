@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Sandeep Shedmake <sandeep.shedmake@gmail.com>, 2008, 2009.
-# Sandeep Shedmake <sshedmak@redhat.com>, 2009.
+# Sandeep Shedmake <sshedmak@redhat.com>, 2009, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: mr\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-02 21:21-0400\n"
-"PO-Revision-Date: 2009-09-15 20:25+0530\n"
+"POT-Creation-Date: 2010-06-10 11:56-0400\n"
+"PO-Revision-Date: 2010-04-14 15:50+0530\n"
 "Last-Translator: Sandeep Shedmake <sshedmak@redhat.com>\n"
-"Language-Team: Marathi <fedora-trans-mr@redhat.com>\n"
+"Language-Team: Marathi <maajhe-sanganak@freelists.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -403,11 +403,11 @@ msgid "Image pixel data corrupt"
 msgstr "प्रतिमेमधील चित्रकणविषयक माहिती दुषित आहे "
 
 #: gdk-pixbuf/gdk-pixdata.c:432
-#, c-format
+#, fuzzy, c-format
 msgid "failed to allocate image buffer of %u byte"
 msgid_plural "failed to allocate image buffer of %u bytes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "फाइल रीड बफरकरीता %d बाईट्स्चे वाटप करण्यास अपयशी"
+msgstr[1] "फाइल रीड बफरकरीता %d बाईट्स्चे वाटप करण्यास अपयशी"
 
 #: gdk-pixbuf/io-ani.c:244
 msgid "Unexpected icon chunk in animation"
@@ -778,7 +778,7 @@ msgstr "PNG पाठ चंकसाठी कळा ASCII अक्षरा�
 #: gdk-pixbuf/io-png.c:886 gdk-pixbuf/io-tiff.c:738
 #, c-format
 msgid "Color profile has invalid length %d."
-msgstr ""
+msgstr "रंग प्रोफाइलची अवैध लांबी %d."
 
 #: gdk-pixbuf/io-png.c:899 gdk-pixbuf/io-gdip-png.c:56
 #, c-format
@@ -867,52 +867,47 @@ msgstr "PNM/PBM/PGM/PPM प्रतिमा स्वरूप परिवा
 
 #: gdk-pixbuf/io-qtif.c:128
 msgid "Input file descriptor is NULL."
-msgstr ""
+msgstr "इंपुट फाइल डिस्क्रीप्टर NULL आहे."
 
 #: gdk-pixbuf/io-qtif.c:143
-#, fuzzy
 msgid "Failed to read QTIF header"
-msgstr "हेड्डरवर लिहीण्यास अपयशी\n"
+msgstr "QTIF हेड्डर वाचण्यास अपयशी"
 
 #: gdk-pixbuf/io-qtif.c:152 gdk-pixbuf/io-qtif.c:182 gdk-pixbuf/io-qtif.c:446
 #, c-format
 msgid "QTIF atom size too large (%d bytes)"
-msgstr ""
+msgstr "QTIF ऍटम आकार खूप मोठे आहे (%d बाईट्स्)"
 
 #: gdk-pixbuf/io-qtif.c:172
 #, c-format
 msgid "Failed to allocate %d bytes for file read buffer"
-msgstr ""
+msgstr "फाइल रीड बफरकरीता %d बाईट्स्चे वाटप करण्यास अपयशी"
 
 #: gdk-pixbuf/io-qtif.c:196
-#, fuzzy, c-format
+#, c-format
 msgid "File error when reading QTIF atom: %s"
-msgstr "GIF %s मधील मजकूर वाचता येत नाहीः"
+msgstr "QTIF atom वाचतेवेळी फाइल त्रुटी: %s"
 
 #: gdk-pixbuf/io-qtif.c:233
 #, c-format
 msgid "Failed to skip the next %d bytes with seek()."
-msgstr ""
+msgstr "पुढचे %d बाईट्स् seek() सह वगळण्यास अपयशी."
 
 #: gdk-pixbuf/io-qtif.c:257
-#, fuzzy
 msgid "Failed to allocate QTIF context structure."
-msgstr "TGA संदर्भ struct साठी स्मृती राखू शकत नाही"
+msgstr "QTIF कंटेक्स्ट स्ट्रक्चरचे वाटप करण्यास अपयशी."
 
 #: gdk-pixbuf/io-qtif.c:317
-#, fuzzy
 msgid "Failed to create GdkPixbufLoader object."
-msgstr "फोल्डर विषयसूची लिहण्यास अपयशी\n"
+msgstr "GdkPixbufLoader ऑब्जेक्ट निर्माण करण्यास अपयशी."
 
 #: gdk-pixbuf/io-qtif.c:421
-#, fuzzy
 msgid "Failed to find an image data atom."
-msgstr "TIFF प्रतिमा उघडण्यात असफल"
+msgstr "प्रतिमा डाटा ऍटम शोधण्यास अपयशी."
 
 #: gdk-pixbuf/io-qtif.c:602
-#, fuzzy
 msgid "The QTIF image format"
-msgstr "TIFF प्रतिमा स्वरूप"
+msgstr "QTIF प्रतिमा रूपण"
 
 #: gdk-pixbuf/io-ras.c:126
 msgid "RAS image has bogus header data"
@@ -955,9 +950,8 @@ msgid "Cannot allocate new pixbuf"
 msgstr "नविन  Pixbuf साठी स्मृती राखता येत नाही"
 
 #: gdk-pixbuf/io-tga.c:686
-#, fuzzy
 msgid "Image is corrupted or truncated"
-msgstr "GIF प्रतिमा अपूर्ण किंवा सदोष होते."
+msgstr "प्रतिमा दोषीत किंवा ट्रंकेटेड आहे"
 
 #: gdk-pixbuf/io-tga.c:693
 msgid "Cannot allocate colormap structure"
@@ -1038,7 +1032,7 @@ msgstr "TIFF प्रतिमा सुरक्षित करण्या�
 
 #: gdk-pixbuf/io-tiff.c:727
 msgid "TIFF compression doesn't refer to a valid codec."
-msgstr ""
+msgstr "TIFF संकोचन वैध कोडेककरीता संदर्भ पुरवत नाही."
 
 #: gdk-pixbuf/io-tiff.c:767
 msgid "Failed to write TIFF data"
@@ -1590,11 +1584,11 @@ msgstr "तुम्ही निवडलेला रंग. तुम्ह�
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
-msgstr ""
+msgstr "पूर्वी-नीवडलेला रंग, आत्ता नीवडलेल्या रंगाशी तुलना करण्यासाठी आहे."
 
 #: gtk/gtkcolorsel.c:969
 msgid "The color you've chosen."
-msgstr ""
+msgstr "तुम्ही नीवडलेला रंग."
 
 #: gtk/gtkcolorsel.c:1382
 msgid "_Save color here"
@@ -1676,15 +1670,15 @@ msgstr "उजवा(_R):"
 msgid "Paper Margins"
 msgstr "कागद समास"
 
-#: gtk/gtkentry.c:8698 gtk/gtktextview.c:7881
+#: gtk/gtkentry.c:8747 gtk/gtktextview.c:7974
 msgid "Input _Methods"
 msgstr "इनपुट पद्धती (_M)"
 
-#: gtk/gtkentry.c:8712 gtk/gtktextview.c:7895
+#: gtk/gtkentry.c:8761 gtk/gtktextview.c:7988
 msgid "_Insert Unicode Control Character"
 msgstr "युनिकोड नियंत्रण अक्षर घाला(_I)"
 
-#: gtk/gtkentry.c:10091
+#: gtk/gtkentry.c:10140
 msgid "Caps Lock is on"
 msgstr "Caps Lock सुरू आहे"
 
@@ -1883,14 +1877,13 @@ msgid "Create in _folder:"
 msgstr "या फोल्डरमध्ये निर्माण करा(_f):"
 
 #: gtk/gtkfilechooserdefault.c:6423
-#, fuzzy, c-format
+#, c-format
 msgid "Could not read the contents of %s"
-msgstr "स्ट्रीम बनवू शकत नाही: %s"
+msgstr "%s ची अंतर्भुत माहिती वाचण्यास अशक्य"
 
 #: gtk/gtkfilechooserdefault.c:6427
-#, fuzzy
 msgid "Could not read the contents of the folder"
-msgstr "रूट फोल्डर मिळवता आले नाही"
+msgstr "फोल्डरची अंतर्भुत माहिती वाचण्यास अशक्य"
 
 #: gtk/gtkfilechooserdefault.c:6520 gtk/gtkfilechooserdefault.c:6588
 #: gtk/gtkfilechooserdefault.c:6733
@@ -2249,10 +2242,9 @@ msgid "System"
 msgstr "प्रणाली"
 
 #: gtk/gtkimmulticontext.c:573
-#, fuzzy
 msgctxt "input method menu"
 msgid "None"
-msgstr "काहीच नाही"
+msgstr "काहिच नाही"
 
 #: gtk/gtkimmulticontext.c:656
 #, c-format
@@ -2490,7 +2482,7 @@ msgstr "कार्यला pid %d सह समाप्त करणे अ�
 msgid "Page %u"
 msgstr "पान %u"
 
-#: gtk/gtkpagesetup.c:597 gtk/gtkpapersize.c:825 gtk/gtkpapersize.c:867
+#: gtk/gtkpagesetup.c:597 gtk/gtkpapersize.c:826 gtk/gtkpapersize.c:868
 msgid "Not a valid page setup file"
 msgstr "वैध मांडणी फाइल नाही"
 
@@ -2664,7 +2656,7 @@ msgstr "कागद संपले"
 
 #. Translators: this is a printer status.
 #: gtk/gtkprintoperation-win32.c:616
-#: modules/printbackends/cups/gtkprintbackendcups.c:1997
+#: modules/printbackends/cups/gtkprintbackendcups.c:2000
 msgid "Paused"
 msgstr "थांबलेले"
 
@@ -2710,9 +2702,8 @@ msgid "Unspecified error"
 msgstr "न दर्शवलेली चूक"
 
 #: gtk/gtkprintunixdialog.c:614
-#, fuzzy
 msgid "Getting printer information failed"
-msgstr "छपाई माहिती प्राप्त करत आहे..."
+msgstr "छपाई माहिती प्राप्त करण्यास अपयशी"
 
 #: gtk/gtkprintunixdialog.c:1862
 msgid "Getting printer information..."
@@ -2792,42 +2783,42 @@ msgstr "सामान्य"
 #. * multiple pages on a sheet when printing
 #.
 #: gtk/gtkprintunixdialog.c:3010
-#: modules/printbackends/cups/gtkprintbackendcups.c:3505
+#: modules/printbackends/cups/gtkprintbackendcups.c:3510
 msgid "Left to right, top to bottom"
 msgstr "डावीकडून उजवीकडे, शिर्ष ते तळ"
 
 #: gtk/gtkprintunixdialog.c:3010
-#: modules/printbackends/cups/gtkprintbackendcups.c:3505
+#: modules/printbackends/cups/gtkprintbackendcups.c:3510
 msgid "Left to right, bottom to top"
 msgstr "डावीकडून उजवीकडे, तळ ते शिर्ष"
 
 #: gtk/gtkprintunixdialog.c:3011
-#: modules/printbackends/cups/gtkprintbackendcups.c:3506
+#: modules/printbackends/cups/gtkprintbackendcups.c:3511
 msgid "Right to left, top to bottom"
 msgstr "उजवीकडून डावीकडे, शिर्ष ते तळ"
 
 #: gtk/gtkprintunixdialog.c:3011
-#: modules/printbackends/cups/gtkprintbackendcups.c:3506
+#: modules/printbackends/cups/gtkprintbackendcups.c:3511
 msgid "Right to left, bottom to top"
 msgstr "उजवीकडून डावीकडे, तळ ते शिर्ष"
 
 #: gtk/gtkprintunixdialog.c:3012
-#: modules/printbackends/cups/gtkprintbackendcups.c:3507
+#: modules/printbackends/cups/gtkprintbackendcups.c:3512
 msgid "Top to bottom, left to right"
 msgstr "शिर्ष ते तळ, डावीकडून उजवीकडे"
 
 #: gtk/gtkprintunixdialog.c:3012
-#: modules/printbackends/cups/gtkprintbackendcups.c:3507
+#: modules/printbackends/cups/gtkprintbackendcups.c:3512
 msgid "Top to bottom, right to left"
 msgstr "शिर्ष ते तळ, उजवीकडून डावीकडे"
 
 #: gtk/gtkprintunixdialog.c:3013
-#: modules/printbackends/cups/gtkprintbackendcups.c:3508
+#: modules/printbackends/cups/gtkprintbackendcups.c:3513
 msgid "Bottom to top, left to right"
 msgstr "तळ ते शिर्ष, डावीकडून उजवीकडे"
 
 #: gtk/gtkprintunixdialog.c:3013
-#: modules/printbackends/cups/gtkprintbackendcups.c:3508
+#: modules/printbackends/cups/gtkprintbackendcups.c:3513
 msgid "Bottom to top, right to left"
 msgstr "तळ ते शिर्ष, उजवीकडून डावीकडे"
 
@@ -2835,7 +2826,7 @@ msgstr "तळ ते शिर्ष, उजवीकडून डावीक�
 #. * dialog that controls in what order multiple pages are arranged
 #.
 #: gtk/gtkprintunixdialog.c:3017 gtk/gtkprintunixdialog.c:3030
-#: modules/printbackends/cups/gtkprintbackendcups.c:3540
+#: modules/printbackends/cups/gtkprintbackendcups.c:3545
 msgid "Page Ordering"
 msgstr "पानाची क्रमवारी"
 
@@ -3143,14 +3134,13 @@ msgid "Unable to find an item with URI '%s'"
 msgstr "URI '%s' साठी बाब शोधण्यास असमर्थ"
 
 #: gtk/gtkspinner.c:458
-#, fuzzy
 msgctxt "throbbing progress animation widget"
 msgid "Spinner"
-msgstr "Super"
+msgstr "स्पीनर"
 
 #: gtk/gtkspinner.c:459
 msgid "Provides visual indication of progress"
-msgstr ""
+msgstr "प्रगतीचे दृष्यास्पद संकेत पुरवतो"
 
 #. KEEP IN SYNC with gtkiconfactory.c stock icons, when appropriate
 #: gtk/gtkstock.c:314
@@ -3828,39 +3818,39 @@ msgstr "ओळ %d char %d अपरिचीत अक्षर माहित�
 msgid "Empty"
 msgstr "रिकामे"
 
-#: gtk/gtkvolumebutton.c:73
+#: gtk/gtkvolumebutton.c:83
 msgid "Volume"
 msgstr "प्रमाण"
 
-#: gtk/gtkvolumebutton.c:75
+#: gtk/gtkvolumebutton.c:85
 msgid "Turns volume down or up"
 msgstr "आवाज कमी करतो किंवा वाढवितो"
 
-#: gtk/gtkvolumebutton.c:78
+#: gtk/gtkvolumebutton.c:88
 msgid "Adjusts the volume"
 msgstr "आवाज नियंत्रीत करतो"
 
-#: gtk/gtkvolumebutton.c:81 gtk/gtkvolumebutton.c:84
+#: gtk/gtkvolumebutton.c:91 gtk/gtkvolumebutton.c:94
 msgid "Volume Down"
 msgstr "आवाज वाढवा कमी करा"
 
-#: gtk/gtkvolumebutton.c:83
+#: gtk/gtkvolumebutton.c:93
 msgid "Decreases the volume"
 msgstr "आवाज कमी करतो"
 
-#: gtk/gtkvolumebutton.c:87 gtk/gtkvolumebutton.c:90
+#: gtk/gtkvolumebutton.c:97 gtk/gtkvolumebutton.c:100
 msgid "Volume Up"
 msgstr "आवाज वाढवा"
 
-#: gtk/gtkvolumebutton.c:89
+#: gtk/gtkvolumebutton.c:99
 msgid "Increases the volume"
 msgstr "आवाज वाढवितो"
 
-#: gtk/gtkvolumebutton.c:147
+#: gtk/gtkvolumebutton.c:157
 msgid "Muted"
 msgstr "मंद केले"
 
-#: gtk/gtkvolumebutton.c:151
+#: gtk/gtkvolumebutton.c:161
 msgid "Full Volume"
 msgstr "पूर्णतया आवाज"
 
@@ -3869,7 +3859,7 @@ msgstr "पूर्णतया आवाज"
 #. * Translate the "%d" to "%Id" if you want to use localised digits,
 #. * or otherwise translate the "%d" to "%d".
 #.
-#: gtk/gtkvolumebutton.c:164
+#: gtk/gtkvolumebutton.c:174
 #, c-format
 msgctxt "volume percentage"
 msgid "%d %%"
@@ -4681,10 +4671,9 @@ msgid "prc8 Envelope"
 msgstr "prc8 Envelope"
 
 #: gtk/paper_names_offsets.c:166
-#, fuzzy
 msgctxt "paper size"
 msgid "prc9 Envelope"
-msgstr "prc1 Envelope"
+msgstr "prc9 Envelope"
 
 #: gtk/paper_names_offsets.c:167
 msgctxt "paper size"
@@ -4859,261 +4848,259 @@ msgstr "विएतनामी (VIQR)"
 msgid "X Input Method"
 msgstr "X आदान पध्दत "
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:809
-#: modules/printbackends/cups/gtkprintbackendcups.c:1018
+#: modules/printbackends/cups/gtkprintbackendcups.c:811
+#: modules/printbackends/cups/gtkprintbackendcups.c:1020
 msgid "Username:"
 msgstr "वापरकर्त्याचे नाव:"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:810
-#: modules/printbackends/cups/gtkprintbackendcups.c:1027
+#: modules/printbackends/cups/gtkprintbackendcups.c:812
+#: modules/printbackends/cups/gtkprintbackendcups.c:1029
 msgid "Password:"
 msgstr "पासवर्ड:"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:848
+#: modules/printbackends/cups/gtkprintbackendcups.c:850
 #, c-format
 msgid "Authentication is required to get a file from %s"
 msgstr "%s पासून फाइल प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:852
-#: modules/printbackends/cups/gtkprintbackendcups.c:1040
+#: modules/printbackends/cups/gtkprintbackendcups.c:854
+#: modules/printbackends/cups/gtkprintbackendcups.c:1042
 #, c-format
 msgid "Authentication is required to print document '%s' on printer %s"
 msgstr "छपाईयंत्र %2$s वरील दस्तऐवज '%1$s' च्या छपाईकरीता ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:854
+#: modules/printbackends/cups/gtkprintbackendcups.c:856
 #, c-format
 msgid "Authentication is required to print a document on %s"
 msgstr "%s वरील दस्तऐवजाची छपाईकरीता ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:858
+#: modules/printbackends/cups/gtkprintbackendcups.c:860
 #, c-format
 msgid "Authentication is required to get attributes of job '%s'"
 msgstr "कार्य '%s' चे गुणधर्म प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:860
+#: modules/printbackends/cups/gtkprintbackendcups.c:862
 msgid "Authentication is required to get attributes of a job"
 msgstr "कार्याचे गुणधर्म प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:864
+#: modules/printbackends/cups/gtkprintbackendcups.c:866
 #, c-format
 msgid "Authentication is required to get attributes of printer %s"
 msgstr "छपाईयंत्र %s चे गुणधर्म प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:866
+#: modules/printbackends/cups/gtkprintbackendcups.c:868
 msgid "Authentication is required to get attributes of a printer"
 msgstr "छपाईयंत्राचे गुणधर्म प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:869
+#: modules/printbackends/cups/gtkprintbackendcups.c:871
 #, c-format
 msgid "Authentication is required to get default printer of %s"
 msgstr "%s चे पूर्वनिर्धारीत छपाईयंत्र प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:872
+#: modules/printbackends/cups/gtkprintbackendcups.c:874
 #, c-format
 msgid "Authentication is required to get printers from %s"
 msgstr "%s पासून छपाईयंत्र प्राप्त करण्यासाठी ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:875
+#: modules/printbackends/cups/gtkprintbackendcups.c:877
 #, c-format
 msgid "Authentication is required on %s"
 msgstr "%s वर ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1012
-#, fuzzy
+#: modules/printbackends/cups/gtkprintbackendcups.c:1014
 msgid "Domain:"
-msgstr "क्षेत्र (_D):"
+msgstr "क्षेत्र:"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1042
-#, fuzzy, c-format
+#: modules/printbackends/cups/gtkprintbackendcups.c:1044
+#, c-format
 msgid "Authentication is required to print document '%s'"
-msgstr "%s वरील दस्तऐवजाची छपाईकरीता ओळख पटवणे आवश्यक आहे"
-
-#: modules/printbackends/cups/gtkprintbackendcups.c:1047
-#, fuzzy, c-format
-msgid "Authentication is required to print this document on printer %s"
-msgstr "छपाईयंत्र %2$s वरील दस्तऐवज '%1$s' च्या छपाईकरीता ओळख पटवणे आवश्यक आहे"
+msgstr "दस्तऐवज '%s' च्या छपाईकरीता ओळख पटवणे आवश्यक आहे"
 
 #: modules/printbackends/cups/gtkprintbackendcups.c:1049
-#, fuzzy
-msgid "Authentication is required to print this document"
-msgstr "%s वरील दस्तऐवजाची छपाईकरीता ओळख पटवणे आवश्यक आहे"
+#, c-format
+msgid "Authentication is required to print this document on printer %s"
+msgstr "छपाईयंत्र %s वरील या दस्तऐवजाची छपाई करीता ओळख पटवणे आवश्यक आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1670
+#: modules/printbackends/cups/gtkprintbackendcups.c:1051
+msgid "Authentication is required to print this document"
+msgstr "या दस्तऐवजाच्या छपाईकरीता ओळख पटवणे आवश्यक आहे"
+
+#: modules/printbackends/cups/gtkprintbackendcups.c:1673
 #, c-format
 msgid "Printer '%s' is low on toner."
 msgstr "छपाईयंत्र '%s' मधिल टोनर कमी आहे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1671
+#: modules/printbackends/cups/gtkprintbackendcups.c:1674
 #, c-format
 msgid "Printer '%s' has no toner left."
 msgstr "छपाईयंत्र '%s' मध्ये टोनर नाही."
 
 #. Translators: "Developer" like on photo development context
-#: modules/printbackends/cups/gtkprintbackendcups.c:1673
+#: modules/printbackends/cups/gtkprintbackendcups.c:1676
 #, c-format
 msgid "Printer '%s' is low on developer."
 msgstr "छपाईयंत्र '%s' चे डेव्हलपर समाप्त होत आहे."
 
 #. Translators: "Developer" like on photo development context
-#: modules/printbackends/cups/gtkprintbackendcups.c:1675
+#: modules/printbackends/cups/gtkprintbackendcups.c:1678
 #, c-format
 msgid "Printer '%s' is out of developer."
 msgstr "छपाईयंत्र '%s' चे डेव्हलपर समाप्त झाले."
 
 #. Translators: "marker" is one color bin of the printer
-#: modules/printbackends/cups/gtkprintbackendcups.c:1677
+#: modules/printbackends/cups/gtkprintbackendcups.c:1680
 #, c-format
 msgid "Printer '%s' is low on at least one marker supply."
 msgstr "छपाईयंत्र '%s' करीता किमान एका मार्कर कमी पडत आहे."
 
 #. Translators: "marker" is one color bin of the printer
-#: modules/printbackends/cups/gtkprintbackendcups.c:1679
+#: modules/printbackends/cups/gtkprintbackendcups.c:1682
 #, c-format
 msgid "Printer '%s' is out of at least one marker supply."
 msgstr "छपाईयंत्र '%s' करीता किमान एका मार्कर पुरविले गेले नाही."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1680
+#: modules/printbackends/cups/gtkprintbackendcups.c:1683
 #, c-format
 msgid "The cover is open on printer '%s'."
 msgstr "छपाईयंत्र '%s' चे कवर उघडे आहे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1681
+#: modules/printbackends/cups/gtkprintbackendcups.c:1684
 #, c-format
 msgid "The door is open on printer '%s'."
 msgstr "छपाईयंत्र '%s' चे दार उघडे आहे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1682
+#: modules/printbackends/cups/gtkprintbackendcups.c:1685
 #, c-format
 msgid "Printer '%s' is low on paper."
 msgstr "छपाईयंत्र '%s' मध्ये पेपरची संख्या कमी आहे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1683
+#: modules/printbackends/cups/gtkprintbackendcups.c:1686
 #, c-format
 msgid "Printer '%s' is out of paper."
 msgstr "छपाईयंत्र '%s' मध्ये पेपर नाही."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1684
+#: modules/printbackends/cups/gtkprintbackendcups.c:1687
 #, c-format
 msgid "Printer '%s' is currently off-line."
 msgstr "छपाईयंत्र '%s' वर्तमान क्षणी ऑफलाइन आहे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1685
+#: modules/printbackends/cups/gtkprintbackendcups.c:1688
 #, c-format
 msgid "Printer '%s' may not be connected."
 msgstr "छपाईयंत्र '%s' जुळलेले नसावे."
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:1686
+#: modules/printbackends/cups/gtkprintbackendcups.c:1689
 #, c-format
 msgid "There is a problem on printer '%s'."
 msgstr "छपाईयंत्र '%s' वरील अडचण."
 
 #. Translators: this is a printer status.
-#: modules/printbackends/cups/gtkprintbackendcups.c:1994
+#: modules/printbackends/cups/gtkprintbackendcups.c:1997
 msgid "Paused ; Rejecting Jobs"
 msgstr "स्तब्ध ; कार्य नकारत आहे"
 
 #. Translators: this is a printer status.
-#: modules/printbackends/cups/gtkprintbackendcups.c:2000
+#: modules/printbackends/cups/gtkprintbackendcups.c:2003
 msgid "Rejecting Jobs"
 msgstr "कार्य नकारत आहे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2774
+#: modules/printbackends/cups/gtkprintbackendcups.c:2779
 msgid "Two Sided"
 msgstr "पाठपोट"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2775
+#: modules/printbackends/cups/gtkprintbackendcups.c:2780
 msgid "Paper Type"
 msgstr "कागद प्रकार"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2776
+#: modules/printbackends/cups/gtkprintbackendcups.c:2781
 msgid "Paper Source"
 msgstr "कागद स्त्रोत"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2777
+#: modules/printbackends/cups/gtkprintbackendcups.c:2782
 msgid "Output Tray"
 msgstr "आऊटपुट ट्रे"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2778
+#: modules/printbackends/cups/gtkprintbackendcups.c:2783
 msgid "Resolution"
 msgstr "रेजोल्यूशन"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2779
+#: modules/printbackends/cups/gtkprintbackendcups.c:2784
 msgid "GhostScript pre-filtering"
 msgstr "GhostScript पूर्व-चाळणी"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:2788
+#: modules/printbackends/cups/gtkprintbackendcups.c:2793
 msgid "One Sided"
 msgstr "एका बाजूचे"
 
 #. Translators: this is an option of "Two Sided"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2790
+#: modules/printbackends/cups/gtkprintbackendcups.c:2795
 msgid "Long Edge (Standard)"
 msgstr "लांब स्वरूप (मानक)"
 
 #. Translators: this is an option of "Two Sided"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2792
+#: modules/printbackends/cups/gtkprintbackendcups.c:2797
 msgid "Short Edge (Flip)"
 msgstr "लहान स्वरूप (पलटवा)"
 
 #. Translators: this is an option of "Paper Source"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2794
-#: modules/printbackends/cups/gtkprintbackendcups.c:2796
-#: modules/printbackends/cups/gtkprintbackendcups.c:2804
+#: modules/printbackends/cups/gtkprintbackendcups.c:2799
+#: modules/printbackends/cups/gtkprintbackendcups.c:2801
+#: modules/printbackends/cups/gtkprintbackendcups.c:2809
 msgid "Auto Select"
 msgstr "स्वयं निवडणे"
 
 #. Translators: this is an option of "Paper Source"
 #. Translators: this is an option of "Resolution"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2798
-#: modules/printbackends/cups/gtkprintbackendcups.c:2800
-#: modules/printbackends/cups/gtkprintbackendcups.c:2802
-#: modules/printbackends/cups/gtkprintbackendcups.c:2806
-#: modules/printbackends/cups/gtkprintbackendcups.c:3292
+#: modules/printbackends/cups/gtkprintbackendcups.c:2803
+#: modules/printbackends/cups/gtkprintbackendcups.c:2805
+#: modules/printbackends/cups/gtkprintbackendcups.c:2807
+#: modules/printbackends/cups/gtkprintbackendcups.c:2811
+#: modules/printbackends/cups/gtkprintbackendcups.c:3297
 msgid "Printer Default"
 msgstr "मुलभूत छपाईयंत्र"
 
 #. Translators: this is an option of "GhostScript"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2808
+#: modules/printbackends/cups/gtkprintbackendcups.c:2813
 msgid "Embed GhostScript fonts only"
 msgstr "फक्त GhostScript फॉन्टस् अंतर्भूत करा"
 
 #. Translators: this is an option of "GhostScript"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2810
+#: modules/printbackends/cups/gtkprintbackendcups.c:2815
 msgid "Convert to PS level 1"
 msgstr "PS स्तर 1 नुरूप रूपांतरीत करा"
 
 #. Translators: this is an option of "GhostScript"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2812
+#: modules/printbackends/cups/gtkprintbackendcups.c:2817
 msgid "Convert to PS level 2"
 msgstr "PS स्तर 2 नुरूप रूपांतरीत करा"
 
 #. Translators: this is an option of "GhostScript"
-#: modules/printbackends/cups/gtkprintbackendcups.c:2814
+#: modules/printbackends/cups/gtkprintbackendcups.c:2819
 msgid "No pre-filtering"
 msgstr "पूर्व-चाळणी आढळली नाही"
 
 #. Translators: "Miscellaneous" is the label for a button, that opens
 #. up an extra panel of settings in a print dialog.
-#: modules/printbackends/cups/gtkprintbackendcups.c:2823
+#: modules/printbackends/cups/gtkprintbackendcups.c:2828
 msgid "Miscellaneous"
 msgstr "मिश्र"
 
 #. Translators: These strings name the possible values of the
 #. * job priority option in the print dialog
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3500
+#: modules/printbackends/cups/gtkprintbackendcups.c:3505
 msgid "Urgent"
 msgstr "तातडीने"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3500
+#: modules/printbackends/cups/gtkprintbackendcups.c:3505
 msgid "High"
 msgstr "उंच"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3500
+#: modules/printbackends/cups/gtkprintbackendcups.c:3505
 msgid "Medium"
 msgstr "मध्यम"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3500
+#: modules/printbackends/cups/gtkprintbackendcups.c:3505
 msgid "Low"
 msgstr "खाली"
 
@@ -5121,66 +5108,66 @@ msgstr "खाली"
 #. Translators, this string is used to label the pages-per-sheet option
 #. * in the print dialog
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3524
+#: modules/printbackends/cups/gtkprintbackendcups.c:3529
 msgid "Pages per Sheet"
 msgstr "प्रत्येक शीट करीता पान"
 
 #. Translators, this string is used to label the job priority option
 #. * in the print dialog
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3561
+#: modules/printbackends/cups/gtkprintbackendcups.c:3566
 msgid "Job Priority"
 msgstr "कार्य प्राधान्यता"
 
 #. Translators, this string is used to label the billing info entry
 #. * in the print dialog
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3572
+#: modules/printbackends/cups/gtkprintbackendcups.c:3577
 msgid "Billing Info"
 msgstr "बिलिंग माहिती"
 
 #. Translators, these strings are names for various 'standard' cover
 #. * pages that the printing system may support.
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "None"
 msgstr "काहीच नाही"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Classified"
 msgstr "वर्गीकृत"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Confidential"
 msgstr "गुप्त"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Secret"
 msgstr "गुपित"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Standard"
 msgstr "मानक"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Top Secret"
 msgstr "उच्च गुपित"
 
-#: modules/printbackends/cups/gtkprintbackendcups.c:3587
+#: modules/printbackends/cups/gtkprintbackendcups.c:3592
 msgid "Unclassified"
 msgstr "अवर्गिकृत"
 
 #. Translators, this is the label used for the option in the print
 #. * dialog that controls the front cover page.
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3622
+#: modules/printbackends/cups/gtkprintbackendcups.c:3627
 msgid "Before"
 msgstr "पूर्वी"
 
 #. Translators, this is the label used for the option in the print
 #. * dialog that controls the back cover page.
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3637
+#: modules/printbackends/cups/gtkprintbackendcups.c:3642
 msgid "After"
 msgstr "नंतर"
 
@@ -5188,14 +5175,14 @@ msgstr "नंतर"
 #. * a print job is printed. Possible values are 'now', a specified time,
 #. * or 'on hold'
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3657
+#: modules/printbackends/cups/gtkprintbackendcups.c:3662
 msgid "Print at"
 msgstr "याक्षणी छपाई करा"
 
 #. Translators: this is the name of the option that allows the user
 #. * to specify a time when a print job will be printed.
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3668
+#: modules/printbackends/cups/gtkprintbackendcups.c:3673
 msgid "Print at time"
 msgstr "याक्षणी छपाई करा"
 
@@ -5203,7 +5190,7 @@ msgstr "याक्षणी छपाई करा"
 #. * size. The two placeholders are replaced with the width and height
 #. * in points. E.g: "Custom 230.4x142.9"
 #.
-#: modules/printbackends/cups/gtkprintbackendcups.c:3703
+#: modules/printbackends/cups/gtkprintbackendcups.c:3708
 #, c-format
 msgid "Custom %sx%s"
 msgstr "इच्छिक %sx%s"
@@ -5294,6 +5281,3 @@ msgstr "चाचणी छपाईयंत्रकरीता छपाई"
 #, c-format
 msgid "Could not get information for file '%s': %s"
 msgstr "'%s' फाइलची माहिती मिळवता आली नाही: %s"
-
-#~ msgid "(Empty)"
-#~ msgstr "(रिकामे)"

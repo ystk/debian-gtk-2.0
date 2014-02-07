@@ -51,12 +51,14 @@ gtk_about_dialog_set_authors
 gtk_about_dialog_set_comments
 gtk_about_dialog_set_copyright
 gtk_about_dialog_set_documenters
-gtk_about_dialog_set_email_hook
 gtk_about_dialog_set_license
 gtk_about_dialog_set_logo
 gtk_about_dialog_set_logo_icon_name
 gtk_about_dialog_set_translator_credits
+#ifndef GTK_DISABLE_DEPRECATED
+gtk_about_dialog_set_email_hook
 gtk_about_dialog_set_url_hook
+#endif
 gtk_about_dialog_set_version
 gtk_about_dialog_set_website
 gtk_about_dialog_set_website_label
@@ -138,6 +140,8 @@ gtk_accel_map_unlock_path
 #if IN_FILE(__GTK_ACCESSIBLE_C__)
 gtk_accessible_connect_widget_destroyed
 gtk_accessible_get_type G_GNUC_CONST
+gtk_accessible_get_widget
+gtk_accessible_set_widget
 #endif
 #endif
 
@@ -301,6 +305,7 @@ gtk_assistant_get_page_complete
 gtk_assistant_add_action_widget
 gtk_assistant_remove_action_widget
 gtk_assistant_update_buttons_state
+gtk_assistant_commit
 #endif
 #endif
 
@@ -548,6 +553,7 @@ gtk_button_clicked
 gtk_button_enter
 #endif
 gtk_button_get_alignment
+gtk_button_get_event_window
 gtk_button_get_focus_on_click
 gtk_button_get_image
 gtk_button_get_image_position
@@ -937,7 +943,9 @@ gtk_combo_box_get_active_iter
 gtk_combo_box_get_active_text
 gtk_combo_box_get_add_tearoffs
 gtk_combo_box_get_column_span_column
+gtk_combo_box_get_entry_text_column
 gtk_combo_box_get_focus_on_click
+gtk_combo_box_get_has_entry
 gtk_combo_box_get_model
 gtk_combo_box_get_popup_accessible
 gtk_combo_box_get_row_separator_func
@@ -949,7 +957,9 @@ gtk_combo_box_get_wrap_width
 gtk_combo_box_insert_text
 gtk_combo_box_new
 gtk_combo_box_new_text
+gtk_combo_box_new_with_entry
 gtk_combo_box_new_with_model
+gtk_combo_box_new_with_model_and_entry
 gtk_combo_box_popdown
 gtk_combo_box_popup
 gtk_combo_box_prepend_text
@@ -958,6 +968,7 @@ gtk_combo_box_set_active
 gtk_combo_box_set_active_iter
 gtk_combo_box_set_add_tearoffs
 gtk_combo_box_set_column_span_column
+gtk_combo_box_set_entry_text_column
 gtk_combo_box_set_focus_on_click
 gtk_combo_box_set_model
 gtk_combo_box_set_row_separator_func
@@ -968,14 +979,29 @@ gtk_combo_box_set_wrap_width
 #endif
 #endif
 
+#if IN_HEADER(__GTK_COMBO_BOX_TEXT_H__)
+#if IN_FILE(__GTK_COMBO_BOX_TEXT_C__)
+gtk_combo_box_text_append_text
+gtk_combo_box_text_get_active_text
+gtk_combo_box_text_get_type G_GNUC_CONST
+gtk_combo_box_text_insert_text
+gtk_combo_box_text_new
+gtk_combo_box_text_new_with_entry
+gtk_combo_box_text_prepend_text
+gtk_combo_box_text_remove
+#endif
+#endif
+
 #if IN_HEADER(__GTK_COMBO_BOX_ENTRY_H__)
 #if IN_FILE(__GTK_COMBO_BOX_ENTRY_C__)
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_combo_box_entry_get_text_column
 gtk_combo_box_entry_get_type G_GNUC_CONST
 gtk_combo_box_entry_new
 gtk_combo_box_entry_new_text
 gtk_combo_box_entry_new_with_model
 gtk_combo_box_entry_set_text_column
+#endif
 #endif
 #endif
 
@@ -1143,7 +1169,6 @@ gtk_dialog_add_button
 gtk_dialog_add_buttons G_GNUC_NULL_TERMINATED
 gtk_dialog_get_action_area
 gtk_dialog_get_content_area
-gtk_dialog_get_has_separator
 gtk_dialog_get_widget_for_response
 gtk_dialog_get_response_for_widget
 gtk_dialog_get_type G_GNUC_CONST
@@ -1155,7 +1180,10 @@ gtk_alternative_dialog_button_order
 gtk_dialog_set_alternative_button_order
 gtk_dialog_set_alternative_button_order_from_array
 gtk_dialog_set_default_response
+#ifndef GTK_DISABLE_DEPRECATED
+gtk_dialog_get_has_separator
 gtk_dialog_set_has_separator
+#endif
 gtk_dialog_set_response_sensitive
 #endif
 #endif
@@ -1236,8 +1264,10 @@ gtk_status_icon_set_has_tooltip
 gtk_status_icon_get_has_tooltip
 gtk_status_icon_set_visible
 gtk_status_icon_get_visible
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_status_icon_set_blinking
 gtk_status_icon_get_blinking
+#endif
 gtk_status_icon_is_embedded
 gtk_status_icon_position_menu
 gtk_status_icon_get_geometry
@@ -1383,10 +1413,12 @@ gtk_entry_get_type G_GNUC_CONST
 gtk_entry_get_visibility
 gtk_entry_get_width_chars
 gtk_entry_get_text_window
+gtk_entry_im_context_filter_keypress
 gtk_entry_layout_index_to_text_index
 gtk_entry_new
 gtk_entry_new_with_buffer
 gtk_entry_progress_pulse
+gtk_entry_reset_im_context
 gtk_entry_set_activates_default
 gtk_entry_set_alignment
 gtk_entry_set_buffer
@@ -1487,6 +1519,7 @@ gtk_event_box_set_visible_window
 #if IN_FILE(__GTK_EXPANDER_C__)
 gtk_expander_get_expanded
 gtk_expander_get_label
+gtk_expander_get_label_fill
 gtk_expander_get_label_widget
 gtk_expander_get_spacing
 gtk_expander_get_type G_GNUC_CONST
@@ -1496,6 +1529,7 @@ gtk_expander_new
 gtk_expander_new_with_mnemonic
 gtk_expander_set_expanded
 gtk_expander_set_label
+gtk_expander_set_label_fill
 gtk_expander_set_label_widget
 gtk_expander_set_spacing
 gtk_expander_set_use_markup
@@ -1744,6 +1778,7 @@ gtk_font_button_set_use_size
 #if IN_FILE(__GTK_FONTSEL_C__)
 gtk_font_selection_dialog_get_cancel_button
 gtk_font_selection_dialog_get_font_name
+gtk_font_selection_dialog_get_font_selection
 gtk_font_selection_dialog_get_ok_button
 gtk_font_selection_dialog_get_preview_text
 gtk_font_selection_dialog_get_type G_GNUC_CONST
@@ -1846,8 +1881,10 @@ gtk_hpaned_new
 
 #if IN_HEADER(__GTK_HRULER_H__)
 #if IN_FILE(__GTK_HRULER_C__)
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_hruler_get_type G_GNUC_CONST
 gtk_hruler_new
+#endif
 #endif
 #endif
 
@@ -2021,6 +2058,7 @@ gtk_icon_view_get_margin
 gtk_icon_view_get_markup_column
 gtk_icon_view_get_model
 gtk_icon_view_get_orientation
+gtk_icon_view_get_item_orientation
 gtk_icon_view_get_path_at_pos
 gtk_icon_view_get_item_at_pos
 gtk_icon_view_convert_widget_to_bin_window_coords
@@ -2049,6 +2087,7 @@ gtk_icon_view_set_margin
 gtk_icon_view_set_markup_column
 gtk_icon_view_set_model
 gtk_icon_view_set_orientation
+gtk_icon_view_set_item_orientation
 gtk_icon_view_set_pixbuf_column
 gtk_icon_view_set_row_spacing
 gtk_icon_view_set_selection_mode
@@ -2071,6 +2110,8 @@ gtk_icon_view_set_tooltip_cell
 gtk_icon_view_get_tooltip_context
 gtk_icon_view_set_tooltip_column
 gtk_icon_view_get_tooltip_column
+gtk_icon_view_get_item_row
+gtk_icon_view_get_item_column
 #endif
 #endif
 
@@ -2189,10 +2230,12 @@ gtk_invisible_set_screen
 
 #if IN_HEADER(__GTK_ITEM_H__)
 #if IN_FILE(__GTK_ITEM_C__)
-gtk_item_deselect
 gtk_item_get_type G_GNUC_CONST
+#ifndef GTK_DISABLE_DEPRECATED
+gtk_item_deselect
 gtk_item_select
 gtk_item_toggle
+#endif
 #endif
 #endif
 
@@ -2308,7 +2351,9 @@ gtk_link_button_new
 gtk_link_button_new_with_label
 gtk_link_button_get_uri
 gtk_link_button_set_uri
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_link_button_set_uri_hook
+#endif
 gtk_link_button_get_visited
 gtk_link_button_set_visited
 #endif
@@ -2394,6 +2439,7 @@ gtk_get_current_event_state
 gtk_get_current_event_time
 #ifndef GTK_DISABLE_DEPRECATED
 gtk_exit
+gtk_set_locale
 gtk_idle_add
 gtk_idle_add_full
 gtk_idle_add_priority
@@ -2409,7 +2455,6 @@ gtk_false G_GNUC_CONST
 gtk_true G_GNUC_CONST
 gtk_events_pending
 gtk_disable_setlocale
-gtk_set_locale
 gtk_check_version
 gtk_get_default_language
 gtk_get_event_widget
@@ -2591,6 +2636,7 @@ gtk_menu_tool_button_set_menu
 #if IN_FILE(__GTK_MESSAGE_DIALOG_C__)
 gtk_message_dialog_format_secondary_markup G_GNUC_PRINTF(2,3)
 gtk_message_dialog_format_secondary_text G_GNUC_PRINTF(2,3)
+gtk_message_dialog_get_message_area
 gtk_message_dialog_get_type G_GNUC_CONST
 gtk_message_dialog_new G_GNUC_PRINTF(5,6)
 gtk_message_dialog_new_with_markup G_GNUC_PRINTF(5,6)
@@ -2671,13 +2717,17 @@ gtk_notebook_set_tab_label_packing
 #endif
 gtk_notebook_set_tab_label_text
 gtk_notebook_set_tab_pos
-gtk_notebook_set_window_creation_hook
+gtk_notebook_get_tab_hborder
+gtk_notebook_get_tab_vborder
 #ifndef GTK_DISABLE_DEPRECATED
+gtk_notebook_set_window_creation_hook
 gtk_notebook_get_group_id
 gtk_notebook_set_group_id
-#endif
 gtk_notebook_get_group
 gtk_notebook_set_group
+#endif
+gtk_notebook_get_group_name
+gtk_notebook_set_group_name
 gtk_notebook_get_tab_reorderable
 gtk_notebook_set_tab_reorderable
 gtk_notebook_get_tab_detachable
@@ -2972,6 +3022,8 @@ gtk_print_capabilities_get_type G_GNUC_CONST
 #if IN_FILE(__GTK_PRINTER_C__)
 #ifdef G_OS_UNIX
 gtk_printer_new
+gtk_printer_set_accepts_pdf
+gtk_printer_set_accepts_ps
 gtk_printer_set_description
 gtk_printer_set_has_details
 gtk_printer_set_icon_name
@@ -3358,7 +3410,9 @@ gtk_range_get_show_fill_level
 gtk_range_get_slider_range
 gtk_range_get_slider_size_fixed
 gtk_range_get_type G_GNUC_CONST
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_range_get_update_policy
+#endif
 gtk_range_get_upper_stepper_sensitivity
 gtk_range_get_value
 gtk_range_set_adjustment
@@ -3372,9 +3426,13 @@ gtk_range_set_range
 gtk_range_set_restrict_to_fill_level
 gtk_range_set_show_fill_level
 gtk_range_set_slider_size_fixed
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_range_set_update_policy
+#endif
 gtk_range_set_upper_stepper_sensitivity
 gtk_range_set_value
+gtk_range_set_round_digits
+gtk_range_get_round_digits
 #endif
 #endif
 
@@ -3614,6 +3672,7 @@ gtk_text_buffer_unregister_serialize_format
 
 #if IN_HEADER(__GTK_RULER_H__)
 #if IN_FILE(__GTK_RULER_C__)
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_ruler_draw_pos
 gtk_ruler_draw_ticks
 gtk_ruler_get_metric
@@ -3621,6 +3680,7 @@ gtk_ruler_get_range
 gtk_ruler_get_type G_GNUC_CONST
 gtk_ruler_set_metric
 gtk_ruler_set_range
+#endif
 #endif
 #endif
 
@@ -3880,6 +3940,7 @@ gtk_statusbar_new
 gtk_statusbar_pop
 gtk_statusbar_push
 gtk_statusbar_remove
+gtk_statusbar_remove_all
 gtk_statusbar_set_has_resize_grip
 #endif
 #endif
@@ -3905,6 +3966,7 @@ gtk_table_get_default_col_spacing
 gtk_table_get_default_row_spacing
 gtk_table_get_homogeneous
 gtk_table_get_row_spacing
+gtk_table_get_size
 gtk_table_get_type G_GNUC_CONST
 gtk_table_new
 gtk_table_resize
@@ -4251,6 +4313,7 @@ gtk_text_view_get_buffer
 gtk_text_view_get_cursor_visible
 gtk_text_view_get_default_attributes
 gtk_text_view_get_editable
+gtk_text_view_get_hadjustment
 gtk_text_view_get_indent
 gtk_text_view_get_iter_at_location
 gtk_text_view_get_iter_at_position
@@ -4266,16 +4329,19 @@ gtk_text_view_get_pixels_inside_wrap
 gtk_text_view_get_right_margin
 gtk_text_view_get_tabs
 gtk_text_view_get_type G_GNUC_CONST
+gtk_text_view_get_vadjustment
 gtk_text_view_get_visible_rect
 gtk_text_view_get_window
 gtk_text_view_get_window_type
 gtk_text_view_get_wrap_mode
+gtk_text_view_im_context_filter_keypress
 gtk_text_view_move_child
 gtk_text_view_move_mark_onscreen
 gtk_text_view_move_visually
 gtk_text_view_new
 gtk_text_view_new_with_buffer
 gtk_text_view_place_cursor_onscreen
+gtk_text_view_reset_im_context
 gtk_text_view_scroll_mark_onscreen
 gtk_text_view_scroll_to_iter
 gtk_text_view_scroll_to_mark
@@ -4655,6 +4721,7 @@ gtk_tree_path_down
 gtk_tree_path_free
 gtk_tree_path_get_depth
 gtk_tree_path_get_indices
+gtk_tree_path_get_indices_with_depth
 gtk_tree_path_get_type G_GNUC_CONST
 gtk_tree_path_is_ancestor
 gtk_tree_path_is_descendant
@@ -5019,6 +5086,7 @@ gtk_viewport_get_shadow_type
 gtk_viewport_get_type G_GNUC_CONST
 gtk_viewport_get_vadjustment
 gtk_viewport_get_bin_window
+gtk_viewport_get_view_window
 gtk_viewport_new
 gtk_viewport_set_hadjustment
 gtk_viewport_set_shadow_type
@@ -5042,8 +5110,10 @@ gtk_vpaned_new
 
 #if IN_HEADER(__GTK_VRULER_H__)
 #if IN_FILE(__GTK_VRULER_C__)
+#ifndef GTK_DISABLE_DEPRECATED
 gtk_vruler_get_type G_GNUC_CONST
 gtk_vruler_new
+#endif
 #endif
 #endif
 
@@ -5195,6 +5265,7 @@ gtk_widget_reparent
 gtk_widget_reset_rc_styles
 gtk_widget_reset_shapes
 gtk_widget_send_expose
+gtk_widget_send_focus_change
 gtk_widget_set_accel_path
 gtk_widget_set_allocation
 gtk_widget_set_app_paintable
@@ -5277,10 +5348,8 @@ gtk_window_get_default_size
 gtk_window_get_destroy_with_parent
 gtk_window_get_focus
 gtk_window_get_focus_on_map
-gtk_window_get_frame_dimensions
 gtk_window_get_gravity
 gtk_window_get_group
-gtk_window_get_has_frame
 gtk_window_get_icon
 gtk_window_get_icon_list
 gtk_window_get_icon_name
@@ -5305,6 +5374,8 @@ gtk_window_group_get_type G_GNUC_CONST
 gtk_window_group_new
 gtk_window_group_remove_window
 gtk_window_group_list_windows
+gtk_window_group_get_current_grab
+gtk_window_has_group
 gtk_window_has_toplevel_focus
 gtk_window_iconify
 gtk_window_is_active
@@ -5341,10 +5412,14 @@ gtk_window_set_destroy_with_parent
 gtk_window_set_focus
 gtk_window_set_focus_on_map
 gtk_window_set_startup_id
-gtk_window_set_frame_dimensions
 gtk_window_set_geometry_hints
 gtk_window_set_gravity
+#ifndef GTK_DISABLE_DEPRECATED
+gtk_window_get_frame_dimensions
+gtk_window_set_frame_dimensions
+gtk_window_get_has_frame
 gtk_window_set_has_frame
+#endif
 gtk_window_set_icon
 #ifndef _WIN64
 gtk_window_set_icon_from_file PRIVATE

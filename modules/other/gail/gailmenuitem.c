@@ -41,11 +41,11 @@ static gboolean              gail_menu_item_do_action      (AtkAction      *acti
                                                             gint           i);
 static gboolean              idle_do_action                (gpointer       data);
 static gint                  gail_menu_item_get_n_actions  (AtkAction      *action);
-static G_CONST_RETURN gchar* gail_menu_item_get_description(AtkAction      *action,
+static const gchar*          gail_menu_item_get_description(AtkAction      *action,
                                                             gint           i);
-static G_CONST_RETURN gchar* gail_menu_item_get_name       (AtkAction      *action,
+static const gchar*          gail_menu_item_get_name       (AtkAction      *action,
                                                             gint           i);
-static G_CONST_RETURN gchar* gail_menu_item_get_keybinding (AtkAction      *action,
+static const gchar*          gail_menu_item_get_keybinding (AtkAction      *action,
                                                             gint           i);
 static gboolean              gail_menu_item_set_description(AtkAction      *action,
                                                             gint           i,
@@ -164,9 +164,9 @@ get_children (GtkWidget *submenu)
        */
       if (!gtk_widget_get_visible (submenu))
         {
-          GTK_WIDGET_SET_FLAGS (submenu, GTK_VISIBLE);
+          /* FIXME GTK_WIDGET_SET_FLAGS (submenu, GTK_VISIBLE); */
           g_signal_emit_by_name (submenu, "show");
-          GTK_WIDGET_UNSET_FLAGS (submenu, GTK_VISIBLE);
+          /* FIXME GTK_WIDGET_UNSET_FLAGS (submenu, GTK_VISIBLE); */
         }
       g_list_free (children);
       children = gtk_container_get_children (GTK_CONTAINER (submenu));
@@ -373,7 +373,7 @@ gail_menu_item_get_n_actions (AtkAction *action)
   return 1;
 }
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_menu_item_get_description (AtkAction *action,
                                 gint      i)
 {
@@ -388,7 +388,7 @@ gail_menu_item_get_description (AtkAction *action,
     return NULL;
 }
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_menu_item_get_name (AtkAction *action,
                          gint      i)
 {
@@ -398,7 +398,7 @@ gail_menu_item_get_name (AtkAction *action,
     return NULL;
 }
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_menu_item_get_keybinding (AtkAction *action,
                                gint      i)
 {

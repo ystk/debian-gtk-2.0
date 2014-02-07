@@ -95,7 +95,7 @@ gtk_invisible_init (GtkInvisible *invisible)
   GdkColormap *colormap;
   
   gtk_widget_set_has_window (GTK_WIDGET (invisible), TRUE);
-  GTK_WIDGET_SET_FLAGS (invisible, GTK_TOPLEVEL);
+  _gtk_widget_set_is_toplevel (GTK_WIDGET (invisible), TRUE);
 
   g_object_ref_sink (invisible);
 
@@ -199,7 +199,7 @@ gtk_invisible_set_screen (GtkInvisible *invisible,
  *
  * Returns the #GdkScreen object associated with @invisible
  *
- * Return value: the associated #GdkScreen.
+ * Return value: (transfer none): the associated #GdkScreen.
  *
  * Since: 2.2
  **/

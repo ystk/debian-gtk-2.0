@@ -307,7 +307,7 @@ gtk_plug_get_embedded (GtkPlug *plug)
  *
  * Retrieves the socket the plug is embedded in.
  *
- * Return value: the window of the socket, or %NULL
+ * Return value: (transfer none): the window of the socket, or %NULL
  *
  * Since: 2.14
  **/
@@ -351,7 +351,8 @@ _gtk_plug_add_to_socket (GtkPlug   *plug,
 
   if (gtk_widget_get_realized (widget))
     {
-      gdk_drawable_get_size (GDK_DRAWABLE (widget->window), &w, &h);
+      w = gdk_window_get_width (widget->window);
+      h = gdk_window_get_height (widget->window);
       gdk_window_reparent (widget->window, plug->socket_window, -w, -h);
     }
 
@@ -539,7 +540,7 @@ gtk_plug_new (GdkNativeWindow socket_id)
 
 /**
  * gtk_plug_new_for_display:
- * @display : the #GdkDisplay on which @socket_id is displayed
+ * @display: the #GdkDisplay on which @socket_id is displayed
  * @socket_id: the XID of the socket's window.
  * 
  * Create a new plug widget inside the #GtkSocket identified by socket_id.

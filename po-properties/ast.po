@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+-properties\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-02 21:21-0400\n"
+"POT-Creation-Date: 2010-06-10 11:56-0400\n"
 "PO-Revision-Date: 2010-01-11 22:48+0100\n"
 "Last-Translator: astur <malditoastur@gmail.com>\n"
 "Language-Team: Asturian <alministradores@softastur.org>\n"
@@ -262,77 +262,77 @@ msgstr "Widget acelerador"
 msgid "The widget to be monitored for accelerator changes"
 msgstr "El widget a monitorizar pa cambeos nel acelerador"
 
-#: gtk/gtkaction.c:181 gtk/gtkactiongroup.c:170 gtk/gtkprinter.c:111
+#: gtk/gtkaction.c:220 gtk/gtkactiongroup.c:170 gtk/gtkprinter.c:111
 #: gtk/gtktextmark.c:89
 msgid "Name"
 msgstr "Nome"
 
-#: gtk/gtkaction.c:182
+#: gtk/gtkaction.c:221
 msgid "A unique name for the action."
 msgstr "Un nome únicu pa l'aición."
 
-#: gtk/gtkaction.c:200 gtk/gtkbutton.c:219 gtk/gtkexpander.c:195
+#: gtk/gtkaction.c:239 gtk/gtkbutton.c:219 gtk/gtkexpander.c:195
 #: gtk/gtkframe.c:105 gtk/gtklabel.c:506 gtk/gtkmenuitem.c:305
 #: gtk/gtktoolbutton.c:204 gtk/gtktoolitemgroup.c:1543
 msgid "Label"
 msgstr "Etiqueta"
 
-#: gtk/gtkaction.c:201
+#: gtk/gtkaction.c:240
 msgid "The label used for menu items and buttons that activate this action."
 msgstr ""
 "La etiqueta que s'usa pa los elementos de menú y botones qu'activen esta "
 "aición."
 
-#: gtk/gtkaction.c:217
+#: gtk/gtkaction.c:256
 msgid "Short label"
 msgstr "Etiqueta curtia"
 
-#: gtk/gtkaction.c:218
+#: gtk/gtkaction.c:257
 msgid "A shorter label that may be used on toolbar buttons."
 msgstr ""
 "Una etiqueta más curtia que podría usase nos botones de la barra de "
 "ferramientes."
 
-#: gtk/gtkaction.c:226
+#: gtk/gtkaction.c:265
 msgid "Tooltip"
 msgstr "Conseyu"
 
-#: gtk/gtkaction.c:227
+#: gtk/gtkaction.c:266
 msgid "A tooltip for this action."
 msgstr "Un conseyu pa esta aición."
 
-#: gtk/gtkaction.c:242
+#: gtk/gtkaction.c:281
 msgid "Stock Icon"
 msgstr "Iconu d'inventariu"
 
-#: gtk/gtkaction.c:243
+#: gtk/gtkaction.c:282
 msgid "The stock icon displayed in widgets representing this action."
 msgstr "L'iconu d'inventariu amosáu nos widgets representando esta aición."
 
-#: gtk/gtkaction.c:263 gtk/gtkstatusicon.c:253
+#: gtk/gtkaction.c:302 gtk/gtkstatusicon.c:253
 msgid "GIcon"
 msgstr "GIcon"
 
-#: gtk/gtkaction.c:264 gtk/gtkcellrendererpixbuf.c:206 gtk/gtkimage.c:339
+#: gtk/gtkaction.c:303 gtk/gtkcellrendererpixbuf.c:206 gtk/gtkimage.c:339
 #: gtk/gtkstatusicon.c:254
 msgid "The GIcon being displayed"
 msgstr "L'iconu amosáu"
 
-#: gtk/gtkaction.c:284 gtk/gtkcellrendererpixbuf.c:171 gtk/gtkimage.c:321
+#: gtk/gtkaction.c:323 gtk/gtkcellrendererpixbuf.c:171 gtk/gtkimage.c:321
 #: gtk/gtkprinter.c:160 gtk/gtkstatusicon.c:237 gtk/gtkwindow.c:618
 msgid "Icon Name"
 msgstr "Nome del iconu"
 
-#: gtk/gtkaction.c:285 gtk/gtkcellrendererpixbuf.c:172 gtk/gtkimage.c:322
+#: gtk/gtkaction.c:324 gtk/gtkcellrendererpixbuf.c:172 gtk/gtkimage.c:322
 #: gtk/gtkstatusicon.c:238
 msgid "The name of the icon from the icon theme"
 msgstr "El nome del iconu del tema d'iconos"
 
-#: gtk/gtkaction.c:292 gtk/gtktoolitem.c:192
+#: gtk/gtkaction.c:331 gtk/gtktoolitem.c:192
 msgid "Visible when horizontal"
 msgstr "Visible si ye horizontal"
 
-#: gtk/gtkaction.c:293 gtk/gtktoolitem.c:193
+#: gtk/gtkaction.c:332 gtk/gtktoolitem.c:193
 msgid ""
 "Whether the toolbar item is visible when the toolbar is in a horizontal "
 "orientation."
@@ -340,11 +340,11 @@ msgstr ""
 "Indica si l'elementu de la barra de ferramientes ye visible cuando la barra "
 "tea n'orientación horizontal."
 
-#: gtk/gtkaction.c:308
+#: gtk/gtkaction.c:347
 msgid "Visible when overflown"
 msgstr "Visible cuando rebosa"
 
-#: gtk/gtkaction.c:309
+#: gtk/gtkaction.c:348
 msgid ""
 "When TRUE, toolitem proxies for this action are represented in the toolbar "
 "overflow menu."
@@ -352,11 +352,11 @@ msgstr ""
 "Cuando seya TRUE, represéntanse elementos de proximidá pa esta aición nel "
 "menú de rebosamientu de la barra de ferramientes."
 
-#: gtk/gtkaction.c:316 gtk/gtktoolitem.c:199
+#: gtk/gtkaction.c:355 gtk/gtktoolitem.c:199
 msgid "Visible when vertical"
 msgstr "Visible si ye vertical"
 
-#: gtk/gtkaction.c:317 gtk/gtktoolitem.c:200
+#: gtk/gtkaction.c:356 gtk/gtktoolitem.c:200
 msgid ""
 "Whether the toolbar item is visible when the toolbar is in a vertical "
 "orientation."
@@ -364,11 +364,11 @@ msgstr ""
 "Indica si l'elementu de la barra de ferramientes ye visible cuando la barra "
 "tea n'orientación vertical."
 
-#: gtk/gtkaction.c:324 gtk/gtktoolitem.c:206
+#: gtk/gtkaction.c:363 gtk/gtktoolitem.c:206
 msgid "Is important"
 msgstr "Ye importante"
 
-#: gtk/gtkaction.c:325
+#: gtk/gtkaction.c:364
 msgid ""
 "Whether the action is considered important. When TRUE, toolitem proxies for "
 "this action show text in GTK_TOOLBAR_BOTH_HORIZ mode."
@@ -376,39 +376,39 @@ msgstr ""
 "Indica si l'aición considérase importante. Cuando seya TRUE (braero), los "
 "proxies del elementu toolitem amuesen testu nel mou GTK_TOOLBAR_BOTH_HORIZ."
 
-#: gtk/gtkaction.c:333
+#: gtk/gtkaction.c:372
 msgid "Hide if empty"
 msgstr "Anubrir si ta baleru"
 
-#: gtk/gtkaction.c:334
+#: gtk/gtkaction.c:373
 msgid "When TRUE, empty menu proxies for this action are hidden."
 msgstr ""
 "Cuando seya TRUE (braero), los proxies de menú baleros pa esta aplicación "
 "anubriránse."
 
-#: gtk/gtkaction.c:340 gtk/gtkactiongroup.c:177 gtk/gtkcellrenderer.c:193
+#: gtk/gtkaction.c:379 gtk/gtkactiongroup.c:177 gtk/gtkcellrenderer.c:193
 #: gtk/gtkwidget.c:594
 msgid "Sensitive"
 msgstr "Sensible"
 
-#: gtk/gtkaction.c:341
+#: gtk/gtkaction.c:380
 msgid "Whether the action is enabled."
 msgstr "Indica si l'aición ta activada."
 
-#: gtk/gtkaction.c:347 gtk/gtkactiongroup.c:184 gtk/gtkstatusicon.c:296
+#: gtk/gtkaction.c:386 gtk/gtkactiongroup.c:184 gtk/gtkstatusicon.c:296
 #: gtk/gtktreeviewcolumn.c:192 gtk/gtkwidget.c:587
 msgid "Visible"
 msgstr "Visible"
 
-#: gtk/gtkaction.c:348
+#: gtk/gtkaction.c:387
 msgid "Whether the action is visible."
 msgstr "Indica si l'aición ye visible."
 
-#: gtk/gtkaction.c:354
+#: gtk/gtkaction.c:393
 msgid "Action Group"
 msgstr "Grupu d'aición"
 
-#: gtk/gtkaction.c:355
+#: gtk/gtkaction.c:394
 msgid ""
 "The GtkActionGroup this GtkAction is associated with, or NULL (for internal "
 "use)."
@@ -416,11 +416,11 @@ msgstr ""
 "El GtkActionGroup col que ésta GtkAction ta asociada, o NULL (pa usu "
 "internu)."
 
-#: gtk/gtkaction.c:373 gtk/gtkimagemenuitem.c:169
+#: gtk/gtkaction.c:412 gtk/gtkimagemenuitem.c:169
 msgid "Always show image"
 msgstr "Siempre amosar la imaxe"
 
-#: gtk/gtkaction.c:374 gtk/gtkimagemenuitem.c:170
+#: gtk/gtkaction.c:413 gtk/gtkimagemenuitem.c:170
 msgid "Whether the image will always be shown"
 msgstr "Indica si la imaxe s'amosará siempres"
 
@@ -502,11 +502,11 @@ msgstr "Tamañu de páxina"
 msgid "The page size of the adjustment"
 msgstr "El tamañu de páxina del axuste"
 
-#: gtk/gtkalignment.c:90
+#: gtk/gtkalignment.c:109
 msgid "Horizontal alignment"
 msgstr "Alliniación horizontal"
 
-#: gtk/gtkalignment.c:91 gtk/gtkbutton.c:270
+#: gtk/gtkalignment.c:110 gtk/gtkbutton.c:270
 msgid ""
 "Horizontal position of child in available space. 0.0 is left aligned, 1.0 is "
 "right aligned"
@@ -514,11 +514,11 @@ msgstr ""
 "Posición horizontal del fíu nel espaciu disponible. 0.0 allíniase a la "
 "esquierda, 1.0 allíniase a la drecha"
 
-#: gtk/gtkalignment.c:100
+#: gtk/gtkalignment.c:119
 msgid "Vertical alignment"
 msgstr "Alliniación vertical"
 
-#: gtk/gtkalignment.c:101 gtk/gtkbutton.c:289
+#: gtk/gtkalignment.c:120 gtk/gtkbutton.c:289
 msgid ""
 "Vertical position of child in available space. 0.0 is top aligned, 1.0 is "
 "bottom aligned"
@@ -526,11 +526,11 @@ msgstr ""
 "Posición vertical del fíu nel espaciu disponible. 0.0 allíniase arriba, 1.0 "
 "allíniase abaxo"
 
-#: gtk/gtkalignment.c:109
+#: gtk/gtkalignment.c:128
 msgid "Horizontal scale"
 msgstr "Escala horizontal"
 
-#: gtk/gtkalignment.c:110
+#: gtk/gtkalignment.c:129
 msgid ""
 "If available horizontal space is bigger than needed for the child, how much "
 "of it to use for the child. 0.0 means none, 1.0 means all"
@@ -538,11 +538,11 @@ msgstr ""
 "Si l'espaciu horizontal disponible ye mayor que'l necesariu pal fíu, cuánto "
 "se tien d'usar pal fíu. 0.0 significa res, 1.0 significa too"
 
-#: gtk/gtkalignment.c:118
+#: gtk/gtkalignment.c:137
 msgid "Vertical scale"
 msgstr "Escala vertical"
 
-#: gtk/gtkalignment.c:119
+#: gtk/gtkalignment.c:138
 msgid ""
 "If available vertical space is bigger than needed for the child, how much of "
 "it to use for the child. 0.0 means none, 1.0 means all"
@@ -550,147 +550,147 @@ msgstr ""
 "Si l'espaciu vertical disponible ye mayor que'l necesariu pal fíu, cuánto se "
 "tien d'usar pal fíu. 0.0 significa res, 1.0 significa too"
 
-#: gtk/gtkalignment.c:136
+#: gtk/gtkalignment.c:155
 msgid "Top Padding"
 msgstr "Rellenu superior"
 
-#: gtk/gtkalignment.c:137
+#: gtk/gtkalignment.c:156
 msgid "The padding to insert at the top of the widget."
 msgstr "El rellenu a introducir per enriba del widget."
 
-#: gtk/gtkalignment.c:153
+#: gtk/gtkalignment.c:172
 msgid "Bottom Padding"
 msgstr "Rellenu inferior"
 
-#: gtk/gtkalignment.c:154
+#: gtk/gtkalignment.c:173
 msgid "The padding to insert at the bottom of the widget."
 msgstr "El rellenu a introducir per debaxo del widget."
 
-#: gtk/gtkalignment.c:170
+#: gtk/gtkalignment.c:189
 msgid "Left Padding"
 msgstr "Rellenu pela esquierda"
 
-#: gtk/gtkalignment.c:171
+#: gtk/gtkalignment.c:190
 msgid "The padding to insert at the left of the widget."
 msgstr "El rellenu a introducir pel llau esquierdu del widget."
 
-#: gtk/gtkalignment.c:187
+#: gtk/gtkalignment.c:206
 msgid "Right Padding"
 msgstr "Rellenu pela drecha"
 
-#: gtk/gtkalignment.c:188
+#: gtk/gtkalignment.c:207
 msgid "The padding to insert at the right of the widget."
 msgstr "El rellenu a introducir pel llau drechu del widget."
 
-#: gtk/gtkarrow.c:75
+#: gtk/gtkarrow.c:95
 msgid "Arrow direction"
 msgstr "Direición de la flecha"
 
-#: gtk/gtkarrow.c:76
+#: gtk/gtkarrow.c:96
 msgid "The direction the arrow should point"
 msgstr "La direición a la que la flecha tendrá d'apuntar"
 
-#: gtk/gtkarrow.c:84
+#: gtk/gtkarrow.c:104
 msgid "Arrow shadow"
 msgstr "Solombra de la flecha"
 
-#: gtk/gtkarrow.c:85
+#: gtk/gtkarrow.c:105
 msgid "Appearance of the shadow surrounding the arrow"
 msgstr "Apariencia de la solombra qu'arrodia la flecha"
 
-#: gtk/gtkarrow.c:92 gtk/gtkmenu.c:711 gtk/gtkmenuitem.c:368
+#: gtk/gtkarrow.c:112 gtk/gtkmenu.c:717 gtk/gtkmenuitem.c:368
 msgid "Arrow Scaling"
 msgstr "Escaláu de fleches"
 
-#: gtk/gtkarrow.c:93
+#: gtk/gtkarrow.c:113
 msgid "Amount of space used up by arrow"
 msgstr "Cantidá d'espaciu ocupáu per flecha"
 
-#: gtk/gtkaspectframe.c:79
+#: gtk/gtkaspectframe.c:93
 msgid "Horizontal Alignment"
 msgstr "Alliniación horizontal"
 
-#: gtk/gtkaspectframe.c:80
+#: gtk/gtkaspectframe.c:94
 msgid "X alignment of the child"
 msgstr "Alliniación X pal fíu"
 
-#: gtk/gtkaspectframe.c:86
+#: gtk/gtkaspectframe.c:100
 msgid "Vertical Alignment"
 msgstr "Alliniación vertical"
 
-#: gtk/gtkaspectframe.c:87
+#: gtk/gtkaspectframe.c:101
 msgid "Y alignment of the child"
 msgstr "Alliniación Y pal fíu"
 
-#: gtk/gtkaspectframe.c:93
+#: gtk/gtkaspectframe.c:107
 msgid "Ratio"
 msgstr "Proporción"
 
-#: gtk/gtkaspectframe.c:94
+#: gtk/gtkaspectframe.c:108
 msgid "Aspect ratio if obey_child is FALSE"
 msgstr "Proporción si obey_child es FALSE"
 
-#: gtk/gtkaspectframe.c:100
+#: gtk/gtkaspectframe.c:114
 msgid "Obey child"
 msgstr "Obedecer al fíu"
 
-#: gtk/gtkaspectframe.c:101
+#: gtk/gtkaspectframe.c:115
 msgid "Force aspect ratio to match that of the frame's child"
 msgstr "Forciar la proporción pa que concase cola forma del fíu"
 
-#: gtk/gtkassistant.c:284
+#: gtk/gtkassistant.c:308
 msgid "Header Padding"
 msgstr "Separtación de la cabecera"
 
-#: gtk/gtkassistant.c:285
+#: gtk/gtkassistant.c:309
 msgid "Number of pixels around the header."
 msgstr "Númberu de píxeles al rodiu de la cabecera."
 
-#: gtk/gtkassistant.c:292
+#: gtk/gtkassistant.c:316
 msgid "Content Padding"
 msgstr "Separtación del conteníu"
 
-#: gtk/gtkassistant.c:293
+#: gtk/gtkassistant.c:317
 msgid "Number of pixels around the content pages."
 msgstr "Númberu de píxeles al rodiu de les páxines de conteníos."
 
-#: gtk/gtkassistant.c:309
+#: gtk/gtkassistant.c:333
 msgid "Page type"
 msgstr "Triba de páxina"
 
-#: gtk/gtkassistant.c:310
+#: gtk/gtkassistant.c:334
 msgid "The type of the assistant page"
 msgstr "La triba de páxina del asistente"
 
-#: gtk/gtkassistant.c:327
+#: gtk/gtkassistant.c:351
 msgid "Page title"
 msgstr "Títulu de páxina"
 
-#: gtk/gtkassistant.c:328
+#: gtk/gtkassistant.c:352
 msgid "The title of the assistant page"
 msgstr "El títulu de la páxina del asistente"
 
-#: gtk/gtkassistant.c:344
+#: gtk/gtkassistant.c:368
 msgid "Header image"
 msgstr "Imaxe de la cabecera"
 
-#: gtk/gtkassistant.c:345
+#: gtk/gtkassistant.c:369
 msgid "Header image for the assistant page"
 msgstr "Imaxe de la cabecera pa la páxina del asistente"
 
-#: gtk/gtkassistant.c:361
+#: gtk/gtkassistant.c:385
 msgid "Sidebar image"
 msgstr "Imaxe de barra llateral"
 
-#: gtk/gtkassistant.c:362
+#: gtk/gtkassistant.c:386
 msgid "Sidebar image for the assistant page"
 msgstr "Imaxe de barra llateral pa la páxina del asistente"
 
-#: gtk/gtkassistant.c:377
+#: gtk/gtkassistant.c:401
 msgid "Page complete"
 msgstr "Páxina completa"
 
-#: gtk/gtkassistant.c:378
+#: gtk/gtkassistant.c:402
 msgid "Whether all required fields on the page have been filled out"
 msgstr "Indica si tolos campos requeríos na páxina se rellenaren"
 
@@ -1060,11 +1060,11 @@ msgstr "Amosar detalles"
 msgid "If TRUE, details are shown"
 msgstr "Si ye TRUE, amuésense los detalles"
 
-#: gtk/gtkcelleditable.c:76
+#: gtk/gtkcelleditable.c:43
 msgid "Editing Canceled"
 msgstr "Encaboxóse la edición"
 
-#: gtk/gtkcelleditable.c:77
+#: gtk/gtkcelleditable.c:44
 msgid "Indicates that editing has been canceled"
 msgstr "Indica qu'encaboxóse la edición"
 
@@ -1307,7 +1307,7 @@ msgid "Value of the progress bar"
 msgstr "Valor de la barra de progresu"
 
 #: gtk/gtkcellrendererprogress.c:146 gtk/gtkcellrenderertext.c:195
-#: gtk/gtkentry.c:738 gtk/gtkentrybuffer.c:353 gtk/gtkmessagedialog.c:153
+#: gtk/gtkentry.c:738 gtk/gtkentrybuffer.c:353 gtk/gtkmessagedialog.c:200
 #: gtk/gtkprogressbar.c:184 gtk/gtktextbuffer.c:198
 msgid "Text"
 msgstr "Testu"
@@ -1349,7 +1349,7 @@ msgid "The vertical text alignment, from 0 (top) to 1 (bottom)."
 msgstr "L'alliniación vertical del testu, dende 0 (superior) a 1 (inferior)."
 
 #: gtk/gtkcellrendererprogress.c:221 gtk/gtkiconview.c:729
-#: gtk/gtkorientable.c:74 gtk/gtkprogressbar.c:126 gtk/gtkstatusicon.c:328
+#: gtk/gtkorientable.c:47 gtk/gtkprogressbar.c:126 gtk/gtkstatusicon.c:328
 #: gtk/gtktrayicon-x11.c:110
 msgid "Orientation"
 msgstr "Orientación"
@@ -1358,7 +1358,7 @@ msgstr "Orientación"
 msgid "Orientation and growth direction of the progress bar"
 msgstr "Orientación y direición del crecimientu de la barra de progresu"
 
-#: gtk/gtkcellrendererspin.c:93 gtk/gtkprogressbar.c:118 gtk/gtkrange.c:367
+#: gtk/gtkcellrendererspin.c:93 gtk/gtkprogressbar.c:118 gtk/gtkrange.c:368
 #: gtk/gtkscalebutton.c:225 gtk/gtkspinbutton.c:208
 msgid "Adjustment"
 msgstr "Axuste"
@@ -1384,7 +1384,7 @@ msgid "The number of decimal places to display"
 msgstr "El númberu de llugares decimales a amosar"
 
 #: gtk/gtkcellrendererspinner.c:124 gtk/gtkcheckmenuitem.c:98
-#: gtk/gtkmenu.c:501 gtk/gtkspinner.c:128 gtk/gtktoggleaction.c:119
+#: gtk/gtkmenu.c:507 gtk/gtkspinner.c:128 gtk/gtktoggleaction.c:119
 #: gtk/gtktogglebutton.c:115 gtk/gtktoggletoolbutton.c:114
 msgid "Active"
 msgstr "Activu"
@@ -1465,11 +1465,11 @@ msgid "Foreground color as a GdkColor"
 msgstr "Color de primer planu como GdkColor"
 
 #: gtk/gtkcellrenderertext.c:261 gtk/gtkentry.c:662 gtk/gtktexttag.c:251
-#: gtk/gtktextview.c:577
+#: gtk/gtktextview.c:576
 msgid "Editable"
 msgstr "Editable"
 
-#: gtk/gtkcellrenderertext.c:262 gtk/gtktexttag.c:252 gtk/gtktextview.c:578
+#: gtk/gtkcellrenderertext.c:262 gtk/gtktexttag.c:252 gtk/gtktextview.c:577
 msgid "Whether the text can be modified by the user"
 msgstr "Indica si'l testu puede modificase pol usuariu"
 
@@ -2036,7 +2036,7 @@ msgstr "Indica si la caxa combo tien un marcu al rodiu del fíu"
 msgid "Whether the combo box grabs focus when it is clicked with the mouse"
 msgstr "Indica si la caxa combo obtién el focu cuando se calca col mur"
 
-#: gtk/gtkcombobox.c:812 gtk/gtkmenu.c:556
+#: gtk/gtkcombobox.c:812 gtk/gtkmenu.c:562
 msgid "Tearoff Title"
 msgstr "Títulu del separtador"
 
@@ -2082,7 +2082,7 @@ msgstr "El tamañu mínimu de la flecha na caxa combo"
 
 #: gtk/gtkcombobox.c:888 gtk/gtkentry.c:787 gtk/gtkhandlebox.c:174
 #: gtk/gtkmenubar.c:194 gtk/gtkstatusbar.c:193 gtk/gtktoolbar.c:623
-#: gtk/gtkviewport.c:122
+#: gtk/gtkviewport.c:141
 msgid "Shadow type"
 msgstr "Triba de solombra"
 
@@ -2328,7 +2328,7 @@ msgstr ""
 "Qué clase de solombra dibuxar al rodiu de la entrada cuando has-frame ta "
 "activáu"
 
-#: gtk/gtkentry.c:803 gtk/gtktextview.c:657
+#: gtk/gtkentry.c:803 gtk/gtktextview.c:656
 msgid "Overwrite mode"
 msgstr "Mou de sobroscritura"
 
@@ -2518,11 +2518,11 @@ msgstr "Marcáu del conseyu del iconu primariu"
 msgid "Secondary icon tooltip markup"
 msgstr "Marcáu del conseyu del iconu secundariu"
 
-#: gtk/gtkentry.c:1219 gtk/gtktextview.c:685
+#: gtk/gtkentry.c:1219 gtk/gtktextview.c:684
 msgid "IM module"
 msgstr "Módulu ME"
 
-#: gtk/gtkentry.c:1220 gtk/gtktextview.c:686
+#: gtk/gtkentry.c:1220 gtk/gtktextview.c:685
 msgid "Which IM module should be used"
 msgstr "Qué módulu de ME se tien d'usar"
 
@@ -3167,7 +3167,7 @@ msgstr "Mapa de píxeles"
 msgid "A GdkPixmap to display"
 msgstr "Un GdkPixmap a amosar"
 
-#: gtk/gtkimage.c:238 gtk/gtkmessagedialog.c:215
+#: gtk/gtkimage.c:238 gtk/gtkmessagedialog.c:262
 msgid "Image"
 msgstr "Imaxe"
 
@@ -3244,7 +3244,7 @@ msgstr ""
 "Indica si se tien d'usar el testu de la etiqueta pa criar un elementu del "
 "menú de stock"
 
-#: gtk/gtkimagemenuitem.c:184 gtk/gtkmenu.c:516
+#: gtk/gtkimagemenuitem.c:184 gtk/gtkmenu.c:522
 msgid "Accel Group"
 msgstr "Grupu d'aceleración"
 
@@ -3260,11 +3260,11 @@ msgstr "Amosar imáxenes del menú"
 msgid "Whether images should be shown in menus"
 msgstr "Indica si tienen d'amosase o non les imáxenes nos menús"
 
-#: gtk/gtkinfobar.c:384 gtk/gtkmessagedialog.c:128
+#: gtk/gtkinfobar.c:384 gtk/gtkmessagedialog.c:175
 msgid "Message Type"
 msgstr "Triba de mensaxe"
 
-#: gtk/gtkinfobar.c:385 gtk/gtkmessagedialog.c:129
+#: gtk/gtkinfobar.c:385 gtk/gtkmessagedialog.c:176
 msgid "The type of message"
 msgstr "La triba de mensaxe.."
 
@@ -3292,7 +3292,7 @@ msgstr "El testu de la etiqueta"
 msgid "A list of style attributes to apply to the text of the label"
 msgstr "Un llista d'atributos d'estilos p'aplicar al testu de la etiqueta"
 
-#: gtk/gtklabel.c:535 gtk/gtktexttag.c:359 gtk/gtktextview.c:594
+#: gtk/gtklabel.c:535 gtk/gtktexttag.c:359 gtk/gtktextview.c:593
 msgid "Justification"
 msgstr "Xustificación"
 
@@ -3404,7 +3404,7 @@ msgstr ""
 "Indica si se tien de seleicionar el conteníu d'una etiqueta esbillable "
 "cuando obtién el focu"
 
-#: gtk/gtklayout.c:617 gtk/gtkviewport.c:106
+#: gtk/gtklayout.c:617 gtk/gtkviewport.c:125
 msgid "Horizontal adjustment"
 msgstr "Axuste horizontal"
 
@@ -3412,7 +3412,7 @@ msgstr "Axuste horizontal"
 msgid "The GtkAdjustment for the horizontal position"
 msgstr "El GtkAdjustment pa la posición horizontal"
 
-#: gtk/gtklayout.c:625 gtk/gtkviewport.c:114
+#: gtk/gtklayout.c:625 gtk/gtkviewport.c:133
 msgid "Vertical adjustment"
 msgstr "Axuste vertical"
 
@@ -3444,33 +3444,33 @@ msgstr "Visitáu"
 msgid "Whether this link has been visited."
 msgstr "Indica si esti enllaz se visitó."
 
-#: gtk/gtkmenu.c:502
+#: gtk/gtkmenu.c:508
 msgid "The currently selected menu item"
 msgstr "L'elementu del menú anguaño esbilláu"
 
-#: gtk/gtkmenu.c:517
+#: gtk/gtkmenu.c:523
 msgid "The accel group holding accelerators for the menu"
 msgstr "El grupu d'aceleración que caltién los aceleradores pal menú"
 
-#: gtk/gtkmenu.c:531 gtk/gtkmenuitem.c:290
+#: gtk/gtkmenu.c:537 gtk/gtkmenuitem.c:290
 msgid "Accel Path"
 msgstr "Camín del acelerador"
 
-#: gtk/gtkmenu.c:532
+#: gtk/gtkmenu.c:538
 msgid "An accel path used to conveniently construct accel paths of child items"
 msgstr ""
 "Una camín d'acelerador usáu pa construyir convenientemente rutes "
 "d'aceleración d'elementos fíu"
 
-#: gtk/gtkmenu.c:548
+#: gtk/gtkmenu.c:554
 msgid "Attach Widget"
 msgstr "Acoplar widget"
 
-#: gtk/gtkmenu.c:549
+#: gtk/gtkmenu.c:555
 msgid "The widget the menu is attached to"
 msgstr "El menú al que ta acopláu el widget"
 
-#: gtk/gtkmenu.c:557
+#: gtk/gtkmenu.c:563
 msgid ""
 "A title that may be displayed by the window manager when this menu is torn-"
 "off"
@@ -3478,54 +3478,54 @@ msgstr ""
 "Un títulu que tien d'amosase pol alministrador de ventanes cuando esti menú "
 "s'alcuentre zarráu"
 
-#: gtk/gtkmenu.c:571
+#: gtk/gtkmenu.c:577
 msgid "Tearoff State"
 msgstr "Estáu de desprendimientu"
 
-#: gtk/gtkmenu.c:572
+#: gtk/gtkmenu.c:578
 msgid "A boolean that indicates whether the menu is torn-off"
 msgstr "Un booleano qu'indica si'l menú se desprendió"
 
-#: gtk/gtkmenu.c:586
+#: gtk/gtkmenu.c:592
 msgid "Monitor"
 msgstr "Monitor"
 
-#: gtk/gtkmenu.c:587
+#: gtk/gtkmenu.c:593
 msgid "The monitor the menu will be popped up on"
 msgstr "El monitor nel que s'amosará el menú"
 
-#: gtk/gtkmenu.c:593
+#: gtk/gtkmenu.c:599
 msgid "Vertical Padding"
 msgstr "Rellenu vertical"
 
-#: gtk/gtkmenu.c:594
+#: gtk/gtkmenu.c:600
 msgid "Extra space at the top and bottom of the menu"
 msgstr "L'espaciu adicional por enriba y por debaxo del menú"
 
-#: gtk/gtkmenu.c:616
+#: gtk/gtkmenu.c:622
 msgid "Reserve Toggle Size"
 msgstr "Reservar tamañu pa conmutar"
 
-#: gtk/gtkmenu.c:617
+#: gtk/gtkmenu.c:623
 msgid ""
 "A boolean that indicates whether the menu reserves space for toggles and "
 "icons"
 msgstr ""
 "Un booleanu qu'indica si'l menú reserva espaciu pa conmutadores ya iconos"
 
-#: gtk/gtkmenu.c:623
+#: gtk/gtkmenu.c:629
 msgid "Horizontal Padding"
 msgstr "Separtación horizontal"
 
-#: gtk/gtkmenu.c:624
+#: gtk/gtkmenu.c:630
 msgid "Extra space at the left and right edges of the menu"
 msgstr "L'espaciu adicional nos berbesos drechu e esquierdu del menú"
 
-#: gtk/gtkmenu.c:632
+#: gtk/gtkmenu.c:638
 msgid "Vertical Offset"
 msgstr "Desplazamientu vertical"
 
-#: gtk/gtkmenu.c:633
+#: gtk/gtkmenu.c:639
 msgid ""
 "When the menu is a submenu, position it this number of pixels offset "
 "vertically"
@@ -3533,11 +3533,11 @@ msgstr ""
 "Cuando'l menú ye un submenú, allugalu esti númberu de píxeles desplazáu "
 "verticalmente"
 
-#: gtk/gtkmenu.c:641
+#: gtk/gtkmenu.c:647
 msgid "Horizontal Offset"
 msgstr "Desplazamientu horizontal"
 
-#: gtk/gtkmenu.c:642
+#: gtk/gtkmenu.c:648
 msgid ""
 "When the menu is a submenu, position it this number of pixels offset "
 "horizontally"
@@ -3545,87 +3545,87 @@ msgstr ""
 "Cuando'l menú ye un submenú, allugalu esti númberu de píxeles desplazáu "
 "horizontalmente"
 
-#: gtk/gtkmenu.c:650
+#: gtk/gtkmenu.c:656
 msgid "Double Arrows"
 msgstr "Dubles fleches"
 
-#: gtk/gtkmenu.c:651
+#: gtk/gtkmenu.c:657
 msgid "When scrolling, always show both arrows."
 msgstr "Al desplazar, siempres amosar dambes fleches."
 
-#: gtk/gtkmenu.c:664
+#: gtk/gtkmenu.c:670
 msgid "Arrow Placement"
 msgstr "Allugamientu de flecha"
 
-#: gtk/gtkmenu.c:665
+#: gtk/gtkmenu.c:671
 msgid "Indicates where scroll arrows should be placed"
 msgstr "Indica si les fleches de desplazamientu se tienen d'allugar"
 
-#: gtk/gtkmenu.c:673
+#: gtk/gtkmenu.c:679
 msgid "Left Attach"
 msgstr "Axuntu esquierdu"
 
-#: gtk/gtkmenu.c:674 gtk/gtktable.c:174
+#: gtk/gtkmenu.c:680 gtk/gtktable.c:174
 msgid "The column number to attach the left side of the child to"
 msgstr "La cantidá de columnes a amestase haza'l llau esquierdu del fíu"
 
-#: gtk/gtkmenu.c:681
+#: gtk/gtkmenu.c:687
 msgid "Right Attach"
 msgstr "Axuntu drechu"
 
-#: gtk/gtkmenu.c:682
+#: gtk/gtkmenu.c:688
 msgid "The column number to attach the right side of the child to"
 msgstr "La cantidá de columnes a amestase haza'l llau drechu del fíu"
 
-#: gtk/gtkmenu.c:689
+#: gtk/gtkmenu.c:695
 msgid "Top Attach"
 msgstr "Axuntu superior"
 
-#: gtk/gtkmenu.c:690
+#: gtk/gtkmenu.c:696
 msgid "The row number to attach the top of the child to"
 msgstr "El númberu de fileres a amestase haza arriba del fíu"
 
-#: gtk/gtkmenu.c:697
+#: gtk/gtkmenu.c:703
 msgid "Bottom Attach"
 msgstr "Axuntu inferior"
 
-#: gtk/gtkmenu.c:698 gtk/gtktable.c:195
+#: gtk/gtkmenu.c:704 gtk/gtktable.c:195
 msgid "The row number to attach the bottom of the child to"
 msgstr "El númberu de fileres a amestase haza abaxo del fíu"
 
-#: gtk/gtkmenu.c:712
+#: gtk/gtkmenu.c:718
 msgid "Arbitrary constant to scale down the size of the scroll arrow"
 msgstr ""
 "Constante arbitraria p'amenorgar l'escaláu del tamañu de la flecha de "
 "desplazamientu"
 
-#: gtk/gtkmenu.c:799
+#: gtk/gtkmenu.c:805
 msgid "Can change accelerators"
 msgstr "Puede camudar combinaciones"
 
-#: gtk/gtkmenu.c:800
+#: gtk/gtkmenu.c:806
 msgid ""
 "Whether menu accelerators can be changed by pressing a key over the menu item"
 msgstr ""
 "Indica si les combinaciones de tecles del menú pueden camudase calcando una "
 "tecla sobro l'elementu de menú"
 
-#: gtk/gtkmenu.c:805
+#: gtk/gtkmenu.c:811
 msgid "Delay before submenus appear"
 msgstr "Allanciu enantes de que'l submenú apareza"
 
-#: gtk/gtkmenu.c:806
+#: gtk/gtkmenu.c:812
 msgid ""
 "Minimum time the pointer must stay over a menu item before the submenu appear"
 msgstr ""
 "Tiempu mínimu nel que'l punteru tien de permanecer sobro un elementu de menú "
 "enantes de que'l submenú apareza"
 
-#: gtk/gtkmenu.c:813
+#: gtk/gtkmenu.c:819
 msgid "Delay before hiding a submenu"
 msgstr "Allanciu enantes d'anubrir un submenú"
 
-#: gtk/gtkmenu.c:814
+#: gtk/gtkmenu.c:820
 msgid ""
 "The time before hiding a submenu when the pointer is moving towards the "
 "submenu"
@@ -3728,63 +3728,63 @@ msgstr "Menú"
 msgid "The dropdown menu"
 msgstr "El menú estenderexable"
 
-#: gtk/gtkmessagedialog.c:98
+#: gtk/gtkmessagedialog.c:145
 msgid "Image/label border"
 msgstr "Berbesu de la imaxe/etiqueta"
 
-#: gtk/gtkmessagedialog.c:99
+#: gtk/gtkmessagedialog.c:146
 msgid "Width of border around the label and image in the message dialog"
 msgstr ""
 "Anchor del berbesu al rodiu de la etiqueta y la imaxe na ventana de mensaxes"
 
-#: gtk/gtkmessagedialog.c:114
+#: gtk/gtkmessagedialog.c:161
 msgid "Use separator"
 msgstr "Usar separtador"
 
-#: gtk/gtkmessagedialog.c:115
+#: gtk/gtkmessagedialog.c:162
 msgid ""
 "Whether to put a separator between the message dialog's text and the buttons"
 msgstr ""
 "Indica si se tien de poner un separtador ente'l testu de diálogu del mensaxe "
 "y los botones."
 
-#: gtk/gtkmessagedialog.c:136
+#: gtk/gtkmessagedialog.c:183
 msgid "Message Buttons"
 msgstr "Botones de mensaxe"
 
-#: gtk/gtkmessagedialog.c:137
+#: gtk/gtkmessagedialog.c:184
 msgid "The buttons shown in the message dialog"
 msgstr "Los botones amosaos nel diálogu de mensaxe"
 
-#: gtk/gtkmessagedialog.c:154
+#: gtk/gtkmessagedialog.c:201
 msgid "The primary text of the message dialog"
 msgstr "El testu primariu del diálogu de mensaxe"
 
-#: gtk/gtkmessagedialog.c:169
+#: gtk/gtkmessagedialog.c:216
 msgid "Use Markup"
 msgstr "Usar marcáu"
 
-#: gtk/gtkmessagedialog.c:170
+#: gtk/gtkmessagedialog.c:217
 msgid "The primary text of the title includes Pango markup."
 msgstr "El testu primariu del títulu inclúi marcáu Pango."
 
-#: gtk/gtkmessagedialog.c:184
+#: gtk/gtkmessagedialog.c:231
 msgid "Secondary Text"
 msgstr "Testu secundariu"
 
-#: gtk/gtkmessagedialog.c:185
+#: gtk/gtkmessagedialog.c:232
 msgid "The secondary text of the message dialog"
 msgstr "El testu secundariu del diálogu de mensaxe"
 
-#: gtk/gtkmessagedialog.c:200
+#: gtk/gtkmessagedialog.c:247
 msgid "Use Markup in secondary"
 msgstr "Usar marcáu nel secundariu"
 
-#: gtk/gtkmessagedialog.c:201
+#: gtk/gtkmessagedialog.c:248
 msgid "The secondary text includes Pango markup."
 msgstr "El testu secundariu inclúi marcáu Pango."
 
-#: gtk/gtkmessagedialog.c:216
+#: gtk/gtkmessagedialog.c:263
 msgid "The image"
 msgstr "La imaxe"
 
@@ -4074,7 +4074,7 @@ msgstr "Tamañu del indicador descolingable"
 msgid "Spacing around indicator"
 msgstr "Espaciáu al rodiu del indicador"
 
-#: gtk/gtkorientable.c:75
+#: gtk/gtkorientable.c:48
 msgid "The orientation of the orientable"
 msgstr "La orientación del orientable"
 
@@ -4407,7 +4407,8 @@ msgid "Has Selection"
 msgstr "Tien seleición"
 
 #: gtk/gtkprintoperation.c:1297
-msgid "TRUE if a selecion exists."
+#, fuzzy
+msgid "TRUE if a selection exists."
 msgstr "TRUE si esiste una seleición."
 
 #: gtk/gtkprintoperation.c:1312 gtk/gtkprintunixdialog.c:361
@@ -4645,33 +4646,33 @@ msgstr "L'elementu del menú de radio a cuyu grupu pertenez esti widget."
 msgid "The radio tool button whose group this button belongs to."
 msgstr "La ferramienta de botón de radio a cuyu grupu pertenez esti widget."
 
-#: gtk/gtkrange.c:358
+#: gtk/gtkrange.c:359
 msgid "Update policy"
 msgstr "Política d'anovamientos"
 
-#: gtk/gtkrange.c:359
+#: gtk/gtkrange.c:360
 msgid "How the range should be updated on the screen"
 msgstr "Cómo se tien d'anovar el rangu na pantalla"
 
-#: gtk/gtkrange.c:368
+#: gtk/gtkrange.c:369
 msgid "The GtkAdjustment that contains the current value of this range object"
 msgstr "El GtkAdjustment que caltién el valor actual d'esti rangu d'oxetos."
 
-#: gtk/gtkrange.c:375
+#: gtk/gtkrange.c:376
 msgid "Inverted"
 msgstr "Invertíu"
 
-#: gtk/gtkrange.c:376
+#: gtk/gtkrange.c:377
 msgid "Invert direction slider moves to increase range value"
 msgstr ""
 "Invierte la direición na que se mueve'l divisor pa incrementar el valor del "
 "rangu"
 
-#: gtk/gtkrange.c:383
+#: gtk/gtkrange.c:384
 msgid "Lower stepper sensitivity"
 msgstr "Sensibilidá de la flecha inferior"
 
-#: gtk/gtkrange.c:384
+#: gtk/gtkrange.c:385
 msgid ""
 "The sensitivity policy for the stepper that points to the adjustment's lower "
 "side"
@@ -4679,11 +4680,11 @@ msgstr ""
 "La directiva de sensibilidá del botón de desplazamientu qu'apunta al llau "
 "más baxu del axuste"
 
-#: gtk/gtkrange.c:392
+#: gtk/gtkrange.c:393
 msgid "Upper stepper sensitivity"
 msgstr "Sensibilidá de la flecha superior"
 
-#: gtk/gtkrange.c:393
+#: gtk/gtkrange.c:394
 msgid ""
 "The sensitivity policy for the stepper that points to the adjustment's upper "
 "side"
@@ -4691,91 +4692,91 @@ msgstr ""
 "La directiva de sensibilidá del botón de flecha qu'apunta al llau más altu "
 "del axuste"
 
-#: gtk/gtkrange.c:410
+#: gtk/gtkrange.c:411
 msgid "Show Fill Level"
 msgstr "Amosar nivel de rellenu"
 
-#: gtk/gtkrange.c:411
+#: gtk/gtkrange.c:412
 msgid "Whether to display a fill level indicator graphics on trough."
 msgstr ""
 "Indica si se tien d'amosar l'indicador de nivel de llenáu nos gráficos "
 "mientres s'enllena."
 
-#: gtk/gtkrange.c:427
+#: gtk/gtkrange.c:428
 msgid "Restrict to Fill Level"
 msgstr "Restrinxir al nivel de llenáu"
 
-#: gtk/gtkrange.c:428
+#: gtk/gtkrange.c:429
 msgid "Whether to restrict the upper boundary to the fill level."
 msgstr ""
 "Indica si se tien de restrinxir el berbesu superior al nivel de llenáu."
 
-#: gtk/gtkrange.c:443
+#: gtk/gtkrange.c:444
 msgid "Fill Level"
 msgstr "Nivel de llenáu"
 
-#: gtk/gtkrange.c:444
+#: gtk/gtkrange.c:445
 msgid "The fill level."
 msgstr "El nivel de llenáu."
 
-#: gtk/gtkrange.c:452
+#: gtk/gtkrange.c:453
 msgid "Slider Width"
 msgstr "Anchor del divisor"
 
-#: gtk/gtkrange.c:453
+#: gtk/gtkrange.c:454
 msgid "Width of scrollbar or scale thumb"
 msgstr "Anchor de la barra de desplazamientu o escala de buelga"
 
-#: gtk/gtkrange.c:460
+#: gtk/gtkrange.c:461
 msgid "Trough Border"
 msgstr "Berbesu de la canal"
 
-#: gtk/gtkrange.c:461
+#: gtk/gtkrange.c:462
 msgid "Spacing between thumb/steppers and outer trough bevel"
 msgstr "Espaciáu ente la buelga/separtadores y los biseles esteriores"
 
-#: gtk/gtkrange.c:468
+#: gtk/gtkrange.c:469
 msgid "Stepper Size"
 msgstr "Tamañu del separtador"
 
-#: gtk/gtkrange.c:469
+#: gtk/gtkrange.c:470
 msgid "Length of step buttons at ends"
 msgstr "Llonxitú de los botones de pasu al final"
 
-#: gtk/gtkrange.c:484
+#: gtk/gtkrange.c:485
 msgid "Stepper Spacing"
 msgstr "Espaciáu del separtador"
 
-#: gtk/gtkrange.c:485
+#: gtk/gtkrange.c:486
 msgid "Spacing between step buttons and thumb"
 msgstr "Espaciáu ente los botones de separación y la buelga"
 
-#: gtk/gtkrange.c:492
+#: gtk/gtkrange.c:493
 msgid "Arrow X Displacement"
 msgstr "Elevación de la flecha X"
 
-#: gtk/gtkrange.c:493
+#: gtk/gtkrange.c:494
 msgid ""
 "How far in the x direction to move the arrow when the button is depressed"
 msgstr ""
 "Cuánto de llonxe mover la flecha na direición «X», cuando un botón se suelta"
 
-#: gtk/gtkrange.c:500
+#: gtk/gtkrange.c:501
 msgid "Arrow Y Displacement"
 msgstr "Elevación de la flecha Y"
 
-#: gtk/gtkrange.c:501
+#: gtk/gtkrange.c:502
 msgid ""
 "How far in the y direction to move the arrow when the button is depressed"
 msgstr ""
 "Distancia na direición «Y» na que se moverá la flecha cuando se suelte un "
 "botón"
 
-#: gtk/gtkrange.c:509
+#: gtk/gtkrange.c:510
 msgid "Draw slider ACTIVE during drag"
 msgstr "Dibuxar eslizador ACTIVU durante l'arrastre"
 
-#: gtk/gtkrange.c:510
+#: gtk/gtkrange.c:511
 msgid ""
 "With this option set to TRUE, sliders will be drawn ACTIVE and with shadow "
 "IN while they are dragged"
@@ -4783,11 +4784,11 @@ msgstr ""
 "Con esta opción puesta a TRUE, los eslizadores dibuxaránse ACTIVOS y con "
 "solombra DIENTRO al arrastrarlos"
 
-#: gtk/gtkrange.c:524
+#: gtk/gtkrange.c:525
 msgid "Trough Side Details"
 msgstr "Detalles del llau del carril"
 
-#: gtk/gtkrange.c:525
+#: gtk/gtkrange.c:526
 msgid ""
 "When TRUE, the parts of the trough on the two sides of the slider are drawn "
 "with different details"
@@ -4795,11 +4796,11 @@ msgstr ""
 "Cuando seya TRUE, les partes del carril nos dos llaos del eslizador "
 "dibuxaránse con detalles diferentes"
 
-#: gtk/gtkrange.c:541
+#: gtk/gtkrange.c:542
 msgid "Trough Under Steppers"
 msgstr "Carril baxo les fleches d'eslizamientu"
 
-#: gtk/gtkrange.c:542
+#: gtk/gtkrange.c:543
 msgid ""
 "Whether to draw trough for full length of range or exclude the steppers and "
 "spacing"
@@ -4807,11 +4808,11 @@ msgstr ""
 "Indica si se tien de dibuxar pal llargor completu del rangu o escluyir les "
 "fleches de desplazamientu y l'espaciáu"
 
-#: gtk/gtkrange.c:555
+#: gtk/gtkrange.c:556
 msgid "Arrow scaling"
 msgstr "Escaláu de fleches"
 
-#: gtk/gtkrange.c:556
+#: gtk/gtkrange.c:557
 msgid "Arrow scaling with regard to scroll button size"
 msgstr ""
 "Escaláu de fleches en consideración col tamañu del botón de desplazamientu"
@@ -6089,7 +6090,7 @@ msgstr ""
 "encamiéntase. Pango define previamente dalgunes escales tales como "
 "PANGO_SCALE_X_LARGE"
 
-#: gtk/gtktexttag.c:360 gtk/gtktextview.c:595
+#: gtk/gtktexttag.c:360 gtk/gtktextview.c:594
 msgid "Left, right, or center justification"
 msgstr "Xustificación a la esquierda, drecha o centru"
 
@@ -6106,7 +6107,7 @@ msgstr ""
 msgid "Left margin"
 msgstr "Marxe esquierdu"
 
-#: gtk/gtktexttag.c:387 gtk/gtktextview.c:604
+#: gtk/gtktexttag.c:387 gtk/gtktextview.c:603
 msgid "Width of the left margin in pixels"
 msgstr "Anchor del marxe esquierdu en píxeles"
 
@@ -6114,15 +6115,15 @@ msgstr "Anchor del marxe esquierdu en píxeles"
 msgid "Right margin"
 msgstr "Marxe drechu"
 
-#: gtk/gtktexttag.c:397 gtk/gtktextview.c:614
+#: gtk/gtktexttag.c:397 gtk/gtktextview.c:613
 msgid "Width of the right margin in pixels"
 msgstr "Anchor del marxe drechu en píxeles"
 
-#: gtk/gtktexttag.c:407 gtk/gtktextview.c:623
+#: gtk/gtktexttag.c:407 gtk/gtktextview.c:622
 msgid "Indent"
 msgstr "Sangrar"
 
-#: gtk/gtktexttag.c:408 gtk/gtktextview.c:624
+#: gtk/gtktexttag.c:408 gtk/gtktextview.c:623
 msgid "Amount to indent the paragraph, in pixels"
 msgstr "Cantidá de píxeles pal sangráu del párrafu"
 
@@ -6138,7 +6139,7 @@ msgstr ""
 msgid "Pixels above lines"
 msgstr "Píxeles enriba de les llinies"
 
-#: gtk/gtktexttag.c:429 gtk/gtktextview.c:548
+#: gtk/gtktexttag.c:429 gtk/gtktextview.c:547
 msgid "Pixels of blank space above paragraphs"
 msgstr "Píxeles d'espaciu en blanco enriba de los párrafos"
 
@@ -6146,7 +6147,7 @@ msgstr "Píxeles d'espaciu en blanco enriba de los párrafos"
 msgid "Pixels below lines"
 msgstr "Píxeles debaxo de les llinies"
 
-#: gtk/gtktexttag.c:439 gtk/gtktextview.c:558
+#: gtk/gtktexttag.c:439 gtk/gtktextview.c:557
 msgid "Pixels of blank space below paragraphs"
 msgstr "Píxeles d'espaciu en blanco debaxo de los párrafos"
 
@@ -6154,22 +6155,22 @@ msgstr "Píxeles d'espaciu en blanco debaxo de los párrafos"
 msgid "Pixels inside wrap"
 msgstr "Píxeles dientro del axuste"
 
-#: gtk/gtktexttag.c:449 gtk/gtktextview.c:568
+#: gtk/gtktexttag.c:449 gtk/gtktextview.c:567
 msgid "Pixels of blank space between wrapped lines in a paragraph"
 msgstr "Píxeles d'espaciu en blanco ente les llinies axustaes nún párrafu"
 
-#: gtk/gtktexttag.c:476 gtk/gtktextview.c:586
+#: gtk/gtktexttag.c:476 gtk/gtktextview.c:585
 msgid ""
 "Whether to wrap lines never, at word boundaries, or at character boundaries"
 msgstr ""
 "Indica si nunca tienen d'axustase les llinies, a los llímites de les "
 "pallabres o a los llímites de los carauteres"
 
-#: gtk/gtktexttag.c:485 gtk/gtktextview.c:633
+#: gtk/gtktexttag.c:485 gtk/gtktextview.c:632
 msgid "Tabs"
 msgstr "Llingüetes"
 
-#: gtk/gtktexttag.c:486 gtk/gtktextview.c:634
+#: gtk/gtktexttag.c:486 gtk/gtktextview.c:633
 msgid "Custom tabs for this text"
 msgstr "Llingüetes personalizaes pa esti testu"
 
@@ -6314,63 +6315,63 @@ msgstr "Afitar el fondu del párrafu"
 msgid "Whether this tag affects the paragraph background color"
 msgstr "Indica si esta etiqueta afeuta'l color de fondu del párrafu"
 
-#: gtk/gtktextview.c:547
+#: gtk/gtktextview.c:546
 msgid "Pixels Above Lines"
 msgstr "Píxeles sobro les llinies"
 
-#: gtk/gtktextview.c:557
+#: gtk/gtktextview.c:556
 msgid "Pixels Below Lines"
 msgstr "Píxeles per debaxo de les llinies"
 
-#: gtk/gtktextview.c:567
+#: gtk/gtktextview.c:566
 msgid "Pixels Inside Wrap"
 msgstr "Píxeles dientro del axuste"
 
-#: gtk/gtktextview.c:585
+#: gtk/gtktextview.c:584
 msgid "Wrap Mode"
 msgstr "Mou axuste"
 
-#: gtk/gtktextview.c:603
+#: gtk/gtktextview.c:602
 msgid "Left Margin"
 msgstr "Marxe esquierdu"
 
-#: gtk/gtktextview.c:613
+#: gtk/gtktextview.c:612
 msgid "Right Margin"
 msgstr "Marxe drechu"
 
-#: gtk/gtktextview.c:641
+#: gtk/gtktextview.c:640
 msgid "Cursor Visible"
 msgstr "Cursor visible"
 
-#: gtk/gtktextview.c:642
+#: gtk/gtktextview.c:641
 msgid "If the insertion cursor is shown"
 msgstr "Si s'amuesa el cursor d'inserción"
 
-#: gtk/gtktextview.c:649
+#: gtk/gtktextview.c:648
 msgid "Buffer"
 msgstr "Búfer"
 
-#: gtk/gtktextview.c:650
+#: gtk/gtktextview.c:649
 msgid "The buffer which is displayed"
 msgstr "El búfer que se ta amosando"
 
-#: gtk/gtktextview.c:658
+#: gtk/gtktextview.c:657
 msgid "Whether entered text overwrites existing contents"
 msgstr "Indica si'l testu introducíu sobroscribe l'esistente"
 
-#: gtk/gtktextview.c:665
+#: gtk/gtktextview.c:664
 msgid "Accepts tab"
 msgstr "Aceuta tabulación"
 
-#: gtk/gtktextview.c:666
+#: gtk/gtktextview.c:665
 msgid "Whether Tab will result in a tab character being entered"
 msgstr "Indica si Tab resultará nun caráuter tabulador introducíu"
 
-#: gtk/gtktextview.c:695
+#: gtk/gtktextview.c:694
 msgid "Error underline color"
 msgstr "Color de sorrayáu de fallos"
 
-#: gtk/gtktextview.c:696
+#: gtk/gtktextview.c:695
 msgid "Color with which to draw error-indication underlines"
 msgstr "Color col que dibuxar el sorrayáu d'indicación de fallos"
 
@@ -7014,7 +7015,7 @@ msgstr "Definición del IU combináu"
 msgid "An XML string describing the merged UI"
 msgstr "Una cadena XML describiendo'l IU combináu"
 
-#: gtk/gtkviewport.c:107
+#: gtk/gtkviewport.c:126
 msgid ""
 "The GtkAdjustment that determines the values of the horizontal position for "
 "this viewport"
@@ -7022,7 +7023,7 @@ msgstr ""
 "El GtkAdjustment que determina los valores de la posición horizontal pa esti "
 "puertu de visión"
 
-#: gtk/gtkviewport.c:115
+#: gtk/gtkviewport.c:134
 msgid ""
 "The GtkAdjustment that determines the values of the vertical position for "
 "this viewport"
@@ -7030,7 +7031,7 @@ msgstr ""
 "El GtkAdjustment que determina los valores de la posición vertical d'esti "
 "puertu de visión"
 
-#: gtk/gtkviewport.c:123
+#: gtk/gtkviewport.c:142
 msgid "Determines how the shadowed box around the viewport is drawn"
 msgstr ""
 "Determina como se dibuxa'l marcu sombreáu al rodiu del puertu de visión"
@@ -7206,51 +7207,51 @@ msgstr "Double Buffered"
 msgid "Whether or not the widget is double buffered"
 msgstr "Indica si'l widget tien búfer duble"
 
-#: gtk/gtkwidget.c:2404
+#: gtk/gtkwidget.c:2423
 msgid "Interior Focus"
 msgstr "Focu interior"
 
-#: gtk/gtkwidget.c:2405
+#: gtk/gtkwidget.c:2424
 msgid "Whether to draw the focus indicator inside widgets"
 msgstr "Indica si dibuxar el focu indicador dientro de los widgets"
 
-#: gtk/gtkwidget.c:2411
+#: gtk/gtkwidget.c:2430
 msgid "Focus linewidth"
 msgstr "Dar focu al anchor de llinia"
 
-#: gtk/gtkwidget.c:2412
+#: gtk/gtkwidget.c:2431
 msgid "Width, in pixels, of the focus indicator line"
 msgstr "Anchor, en píxeles, de la llinia indicadora del focu"
 
-#: gtk/gtkwidget.c:2418
+#: gtk/gtkwidget.c:2437
 msgid "Focus line dash pattern"
 msgstr "Dar focu a la llinia con patrón punteáu"
 
-#: gtk/gtkwidget.c:2419
+#: gtk/gtkwidget.c:2438
 msgid "Dash pattern used to draw the focus indicator"
 msgstr "Patrón punteáu usáu pa dibuxar l'indicador de focu"
 
-#: gtk/gtkwidget.c:2424
+#: gtk/gtkwidget.c:2443
 msgid "Focus padding"
 msgstr "Rellenu del focu"
 
-#: gtk/gtkwidget.c:2425
+#: gtk/gtkwidget.c:2444
 msgid "Width, in pixels, between focus indicator and the widget 'box'"
 msgstr "Anchor, en píxeles, ente l'indicador de focu y la «caxa» del widget"
 
-#: gtk/gtkwidget.c:2430
+#: gtk/gtkwidget.c:2449
 msgid "Cursor color"
 msgstr "Color del cursor"
 
-#: gtk/gtkwidget.c:2431
+#: gtk/gtkwidget.c:2450
 msgid "Color with which to draw insertion cursor"
 msgstr "Color col que dibuxar el cursor d'inxerción"
 
-#: gtk/gtkwidget.c:2436
+#: gtk/gtkwidget.c:2455
 msgid "Secondary cursor color"
 msgstr "Color secundariu del cursor"
 
-#: gtk/gtkwidget.c:2437
+#: gtk/gtkwidget.c:2456
 msgid ""
 "Color with which to draw the secondary insertion cursor when editing mixed "
 "right-to-left and left-to-right text"
@@ -7258,43 +7259,43 @@ msgstr ""
 "Color col que dibuxar el cursor d'inxerción secundariu cuando se ta editando "
 "un mezu de testu de drecha-a-esquierda y esquierda-a-drecha"
 
-#: gtk/gtkwidget.c:2442
+#: gtk/gtkwidget.c:2461
 msgid "Cursor line aspect ratio"
 msgstr "Proporción de la llinia del cursor"
 
-#: gtk/gtkwidget.c:2443
+#: gtk/gtkwidget.c:2462
 msgid "Aspect ratio with which to draw insertion cursor"
 msgstr "La proporción cola que dibuxar el cursor d'inxerción"
 
-#: gtk/gtkwidget.c:2457
+#: gtk/gtkwidget.c:2476
 msgid "Draw Border"
 msgstr "Dibuxar berbesu"
 
-#: gtk/gtkwidget.c:2458
+#: gtk/gtkwidget.c:2477
 msgid "Size of areas outside the widget's allocation to draw"
 msgstr "Tamañu de les estayes fuera de la reserva del widget pa dibuxar"
 
-#: gtk/gtkwidget.c:2471
+#: gtk/gtkwidget.c:2490
 msgid "Unvisited Link Color"
 msgstr "Color del enllaz non visitáu"
 
-#: gtk/gtkwidget.c:2472
+#: gtk/gtkwidget.c:2491
 msgid "Color of unvisited links"
 msgstr "Color de los enllaces non visitaos"
 
-#: gtk/gtkwidget.c:2485
+#: gtk/gtkwidget.c:2504
 msgid "Visited Link Color"
 msgstr "Color del enllaz visitáu"
 
-#: gtk/gtkwidget.c:2486
+#: gtk/gtkwidget.c:2505
 msgid "Color of visited links"
 msgstr "Color de los enllaces visitaos"
 
-#: gtk/gtkwidget.c:2500
+#: gtk/gtkwidget.c:2519
 msgid "Wide Separators"
 msgstr "Separtadores anchos"
 
-#: gtk/gtkwidget.c:2501
+#: gtk/gtkwidget.c:2520
 msgid ""
 "Whether separators have configurable width and should be drawn using a box "
 "instead of a line"
@@ -7302,35 +7303,35 @@ msgstr ""
 "Indica si los separtadores tienen anchu configurable y tienen de dibuxase "
 "usando una caxa n'arróu d'una llinia"
 
-#: gtk/gtkwidget.c:2515
+#: gtk/gtkwidget.c:2534
 msgid "Separator Width"
 msgstr "Anchu del separtador"
 
-#: gtk/gtkwidget.c:2516
+#: gtk/gtkwidget.c:2535
 msgid "The width of separators if wide-separators is TRUE"
 msgstr "L'anchor de los separtadores si «wide-separators« ye TRUE"
 
-#: gtk/gtkwidget.c:2530
+#: gtk/gtkwidget.c:2549
 msgid "Separator Height"
 msgstr "Altor del separtador"
 
-#: gtk/gtkwidget.c:2531
+#: gtk/gtkwidget.c:2550
 msgid "The height of separators if \"wide-separators\" is TRUE"
 msgstr "L'altor de los separtadores si «wide-separators» ye TRUE"
 
-#: gtk/gtkwidget.c:2545
+#: gtk/gtkwidget.c:2564
 msgid "Horizontal Scroll Arrow Length"
 msgstr "Llonxitú de la flecha de desplazamientu horizontal"
 
-#: gtk/gtkwidget.c:2546
+#: gtk/gtkwidget.c:2565
 msgid "The length of horizontal scroll arrows"
 msgstr "El llargor de les fleches de desplazamientu horizontal"
 
-#: gtk/gtkwidget.c:2560
+#: gtk/gtkwidget.c:2579
 msgid "Vertical Scroll Arrow Length"
 msgstr "Llonxitú de les fleches de desplazamientu vertical"
 
-#: gtk/gtkwidget.c:2561
+#: gtk/gtkwidget.c:2580
 msgid "The length of vertical scroll arrows"
 msgstr "El llargor de les fleches de desplazamientu vertical"
 

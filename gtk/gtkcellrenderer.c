@@ -480,10 +480,10 @@ set_cell_bg_color (GtkCellRenderer *cell,
  * @cell: a #GtkCellRenderer
  * @widget: the widget the renderer is rendering to
  * @cell_area: (allow-none): The area a cell will be allocated, or %NULL
- * @x_offset: (allow-none): location to return x offset of cell relative to @cell_area, or %NULL
- * @y_offset: (allow-none): location to return y offset of cell relative to @cell_area, or %NULL
- * @width: (allow-none): location to return width needed to render a cell, or %NULL
- * @height: (allow-none): location to return height needed to render a cell, or %NULL
+ * @x_offset: (out) (allow-none): location to return x offset of cell relative to @cell_area, or %NULL
+ * @y_offset: (out) (allow-none): location to return y offset of cell relative to @cell_area, or %NULL
+ * @width: (out) (allow-none): location to return width needed to render a cell, or %NULL
+ * @height: (out) (allow-none): location to return height needed to render a cell, or %NULL
  *
  * Obtains the width and height needed to render the cell. Used by view 
  * widgets to determine the appropriate size for the cell_area passed to
@@ -632,15 +632,15 @@ gtk_cell_renderer_activate (GtkCellRenderer      *cell,
  * @cell: a #GtkCellRenderer
  * @event: a #GdkEvent
  * @widget: widget that received the event
- * @path: widget-dependent string representation of the event location; 
+ * @path: widget-dependent string representation of the event location;
  *    e.g. for #GtkTreeView, a string representation of #GtkTreePath
  * @background_area: background area as passed to gtk_cell_renderer_render()
  * @cell_area: cell area as passed to gtk_cell_renderer_render()
  * @flags: render flags
- * 
+ *
  * Passes an activate event to the cell renderer for possible processing.
- * 
- * Return value: A new #GtkCellEditable, or %NULL
+ *
+ * Return value: (transfer none): A new #GtkCellEditable, or %NULL
  **/
 GtkCellEditable *
 gtk_cell_renderer_start_editing (GtkCellRenderer      *cell,
@@ -718,8 +718,8 @@ gtk_cell_renderer_set_fixed_size (GtkCellRenderer *cell,
 /**
  * gtk_cell_renderer_get_fixed_size:
  * @cell: A #GtkCellRenderer
- * @width: (allow-none): location to fill in with the fixed width of the cell, or %NULL
- * @height: (allow-none): location to fill in with the fixed height of the cell, or %NULL
+ * @width: (out) (allow-none): location to fill in with the fixed width of the cell, or %NULL
+ * @height: (out) (allow-none): location to fill in with the fixed height of the cell, or %NULL
  *
  * Fills in @width and @height with the appropriate size of @cell.
  **/
@@ -778,8 +778,8 @@ gtk_cell_renderer_set_alignment (GtkCellRenderer *cell,
 /**
  * gtk_cell_renderer_get_alignment:
  * @cell: A #GtkCellRenderer
- * @xalign: (allow-none): location to fill in with the x alignment of the cell, or %NULL
- * @yalign: (allow-none): location to fill in with the y alignment of the cell, or %NULL
+ * @xalign: (out) (allow-none): location to fill in with the x alignment of the cell, or %NULL
+ * @yalign: (out) (allow-none): location to fill in with the y alignment of the cell, or %NULL
  *
  * Fills in @xalign and @yalign with the appropriate values of @cell.
  *
@@ -839,8 +839,8 @@ gtk_cell_renderer_set_padding (GtkCellRenderer *cell,
 /**
  * gtk_cell_renderer_get_padding:
  * @cell: A #GtkCellRenderer
- * @xpad: (allow-none): location to fill in with the x padding of the cell, or %NULL
- * @ypad: (allow-none): location to fill in with the y padding of the cell, or %NULL
+ * @xpad: (out) (allow-none): location to fill in with the x padding of the cell, or %NULL
+ * @ypad: (out) (allow-none): location to fill in with the y padding of the cell, or %NULL
  *
  * Fills in @xpad and @ypad with the appropriate values of @cell.
  *

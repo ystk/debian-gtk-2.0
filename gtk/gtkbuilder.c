@@ -280,29 +280,29 @@ gtk_builder_get_parameters (GtkBuilder  *builder,
       if (G_IS_PARAM_SPEC_OBJECT (pspec) &&
           (G_PARAM_SPEC_VALUE_TYPE (pspec) != GDK_TYPE_PIXBUF))
         {
-          if (pspec->flags & G_PARAM_CONSTRUCT_ONLY)
+          GObject *object = gtk_builder_get_object (builder, prop->data);
+
+          if (object)
             {
-              GObject *object;
-              object = gtk_builder_get_object (builder, prop->data);
-              if (!object)
+              g_value_init (&parameter.value, G_OBJECT_TYPE (object));
+              g_value_set_object (&parameter.value, object);
+            }
+          else 
+            {
+              if (pspec->flags & G_PARAM_CONSTRUCT_ONLY)
                 {
                   g_warning ("Failed to get constuct only property "
                              "%s of %s with value `%s'",
                              prop->name, object_name, prop->data);
                   continue;
                 }
-              g_value_init (&parameter.value, G_OBJECT_TYPE (object));
-              g_value_set_object (&parameter.value, object);
-            }
-          else
-            {
+              /* Delay setting property */
               property = g_slice_new (DelayedProperty);
               property->object = g_strdup (object_name);
               property->name = g_strdup (prop->name);
               property->value = g_strdup (prop->data);
               builder->priv->delayed_properties =
                 g_slist_prepend (builder->priv->delayed_properties, property);
-
               continue;
             }
         }
@@ -317,7 +317,7 @@ gtk_builder_get_parameters (GtkBuilder  *builder,
           continue;
         }
 
-      if (pspec->flags & G_PARAM_CONSTRUCT_ONLY)
+      if (pspec->flags & (G_PARAM_CONSTRUCT | G_PARAM_CONSTRUCT_ONLY))
         g_array_append_val (*construct_parameters, parameter);
       else
         g_array_append_val (*parameters, parameter);
@@ -1061,7 +1061,7 @@ gtk_builder_connect_signals (GtkBuilder *builder,
 /**
  * gtk_builder_connect_signals_full:
  * @builder: a #GtkBuilder
- * @func: the function used to connect the signals
+ * @func: (scope call): the function used to connect the signals
  * @user_data: arbitrary data that will be passed to the connection function
  *
  * This function can be thought of the interpreted language binding
@@ -1123,7 +1123,7 @@ gtk_builder_connect_signals_full (GtkBuilder            *builder,
  * @builder: a #GtkBuilder
  * @pspec: the #GParamSpec for the property
  * @string: the string representation of the value
- * @value: the #GValue to store the result in
+ * @value: (out): the #GValue to store the result in
  * @error: (allow-none): return location for an error, or %NULL
  *
  * This function demarshals a value from a string. This function
@@ -1179,7 +1179,7 @@ gtk_builder_value_from_string (GtkBuilder   *builder,
  * @builder: a #GtkBuilder
  * @type: the #GType of the value
  * @string: the string representation of the value
- * @value: the #GValue to store the result in
+ * @value: (out): the #GValue to store the result in
  * @error: (allow-none): return location for an error, or %NULL
  *
  * Like gtk_builder_value_from_string(), this function demarshals 

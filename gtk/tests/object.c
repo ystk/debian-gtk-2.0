@@ -73,7 +73,6 @@ list_ignore_properties (gboolean buglist)
     { "GtkColorSelection",      "current-color",        (void*) NULL, },                /* not a valid boxed color */
     { "GtkComboBox",            "row-span-column",      (void*) MATCH_ANY_VALUE },      /* GtkComboBoxEntry needs a tree model for this */
     { "GtkComboBox",            "column-span-column",   (void*) MATCH_ANY_VALUE },      /* GtkComboBoxEntry needs a tree model for this */
-    { "GtkComboBoxEntry",       "text-column",          (void*) MATCH_ANY_VALUE },      /* GtkComboBoxEntry needs a tree model for this */
     { "GtkFileChooserButton",   "select-multiple",      (void*) MATCH_ANY_VALUE },      /* property disabled */
     { "GtkFileChooserButton",   "action",               (void*) GTK_FILE_CHOOSER_ACTION_SAVE },
     { "GtkFileChooserButton",   "action",               (void*) GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER },
@@ -277,33 +276,12 @@ widget_test_properties (GtkWidget   *widget,
 }
 
 static void
-widget_fixups (GtkWidget *widget)
-{
-  /* post-constructor for widgets that need additional settings to work correctly */
-  if (GTK_IS_COMBO_BOX_ENTRY (widget))
-    {
-      GtkListStore *store = gtk_list_store_new (1, G_TYPE_STRING);
-      g_object_set (widget, "model", store, "text-column", 0, NULL);
-      g_object_unref (store);
-      gtk_combo_box_append_text (GTK_COMBO_BOX (widget), "test text");
-    }
-  else if (GTK_IS_COMBO_BOX (widget))
-    {
-      GtkListStore *store = gtk_list_store_new (1, G_TYPE_STRING);
-      g_object_set (widget, "model", store, NULL);
-      g_object_unref (store);
-      gtk_combo_box_append_text (GTK_COMBO_BOX (widget), "test text");
-    }
-}
-
-static void
 widget_property_tests (gconstpointer test_data)
 {
   GType wtype = (GType) test_data;
   /* create widget */
   GtkWidget *widget = gtk_widget_new (wtype, NULL);
   g_object_ref_sink (widget);
-  widget_fixups (widget);
   /* test property values */
   widget_test_properties (widget,  +2); /* test default_value */
   widget_test_properties (widget,   0); /* test minimum */

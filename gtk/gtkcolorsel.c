@@ -71,6 +71,7 @@
 /* The cursor for the dropper */
 #define DROPPER_WIDTH 17
 #define DROPPER_HEIGHT 17
+#define DROPPER_STRIDE 4
 #define DROPPER_X_HOT 2
 #define DROPPER_Y_HOT 16
 
@@ -237,18 +238,26 @@ static GtkColorSelectionChangePaletteFunc noscreen_change_palette_hook = default
 static GtkColorSelectionChangePaletteWithScreenFunc change_palette_hook = default_change_palette_func;
 
 static const guchar dropper_bits[] = {
-  0xff, 0x8f, 0x01, 0xff, 0x77, 0x01, 0xff, 0xfb, 0x00, 0xff, 0xf8, 0x00,
-  0x7f, 0xff, 0x00, 0xff, 0x7e, 0x01, 0xff, 0x9d, 0x01, 0xff, 0xd8, 0x01,
-  0x7f, 0xd4, 0x01, 0x3f, 0xee, 0x01, 0x1f, 0xff, 0x01, 0x8f, 0xff, 0x01,
-  0xc7, 0xff, 0x01, 0xe3, 0xff, 0x01, 0xf3, 0xff, 0x01, 0xfd, 0xff, 0x01,
-  0xff, 0xff, 0x01, };
+  0xff, 0x8f, 0x01, 0x00,  0xff, 0x77, 0x01, 0x00,
+  0xff, 0xfb, 0x00, 0x00,  0xff, 0xf8, 0x00, 0x00,
+  0x7f, 0xff, 0x00, 0x00,  0xff, 0x7e, 0x01, 0x00,
+  0xff, 0x9d, 0x01, 0x00,  0xff, 0xd8, 0x01, 0x00,
+  0x7f, 0xd4, 0x01, 0x00,  0x3f, 0xee, 0x01, 0x00,
+  0x1f, 0xff, 0x01, 0x00,  0x8f, 0xff, 0x01, 0x00,
+  0xc7, 0xff, 0x01, 0x00,  0xe3, 0xff, 0x01, 0x00,
+  0xf3, 0xff, 0x01, 0x00,  0xfd, 0xff, 0x01, 0x00,
+  0xff, 0xff, 0x01, 0x00 };
 
 static const guchar dropper_mask[] = {
-  0x00, 0x70, 0x00, 0x00, 0xf8, 0x00, 0x00, 0xfc, 0x01, 0x00, 0xff, 0x01,
-  0x80, 0xff, 0x01, 0x00, 0xff, 0x00, 0x00, 0x7f, 0x00, 0x80, 0x3f, 0x00,
-  0xc0, 0x3f, 0x00, 0xe0, 0x13, 0x00, 0xf0, 0x01, 0x00, 0xf8, 0x00, 0x00,
-  0x7c, 0x00, 0x00, 0x3e, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x0d, 0x00, 0x00,
-  0x02, 0x00, 0x00, };
+  0x00, 0x70, 0x00, 0x00,  0x00, 0xf8, 0x00, 0x00,
+  0x00, 0xfc, 0x01, 0x00,  0x00, 0xff, 0x01, 0x00,
+  0x80, 0xff, 0x01, 0x00,  0x00, 0xff, 0x00, 0x00,
+  0x00, 0x7f, 0x00, 0x00,  0x80, 0x3f, 0x00, 0x00,
+  0xc0, 0x3f, 0x00, 0x00,  0xe0, 0x13, 0x00, 0x00,
+  0xf0, 0x01, 0x00, 0x00,  0xf8, 0x00, 0x00, 0x00,
+  0x7c, 0x00, 0x00, 0x00,  0x3e, 0x00, 0x00, 0x00,
+  0x1e, 0x00, 0x00, 0x00,  0x0d, 0x00, 0x00, 0x00,
+  0x02, 0x00, 0x00, 0x00 };
 
 G_DEFINE_TYPE (GtkColorSelection, gtk_color_selection, GTK_TYPE_VBOX)
 
@@ -1427,9 +1436,8 @@ palette_press (GtkWidget      *drawing_area,
   GtkColorSelection *colorsel = GTK_COLOR_SELECTION (data);
 
   gtk_widget_grab_focus (drawing_area);
-  
-  if (event->button == 3 &&
-      event->type == GDK_BUTTON_PRESS)
+
+  if (_gtk_button_event_triggers_context_menu (event))
     {
       do_popup (colorsel, drawing_area, event->time);
       return TRUE;
@@ -1609,16 +1617,40 @@ make_picker_cursor (GdkScreen *screen)
       GdkColor fg = { 0, 0x0000, 0x0000, 0x0000 };
       GdkWindow *window;
       GdkPixmap *pixmap, *mask;
+      cairo_surface_t *image;
+      cairo_t *cr;
 
       window = gdk_screen_get_root_window (screen);
       
-      pixmap =
-	gdk_bitmap_create_from_data (window, (gchar *) dropper_bits,
-				     DROPPER_WIDTH, DROPPER_HEIGHT);
+
+      pixmap = gdk_pixmap_new (window, DROPPER_WIDTH, DROPPER_HEIGHT, 1);
+
+      cr = gdk_cairo_create (pixmap);
+      cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+      image = cairo_image_surface_create_for_data ((guchar *) dropper_bits,
+                                                   CAIRO_FORMAT_A1,
+                                                   DROPPER_WIDTH,
+                                                   DROPPER_HEIGHT,
+                                                   DROPPER_STRIDE);
+      cairo_set_source_surface (cr, image, 0, 0);
+      cairo_surface_destroy (image);
+      cairo_paint (cr);
+      cairo_destroy (cr);
       
-      mask =
-	gdk_bitmap_create_from_data (window, (gchar *) dropper_mask,
-				     DROPPER_WIDTH, DROPPER_HEIGHT);
+
+      mask = gdk_pixmap_new (window, DROPPER_WIDTH, DROPPER_HEIGHT, 1);
+
+      cr = gdk_cairo_create (mask);
+      cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+      image = cairo_image_surface_create_for_data ((guchar *) dropper_mask,
+                                                   CAIRO_FORMAT_A1,
+                                                   DROPPER_WIDTH,
+                                                   DROPPER_HEIGHT,
+                                                   DROPPER_STRIDE);
+      cairo_set_source_surface (cr, image, 0, 0);
+      cairo_surface_destroy (image);
+      cairo_paint (cr);
+      cairo_destroy (cr);
       
       cursor = gdk_cursor_new_from_pixmap (pixmap, mask, &fg, &bg,
 					   DROPPER_X_HOT, DROPPER_Y_HOT);
@@ -1636,33 +1668,39 @@ grab_color_at_mouse (GdkScreen *screen,
 		     gint       y_root,
 		     gpointer   data)
 {
-  GdkImage *image;
-  guint32 pixel;
+  GdkPixbuf *pixbuf;
+  guchar *pixels;
   GtkColorSelection *colorsel = data;
   ColorSelectionPrivate *priv;
   GdkColor color;
-  GdkColormap *colormap = gdk_screen_get_system_colormap (screen);
   GdkWindow *root_window = gdk_screen_get_root_window (screen);
   
   priv = colorsel->private_data;
   
-  image = gdk_drawable_get_image (root_window, x_root, y_root, 1, 1);
-  if (!image)
+  pixbuf = gdk_pixbuf_get_from_drawable (NULL, root_window, NULL,
+                                         x_root, y_root,
+                                         0, 0,
+                                         1, 1);
+  if (!pixbuf)
     {
       gint x, y;
       GdkDisplay *display = gdk_screen_get_display (screen);
       GdkWindow *window = gdk_display_get_window_at_pointer (display, &x, &y);
       if (!window)
 	return;
-      image = gdk_drawable_get_image (window, x, y, 1, 1);
-      if (!image)
+      pixbuf = gdk_pixbuf_get_from_drawable (NULL, window, NULL,
+                                             x, y,
+                                             0, 0,
+                                             1, 1);
+      if (!pixbuf)
 	return;
     }
-  pixel = gdk_image_get_pixel (image, 0, 0);
-  g_object_unref (image);
+  pixels = gdk_pixbuf_get_pixels (pixbuf);
+  color.red = pixels[0] * 0x101;
+  color.green = pixels[1] * 0x101;
+  color.blue = pixels[2] * 0x101;
+  g_object_unref (pixbuf);
 
-  gdk_colormap_query_color (colormap, pixel, &color);
-  
   priv->color[COLORSEL_RED] = SCALE (color.red);
   priv->color[COLORSEL_GREEN] = SCALE (color.green);
   priv->color[COLORSEL_BLUE] = SCALE (color.blue);
@@ -2480,7 +2518,7 @@ gtk_color_selection_set_color (GtkColorSelection    *colorsel,
 /**
  * gtk_color_selection_get_current_color:
  * @colorsel: a #GtkColorSelection.
- * @color: a #GdkColor to fill in with the current color.
+ * @color: (out): a #GdkColor to fill in with the current color.
  *
  * Sets @color to be the current color in the GtkColorSelection widget.
  **/
@@ -2605,7 +2643,7 @@ gtk_color_selection_set_previous_alpha (GtkColorSelection *colorsel,
 /**
  * gtk_color_selection_get_previous_color:
  * @colorsel: a #GtkColorSelection.
- * @color: a #GdkColor to fill in with the original color value.
+ * @color: (out): a #GdkColor to fill in with the original color value.
  *
  * Fills @color in with the original color value.
  **/
@@ -2700,7 +2738,8 @@ gtk_color_selection_is_adjusting (GtkColorSelection *colorsel)
 /**
  * gtk_color_selection_palette_from_string:
  * @str: a string encoding a color palette.
- * @colors: return location for allocated array of #GdkColor.
+ * @colors: (out) (array length=n_colors): return location for allocated
+ *          array of #GdkColor.
  * @n_colors: return location for length of array.
  * 
  * Parses a color palette string; the string is a colon-separated
@@ -2785,7 +2824,7 @@ gtk_color_selection_palette_from_string (const gchar *str,
 
 /**
  * gtk_color_selection_palette_to_string:
- * @colors: an array of colors.
+ * @colors: (array length=n_colors): an array of colors.
  * @n_colors: length of the array.
  * 
  * Encodes a palette as a string, useful for persistent storage.

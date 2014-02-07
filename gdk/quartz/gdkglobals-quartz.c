@@ -21,7 +21,23 @@
 #include "config.h"
 #include "gdktypes.h"
 #include "gdkprivate.h"
+#include "gdkquartz.h"
 
 GdkDisplay *_gdk_display = NULL;
 GdkScreen *_gdk_screen = NULL;
 GdkWindow *_gdk_root = NULL;
+
+GdkOSXVersion
+gdk_quartz_osx_version (void)
+{
+  gint32 minor;
+  OSErr err = Gestalt (gestaltSystemVersionMinor, (SInt32*)&minor);
+  g_return_val_if_fail (err == noErr, GDK_OSX_UNSUPPORTED);
+
+  if (minor < GDK_OSX_MIN)
+    return GDK_OSX_UNSUPPORTED;
+  else if (minor > GDK_OSX_CURRENT)
+    return GDK_OSX_NEW;
+  else
+    return minor;
+}

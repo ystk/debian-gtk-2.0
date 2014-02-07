@@ -114,7 +114,9 @@ typedef enum
   GTK_HAS_GRAB	       = 1 << 15,
   GTK_RC_STYLE	       = 1 << 16,
   GTK_COMPOSITE_CHILD  = 1 << 17,
+#ifndef GTK_DISABLE_DEPRECATED
   GTK_NO_REPARENT      = 1 << 18,
+#endif
   GTK_APP_PAINTABLE    = 1 << 19,
   GTK_RECEIVES_DEFAULT = 1 << 20,
   GTK_DOUBLE_BUFFERED  = 1 << 21,
@@ -445,8 +447,17 @@ typedef enum
  * @flag: the flags to set.
  *
  * Turns on certain widget flags.
+ *
+ * Deprecated: 2.22: Use the proper function instead: gtk_widget_set_app_paintable(),
+ *   gtk_widget_set_can_default(), gtk_widget_set_can_focus(),
+ *   gtk_widget_set_double_buffered(), gtk_widget_set_has_window(),
+ *   gtk_widget_set_mapped(), gtk_widget_set_no_show_all(),
+ *   gtk_widget_set_realized(), gtk_widget_set_receives_default(),
+ *   gtk_widget_set_sensitive() or gtk_widget_set_visible().
+ *
  */
 #define GTK_WIDGET_SET_FLAGS(wid,flag)	  G_STMT_START{ (GTK_WIDGET_FLAGS (wid) |= (flag)); }G_STMT_END
+/* FIXME: Deprecating GTK_WIDGET_SET_FLAGS requires fixing GTK internals. */
 
 /**
  * GTK_WIDGET_UNSET_FLAGS:
@@ -454,8 +465,11 @@ typedef enum
  * @flag: the flags to unset.
  *
  * Turns off certain widget flags.
+ *
+ * Deprecated: 2.22: Use the proper function instead. See GTK_WIDGET_SET_FLAGS().
  */
 #define GTK_WIDGET_UNSET_FLAGS(wid,flag)  G_STMT_START{ (GTK_WIDGET_FLAGS (wid) &= ~(flag)); }G_STMT_END
+/* FIXME: Deprecating GTK_WIDGET_UNSET_FLAGS requires fixing GTK internals. */
 
 #define GTK_TYPE_REQUISITION              (gtk_requisition_get_type ())
 
@@ -830,12 +844,14 @@ void	   gtk_widget_set		  (GtkWidget	       *widget,
 					   const gchar         *first_property_name,
 					   ...) G_GNUC_NULL_TERMINATED;
 #endif /* GTK_DISABLE_DEPRECATED */
+#if !defined(GTK_DISABLE_DEPRECATED) || defined (GTK_COMPILATION)
+void       gtk_widget_hide_all            (GtkWidget           *widget);
+#endif
 void	   gtk_widget_unparent		  (GtkWidget	       *widget);
 void	   gtk_widget_show		  (GtkWidget	       *widget);
 void       gtk_widget_show_now            (GtkWidget           *widget);
 void	   gtk_widget_hide		  (GtkWidget	       *widget);
 void	   gtk_widget_show_all		  (GtkWidget	       *widget);
-void	   gtk_widget_hide_all		  (GtkWidget	       *widget);
 void       gtk_widget_set_no_show_all     (GtkWidget           *widget,
 					   gboolean             no_show_all);
 gboolean   gtk_widget_get_no_show_all     (GtkWidget           *widget);
@@ -897,6 +913,8 @@ gboolean   gtk_widget_event		  (GtkWidget	       *widget,
 					   GdkEvent	       *event);
 gint       gtk_widget_send_expose         (GtkWidget           *widget,
 					   GdkEvent            *event);
+gboolean   gtk_widget_send_focus_change   (GtkWidget           *widget,
+                                           GdkEvent            *event);
 
 gboolean   gtk_widget_activate		     (GtkWidget	       *widget);
 gboolean   gtk_widget_set_scroll_adjustments (GtkWidget        *widget,
@@ -937,7 +955,7 @@ gboolean   gtk_widget_has_grab            (GtkWidget           *widget);
 
 void                  gtk_widget_set_name               (GtkWidget    *widget,
 							 const gchar  *name);
-G_CONST_RETURN gchar* gtk_widget_get_name               (GtkWidget    *widget);
+const gchar*          gtk_widget_get_name               (GtkWidget    *widget);
 
 void                  gtk_widget_set_state              (GtkWidget    *widget,
 							 GtkStateType  state);
@@ -1250,8 +1268,10 @@ void	     gtk_widget_input_shape_combine_mask (GtkWidget *widget,
 						  gint       offset_x,
 						  gint       offset_y);
 
+#if !defined(GTK_DISABLE_DEPRECATED) || defined (GTK_COMPILATION)
 /* internal function */
 void	     gtk_widget_reset_shapes	   (GtkWidget *widget);
+#endif
 
 /* Compute a widget's path in the form "GtkWindow.MyLabel", and
  * return newly alocated strings.
@@ -1293,6 +1313,13 @@ void            gtk_requisition_free     (GtkRequisition       *requisition);
 #  define gtk_widget_ref g_object_ref
 #  define gtk_widget_unref g_object_unref
 #endif	/* GTK_TRACE_OBJECTS && __GNUC__ */
+
+void              _gtk_widget_set_has_default             (GtkWidget    *widget,
+                                                           gboolean      has_default);
+void              _gtk_widget_set_has_grab                (GtkWidget    *widget,
+                                                           gboolean      has_grab);
+void              _gtk_widget_set_is_toplevel             (GtkWidget    *widget,
+                                                           gboolean      is_toplevel);
 
 void              _gtk_widget_grab_notify                 (GtkWidget    *widget,
 						           gboolean	was_grabbed);

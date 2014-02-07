@@ -112,6 +112,7 @@ enum {
   PROP_ENABLE_POPUP,
   PROP_GROUP_ID,
   PROP_GROUP,
+  PROP_GROUP_NAME,
   PROP_HOMOGENEOUS
 };
 
@@ -395,7 +396,7 @@ static void gtk_notebook_calc_tabs           (GtkNotebook      *notebook,
 
 /*** GtkNotebook Page Switch Methods ***/
 static void gtk_notebook_real_switch_page    (GtkNotebook      *notebook,
-					      GtkNotebookPage  *page,
+					      GtkNotebookPage  *child,
 					      guint             page_num);
 
 /*** GtkNotebook Page Switch Functions ***/
@@ -666,7 +667,7 @@ gtk_notebook_class_init (GtkNotebookClass *class)
 						     -1,
 						     G_MAXINT,
 						     -1,
-						     GTK_PARAM_READWRITE));
+						     GTK_PARAM_READWRITE|G_PARAM_DEPRECATED));
 
   /**
    * GtkNotebook:group:
@@ -674,13 +675,30 @@ gtk_notebook_class_init (GtkNotebookClass *class)
    * Group for tabs drag and drop.
    *
    * Since: 2.12
+   *
+   * Deprecated: 2.24: Use #GtkNotebook:group-name instead
    */    
   g_object_class_install_property (gobject_class,
 				   PROP_GROUP,
 				   g_param_spec_pointer ("group",
 							 P_("Group"),
 							 P_("Group for tabs drag and drop"),
-							 GTK_PARAM_READWRITE));
+							 GTK_PARAM_READWRITE|G_PARAM_DEPRECATED));
+
+  /**
+   * GtkNotebook:group-name:
+   *
+   * Group name for tabs drag and drop.
+   *
+   * Since: 2.24
+   */
+  g_object_class_install_property (gobject_class,
+                                   PROP_GROUP_NAME,
+                                   g_param_spec_string ("group-name",
+                                   P_("Group Name"),
+                                   P_("Group name for tabs drag and drop"),
+                                   NULL,
+                                   GTK_PARAM_READWRITE));
 
   gtk_container_class_install_child_property (container_class,
 					      CHILD_PROP_TAB_LABEL,
@@ -982,12 +1000,13 @@ gtk_notebook_class_init (GtkNotebookClass *class)
    * a notebook where the tab will be attached. It is also 
    * responsible for moving/resizing the window and adding the 
    * necessary properties to the notebook (e.g. the 
-   * #GtkNotebook:group-id ).
+   * #GtkNotebook:group ).
    *
    * The default handler uses the global window creation hook,
    * if one has been set with gtk_notebook_set_window_creation_hook().
    *
-   * Returns: a #GtkNotebook that @page should be added to, or %NULL.
+   * Returns: (transfer none): a #GtkNotebook that @page should be
+   *     added to, or %NULL.
    *
    * Since: 2.12
    */
@@ -1485,6 +1504,18 @@ gtk_notebook_destroy (GtkObject *object)
   GtkNotebook *notebook = GTK_NOTEBOOK (object);
   GtkNotebookPrivate *priv = GTK_NOTEBOOK_GET_PRIVATE (notebook);
 
+  if (priv->action_widget[GTK_PACK_START])
+    {
+      gtk_widget_unparent (priv->action_widget[GTK_PACK_START]);
+      priv->action_widget[GTK_PACK_START] = NULL;
+    }
+
+  if (priv->action_widget[GTK_PACK_END])
+    {
+      gtk_widget_unparent (priv->action_widget[GTK_PACK_END]);
+      priv->action_widget[GTK_PACK_END] = NULL;
+    }
+
   if (notebook->menu)
     gtk_notebook_popup_disable (notebook);
 
@@ -1554,6 +1585,9 @@ gtk_notebook_set_property (GObject         *object,
     case PROP_GROUP:
       gtk_notebook_set_group (notebook, g_value_get_pointer (value));
       break;
+    case PROP_GROUP_NAME:
+      gtk_notebook_set_group_name (notebook, g_value_get_string (value));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1606,6 +1640,9 @@ gtk_notebook_get_property (GObject         *object,
       break;
     case PROP_GROUP:
       g_value_set_pointer (value, priv->group);
+      break;
+    case PROP_GROUP_NAME:
+      g_value_set_string (value, gtk_notebook_get_group_name (notebook));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -2303,8 +2340,8 @@ gtk_notebook_expose (GtkWidget      *widget,
       cairo_paint (cr);
       cairo_destroy (cr);
 
-      gdk_drawable_get_size (priv->drag_window,
-			     &area.width, &area.height);
+      area.width = gdk_window_get_width (priv->drag_window);
+      area.height = gdk_window_get_height (priv->drag_window);
       gtk_notebook_draw_tab (notebook,
 			     notebook->cur_page,
 			     &area);
@@ -2590,7 +2627,8 @@ gtk_notebook_scroll (GtkWidget      *widget,
   for (i = 0; i < 2; i++)
     {
       if (event_widget == priv->action_widget[i] ||
-          gtk_widget_is_ancestor (event_widget, priv->action_widget[i]))
+          (priv->action_widget[i] &&
+           gtk_widget_is_ancestor (event_widget, priv->action_widget[i])))
         return FALSE;
     }
 
@@ -2655,7 +2693,7 @@ gtk_notebook_button_press (GtkWidget      *widget,
   if (arrow)
     return gtk_notebook_arrow_button_press (notebook, arrow, event->button);
 
-  if (event->button == 3 && notebook->menu)
+  if (notebook->menu && _gtk_button_event_triggers_context_menu (event))
     {
       gtk_menu_popup (GTK_MENU (notebook->menu), NULL, NULL, 
 		      NULL, NULL, 3, event->time);
@@ -3021,7 +3059,8 @@ get_pointer_position (GtkNotebook *notebook)
     return POINTER_BETWEEN;
 
   gdk_window_get_position (notebook->event_window, &wx, &wy);
-  gdk_drawable_get_size (GDK_DRAWABLE (notebook->event_window), &width, &height);
+  width = gdk_window_get_width (notebook->event_window);
+  height = gdk_window_get_height (notebook->event_window);
 
   if (notebook->tab_pos == GTK_POS_TOP ||
       notebook->tab_pos == GTK_POS_BOTTOM)
@@ -3102,7 +3141,8 @@ check_threshold (GtkNotebook *notebook,
   dnd_threshold *= DND_THRESHOLD_MULTIPLIER;
 
   gdk_window_get_position (notebook->event_window, &rectangle.x, &rectangle.y);
-  gdk_drawable_get_size (GDK_DRAWABLE (notebook->event_window), &rectangle.width, &rectangle.height);
+  rectangle.width = gdk_window_get_width (notebook->event_window);
+  rectangle.height = gdk_window_get_height (notebook->event_window);
 
   rectangle.x -= dnd_threshold;
   rectangle.width += 2 * dnd_threshold;
@@ -6094,12 +6134,14 @@ gtk_notebook_update_tab_states (GtkNotebook *notebook)
  */
 static void
 gtk_notebook_real_switch_page (GtkNotebook     *notebook,
-			       GtkNotebookPage *page,
+			       GtkNotebookPage* child,
 			       guint            page_num)
 {
+  GList *list = gtk_notebook_find_child (notebook, GTK_WIDGET (child), NULL);
+  GtkNotebookPage *page = GTK_NOTEBOOK_PAGE (list);
   gboolean child_has_focus;
 
-  if (notebook->cur_page == page || !gtk_widget_get_visible (page->child))
+  if (notebook->cur_page == page || !gtk_widget_get_visible (GTK_WIDGET (child)))
     return;
 
   /* save the value here, changing visibility changes focus */
@@ -6157,7 +6199,7 @@ gtk_notebook_switch_page (GtkNotebook     *notebook,
   g_signal_emit (notebook,
 		 notebook_signals[SWITCH_PAGE],
 		 0,
-		 page,
+		 page->child,
 		 page_num);
 }
 
@@ -6252,7 +6294,7 @@ gtk_notebook_menu_switch_page (GtkWidget       *widget,
   g_signal_emit (notebook,
 		 notebook_signals[SWITCH_PAGE],
 		 0,
-		 page,
+		 page->child,
 		 page_num);
 }
 
@@ -6828,13 +6870,15 @@ gtk_notebook_prev_page (GtkNotebook *notebook)
 /* Public GtkNotebook/Tab Style Functions
  *
  * gtk_notebook_set_show_border
+ * gtk_notebook_get_show_border
  * gtk_notebook_set_show_tabs
+ * gtk_notebook_get_show_tabs
  * gtk_notebook_set_tab_pos
- * gtk_notebook_set_homogeneous_tabs
- * gtk_notebook_set_tab_border
- * gtk_notebook_set_tab_hborder
- * gtk_notebook_set_tab_vborder
+ * gtk_notebook_get_tab_pos
  * gtk_notebook_set_scrollable
+ * gtk_notebook_get_scrollable
+ * gtk_notebook_get_tab_hborder
+ * gtk_notebook_get_tab_vborder
  */
 /**
  * gtk_notebook_set_show_border:
@@ -7110,6 +7154,43 @@ gtk_notebook_get_scrollable (GtkNotebook *notebook)
   return notebook->scrollable;
 }
 
+/**
+ * gtk_notebook_get_tab_hborder:
+ * @notebook: a #GtkNotebook
+ *
+ * Returns the horizontal width of a tab border.
+ *
+ * Return value: horizontal width of a tab border
+ *
+ * Since: 2.22
+ */
+guint16
+gtk_notebook_get_tab_hborder (GtkNotebook *notebook)
+{
+  g_return_val_if_fail (GTK_IS_NOTEBOOK (notebook), FALSE);
+
+  return notebook->tab_hborder;
+}
+
+/**
+ * gtk_notebook_get_tab_vborder:
+ * @notebook: a #GtkNotebook
+ *
+ * Returns the vertical width of a tab border.
+ *
+ * Return value: vertical width of a tab border
+ *
+ * Since: 2.22
+ */
+guint16
+gtk_notebook_get_tab_vborder (GtkNotebook *notebook)
+{
+  g_return_val_if_fail (GTK_IS_NOTEBOOK (notebook), FALSE);
+
+  return notebook->tab_vborder;
+}
+
+
 /* Public GtkNotebook Popup Menu Methods:
  *
  * gtk_notebook_popup_enable
@@ -7327,7 +7408,7 @@ gtk_notebook_set_tab_label_text (GtkNotebook *notebook,
  *               string is owned by the widget and must not
  *               be freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_notebook_get_tab_label_text (GtkNotebook *notebook,
 				 GtkWidget   *child)
 {
@@ -7348,12 +7429,12 @@ gtk_notebook_get_tab_label_text (GtkNotebook *notebook,
  * gtk_notebook_get_menu_label:
  * @notebook: a #GtkNotebook
  * @child: a widget contained in a page of @notebook
- * 
+ *
  * Retrieves the menu label widget of the page containing @child.
- * 
- * Return value: the menu label, or %NULL if the
- *               notebook page does not have a menu label other
- *               than the default (the tab label).
+ *
+ * Return value: (transfer none): the menu label, or %NULL if the
+ *     notebook page does not have a menu label other than the
+ *     default (the tab label).
  **/
 GtkWidget*
 gtk_notebook_get_menu_label (GtkNotebook *notebook,
@@ -7365,14 +7446,14 @@ gtk_notebook_get_menu_label (GtkNotebook *notebook,
   g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
   list = CHECK_FIND_CHILD (notebook, child);
-  if (!list)  
+  if (!list)
     return NULL;
 
   if (GTK_NOTEBOOK_PAGE (list)->default_menu)
     return NULL;
 
   return GTK_NOTEBOOK_PAGE (list)->menu_label;
-}  
+}
 
 /**
  * gtk_notebook_set_menu_label:
@@ -7462,7 +7543,7 @@ gtk_notebook_set_menu_label_text (GtkNotebook *notebook,
  *               is not a #GtkLabel. The string is owned by
  *               the widget and must not be freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_notebook_get_menu_label_text (GtkNotebook *notebook,
 				  GtkWidget *child)
 {
@@ -7670,9 +7751,11 @@ gtk_notebook_reorder_child (GtkNotebook *notebook,
  *
  * Installs a global function used to create a window
  * when a detached tab is dropped in an empty area.
- * 
+ *
  * Since: 2.10
- **/
+ *
+ * Deprecated: 2.24: Use the #GtkNotebook::create-window signal instead
+**/
 void
 gtk_notebook_set_window_creation_hook (GtkNotebookWindowCreationFunc  func,
 				       gpointer                       data,
@@ -7697,7 +7780,7 @@ gtk_notebook_set_window_creation_hook (GtkNotebookWindowCreationFunc  func,
  * not be able to exchange tabs with any other notebook.
  * 
  * Since: 2.10
- * Deprecated: 2.12: use gtk_notebook_set_group() instead.
+ * Deprecated: 2.12: use gtk_notebook_set_group_name() instead.
  */
 void
 gtk_notebook_set_group_id (GtkNotebook *notebook,
@@ -7721,8 +7804,10 @@ gtk_notebook_set_group_id (GtkNotebook *notebook,
  * the same group identificator pointer will be able to exchange tabs
  * via drag and drop. A notebook with a %NULL group identificator will
  * not be able to exchange tabs with any other notebook.
- * 
+ *
  * Since: 2.12
+ *
+ * Deprecated: 2.24: Use gtk_notebook_set_group_name() instead
  */
 void
 gtk_notebook_set_group (GtkNotebook *notebook,
@@ -7737,9 +7822,34 @@ gtk_notebook_set_group (GtkNotebook *notebook,
   if (priv->group != group)
     {
       priv->group = group;
-      g_object_notify (G_OBJECT (notebook), "group-id");
       g_object_notify (G_OBJECT (notebook), "group");
     }
+}
+
+/**
+ * gtk_notebook_set_group_name:
+ * @notebook: a #GtkNotebook
+ * @name: (allow-none): the name of the notebook group, or %NULL to unset it
+ *
+ * Sets a group name for @notebook.
+ *
+ * Notebooks with the same name will be able to exchange tabs
+ * via drag and drop. A notebook with a %NULL group name will
+ * not be able to exchange tabs with any other notebook.
+ *
+ * Since: 2.24
+ */
+void
+gtk_notebook_set_group_name (GtkNotebook *notebook,
+                             const gchar *group_name)
+{
+  gpointer group;
+
+  g_return_if_fail (GTK_IS_NOTEBOOK (notebook));
+
+  group = (gpointer)g_intern_string (group_name);
+  gtk_notebook_set_group (notebook, group);
+  g_object_notify (G_OBJECT (notebook), "group-name");
 }
 
 /**
@@ -7751,7 +7861,7 @@ gtk_notebook_set_group (GtkNotebook *notebook,
  * Return Value: the group identificator, or -1 if none is set.
  *
  * Since: 2.10
- * Deprecated: 2.12: use gtk_notebook_get_group() instead.
+ * Deprecated: 2.12: use gtk_notebook_get_group_name() instead.
  */
 gint
 gtk_notebook_get_group_id (GtkNotebook *notebook)
@@ -7766,15 +7876,19 @@ gtk_notebook_get_group_id (GtkNotebook *notebook)
   return GPOINTER_TO_INT (priv->group) - 1;
 }
 
+
 /**
  * gtk_notebook_get_group:
  * @notebook: a #GtkNotebook
- * 
+ *
  * Gets the current group identificator pointer for @notebook.
- * 
- * Return Value: the group identificator, or %NULL if none is set.
+ *
+ * Return Value: (transfer none): the group identificator,
+ *     or %NULL if none is set.
  *
  * Since: 2.12
+ *
+ * Deprecated: 2.24: Use gtk_notebook_get_group_name() instead
  **/
 gpointer
 gtk_notebook_get_group (GtkNotebook *notebook)
@@ -7785,6 +7899,31 @@ gtk_notebook_get_group (GtkNotebook *notebook)
 
   priv = GTK_NOTEBOOK_GET_PRIVATE (notebook);
   return priv->group;
+}
+
+/**
+ * gtk_notebook_get_group_name:
+ * @notebook: a #GtkNotebook
+ *
+ * Gets the current group name for @notebook.
+ *
+ * Note that this funtion can emphasis not be used
+ * together with gtk_notebook_set_group() or
+ * gtk_notebook_set_group_id().
+ *
+ Return Value: (transfer none): the group name,
+ *     or %NULL if none is set.
+ *
+ * Since: 2.24
+ */
+const gchar *
+gtk_notebook_get_group_name (GtkNotebook *notebook)
+{
+  GtkNotebookPrivate *priv;
+  g_return_val_if_fail (GTK_IS_NOTEBOOK (notebook), NULL);
+
+  priv = GTK_NOTEBOOK_GET_PRIVATE (notebook);
+  return (const gchar *)priv->group;
 }
 
 /**
@@ -7946,8 +8085,8 @@ gtk_notebook_set_tab_detachable (GtkNotebook *notebook,
  *
  * Gets one of the action widgets. See gtk_notebook_set_action_widget().
  *
- * Returns: The action widget with the given @pack_type or
- *     %NULL when this action widget has not been set
+ * Returns: (transfer none): The action widget with the given @pack_type
+ *     or %NULL when this action widget has not been set
  *
  * Since: 2.20
  */

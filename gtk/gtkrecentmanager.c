@@ -42,7 +42,7 @@
 #include "gtkalias.h"
 
 /* the file where we store the recently used items */
-#define GTK_RECENTLY_USED_FILE	".recently-used.xbel"
+#define GTK_RECENTLY_USED_FILE	"recently-used.xbel"
 
 /* return all items by default */
 #define DEFAULT_LIMIT	-1
@@ -222,6 +222,11 @@ gtk_recent_manager_class_init (GtkRecentManagerClass *klass)
    * gtk_recent_manager_get_items() function.
    *
    * Since: 2.10
+   *
+   * Deprecated: 2.22: Setting this property does not have any effect.
+   *   The length of the list should be managed by the view (implementing
+   *   #GtkRecentChooser), and not by the model (the #GtkRecentManager).
+   *   See #GtkRecentChooser:limit.
    */
   g_object_class_install_property (gobject_class,
   				   PROP_LIMIT,
@@ -231,7 +236,7 @@ gtk_recent_manager_class_init (GtkRecentManagerClass *klass)
   				   		     -1,
   				   		     G_MAXINT,
   				   		     DEFAULT_LIMIT,
-  				   		     G_PARAM_READWRITE));
+                                                     G_PARAM_READWRITE | G_PARAM_DEPRECATED));
   /**
    * GtkRecentManager:size
    * 
@@ -452,7 +457,9 @@ gtk_recent_manager_monitor_changed (GFileMonitor      *monitor,
     {
     case G_FILE_MONITOR_EVENT_CHANGED:
     case G_FILE_MONITOR_EVENT_CREATED:
+      gdk_threads_enter ();
       gtk_recent_manager_changed (manager);
+      gdk_threads_leave ();
       break;
 
     case G_FILE_MONITOR_EVENT_DELETED:
@@ -461,6 +468,139 @@ gtk_recent_manager_monitor_changed (GFileMonitor      *monitor,
     default:
       break;
     }
+}
+
+/*
+ * get_default_recent_file:
+ *
+ * Retrieves the default storage file
+ *
+ * The default file is under XDG_DATA_HOME/recently-used.xbel but we also
+ * check if the old $HOME/.recently-used.xbel is still there, and rename it
+ * if needed.
+ *
+ * Return value: a newly allocated string with the new file
+ */
+static char *
+get_default_recent_file (void)
+{
+  char *old_file = g_build_filename (g_get_home_dir (),
+                                     "." GTK_RECENTLY_USED_FILE,
+                                     NULL);
+  char *new_file = g_build_filename (g_get_user_data_dir (),
+                                     GTK_RECENTLY_USED_FILE,
+                                     NULL);
+  GBookmarkFile *bf_old = NULL, *bf_new = NULL;
+  char **uris;
+  gsize n_uris, i;
+
+  /* simple case: the old file does not exist, so we just use the new one */
+  if (!g_file_test (old_file, G_FILE_TEST_EXISTS))
+    {
+      g_free (old_file);
+      return new_file;
+    }
+
+  /* less simple case: the old file still exists but the new one doesn't,
+   * so we rename the old one to the new one
+   */
+  if (!g_file_test (new_file, G_FILE_TEST_EXISTS))
+    {
+      if (g_rename (old_file, new_file) == -1)
+        filename_warning ("Unable to rename '%s': %s",
+                          old_file,
+                          g_strerror (errno));
+
+      g_free (old_file);
+      return new_file;
+    }
+
+  /* complex case: both the old file and the new file exist, so we do
+   * a preliminary parse pass and merge the contents, then remove the
+   * old file
+   */
+  bf_old = g_bookmark_file_new ();
+  if (!g_bookmark_file_load_from_file (bf_old, old_file, NULL))
+    goto unlink_and_return;
+
+  bf_new = g_bookmark_file_new ();
+  if (!g_bookmark_file_load_from_file (bf_new, new_file, NULL))
+    goto unlink_and_return;
+
+  uris = g_bookmark_file_get_uris (bf_old, &n_uris);
+  for (i = 0; i < n_uris; i++)
+    {
+      char *mime, *title, *description;
+      gboolean is_private;
+      char **apps;
+      gsize n_apps, j;
+
+      /* the new file always wins */
+      if (g_bookmark_file_has_item (bf_new, uris[i]))
+        continue;
+
+      mime = g_bookmark_file_get_mime_type (bf_old, uris[i], NULL);
+      title = g_bookmark_file_get_title (bf_old, uris[i], NULL);
+      description = g_bookmark_file_get_description (bf_old, uris[i], NULL);
+      is_private = g_bookmark_file_get_is_private (bf_old, uris[i], NULL);
+
+      g_bookmark_file_set_mime_type (bf_new, uris[i], mime);
+
+      if (title != NULL)
+        g_bookmark_file_set_title (bf_new, uris[i], title);
+
+      if (description != NULL)
+        g_bookmark_file_set_description (bf_new, uris[i], description);
+
+      g_free (mime);
+      g_free (title);
+      g_free (description);
+
+      g_bookmark_file_set_is_private (bf_new, uris[i], is_private);
+
+      apps = g_bookmark_file_get_applications (bf_old, uris[i], &n_apps, NULL);
+      for (j = 0; j < n_apps; j++)
+        {
+          char *exec;
+          guint count;
+          time_t stamp;
+
+          g_bookmark_file_get_app_info (bf_old, uris[i], apps[j],
+                                        &exec,
+                                        &count,
+                                        &stamp,
+                                        NULL);
+
+          g_bookmark_file_set_app_info (bf_new, uris[i], apps[j],
+                                        exec,
+                                        count,
+                                        stamp,
+                                        NULL);
+
+          g_free (exec);
+        }
+
+      g_strfreev (apps);
+    }
+
+  g_strfreev (uris);
+
+  /* we don't particularly care about errors here; if it fails then
+   * we start with a blank slate anyhow
+   */
+  g_bookmark_file_to_file (bf_new, new_file, NULL);
+
+unlink_and_return:
+  if (bf_old != NULL)
+    g_bookmark_file_free (bf_old);
+
+  if (bf_new != NULL)
+    g_bookmark_file_free (bf_new);
+
+  g_unlink (old_file);
+  g_free (old_file);
+
+  return new_file;
 }
 
 static void
@@ -503,9 +643,7 @@ gtk_recent_manager_set_filename (GtkRecentManager *manager,
   else
     {
       if (!filename || *filename == '\0')
-        priv->filename = g_build_filename (g_get_home_dir (),
-                                           GTK_RECENTLY_USED_FILE,
-                                           NULL);
+        priv->filename = get_default_recent_file ();
       else
         priv->filename = g_strdup (filename);
     }
@@ -702,6 +840,10 @@ gtk_recent_manager_set_screen (GtkRecentManager *manager,
  * items.
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.22: The length of the list should be managed by the
+ *   view (implementing #GtkRecentChooser), and not by the model (the
+ *   #GtkRecentManager). See #GtkRecentChooser:limit.
  */
 void
 gtk_recent_manager_set_limit (GtkRecentManager *manager,
@@ -725,6 +867,10 @@ gtk_recent_manager_set_limit (GtkRecentManager *manager,
  * Return value: the number of items to return, or -1 for every item.
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.22: The length of the list should be managed by the
+ *   view (implementing #GtkRecentChooser), and not by the model (the
+ *   #GtkRecentManager). See #GtkRecentChooser:limit.
  */
 gint
 gtk_recent_manager_get_limit (GtkRecentManager *manager)
@@ -747,20 +893,10 @@ gtk_recent_manager_add_item_query_info (GObject      *source_object,
   GtkRecentData recent_data;
   GFileInfo *file_info;
   gchar *uri;
-  GError *error;
 
   uri = g_file_get_uri (file);
 
-  error = NULL;
-  file_info = g_file_query_info_finish (file, res, &error);
-  if (error)
-    {
-      g_warning ("Unable to retrieve the file info for `%s': %s",
-                 uri,
-                 error->message);
-      g_error_free (error);
-      goto out;
-    }
+  file_info = g_file_query_info_finish (file, res, NULL); /* NULL-GError */
 
   recent_data.display_name = NULL;
   recent_data.description = NULL;
@@ -780,12 +916,14 @@ gtk_recent_manager_add_item_query_info (GObject      *source_object,
       g_object_unref (file_info);
     }
   else
-    recent_data.mime_type = g_strdup (GTK_RECENT_DEFAULT_MIME);
+    recent_data.mime_type = g_strdup (GTK_RECENT_DEFAULT_MIME); /* FIXME: maybe we should make up the MIME type from the filename's extension */
 
   recent_data.app_name = g_strdup (g_get_application_name ());
   recent_data.app_exec = g_strjoin (" ", g_get_prgname (), "%u", NULL);
   recent_data.groups = NULL;
   recent_data.is_private = FALSE;
+
+  gdk_threads_enter ();
 
   /* Ignore return value, this can't fail anyway since all required
    * fields are set */
@@ -794,11 +932,12 @@ gtk_recent_manager_add_item_query_info (GObject      *source_object,
   manager->priv->is_dirty = TRUE;
   gtk_recent_manager_changed (manager);
 
+  gdk_threads_leave ();
+
   g_free (recent_data.mime_type);
   g_free (recent_data.app_name);
   g_free (recent_data.app_exec);
 
-out:
   g_object_unref (manager);
   g_free (uri);
 }
@@ -1294,16 +1433,10 @@ gtk_recent_manager_get_items (GtkRecentManager *manager)
   if (!priv->recent_items)
     return NULL;
 
-  if (priv->limit == 0)
-    return NULL;
-  
   uris = g_bookmark_file_get_uris (priv->recent_items, &uris_len);
   for (i = 0; i < uris_len; i++)
     {
       GtkRecentInfo *info;
-      
-      if (priv->limit != -1 && i == priv->limit)
-        break;
       
       info = gtk_recent_info_new (uris[i]);
       build_recent_info (priv->recent_items, info);
@@ -1539,7 +1672,7 @@ gtk_recent_info_unref (GtkRecentInfo *info)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_recent_info_get_uri (GtkRecentInfo *info)
 {
   g_return_val_if_fail (info != NULL, NULL);
@@ -1559,7 +1692,7 @@ gtk_recent_info_get_uri (GtkRecentInfo *info)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_recent_info_get_display_name (GtkRecentInfo *info)
 {
   g_return_val_if_fail (info != NULL, NULL);
@@ -1581,7 +1714,7 @@ gtk_recent_info_get_display_name (GtkRecentInfo *info)
  *
  * Since: 2.10
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_recent_info_get_description (GtkRecentInfo *info)
 {
   g_return_val_if_fail (info != NULL, NULL);
@@ -1600,7 +1733,7 @@ gtk_recent_info_get_description (GtkRecentInfo *info)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_recent_info_get_mime_type (GtkRecentInfo *info)
 {
   g_return_val_if_fail (info != NULL, NULL);
@@ -1784,8 +1917,9 @@ gtk_recent_info_get_application_info (GtkRecentInfo  *info,
  *
  * Retrieves the list of applications that have registered this resource.
  *
- * Return value: (array length=length zero-terminated=1): a newly allocated
- *  %NULL-terminated array of strings. Use g_strfreev() to free it.
+ * Return value: (array length=length zero-terminated=1) (transfer full):
+ *     a newly allocated %NULL-terminated array of strings.
+ *     Use g_strfreev() to free it.
  *
  * Since: 2.10
  */
@@ -1944,8 +2078,8 @@ get_icon_fallback (const gchar *icon_name,
  *
  * Retrieves the icon of size @size associated to the resource MIME type.
  *
- * Return value: a #GdkPixbuf containing the icon, or %NULL. Use
- *   g_object_unref() when finished using the icon.
+ * Return value: (transfer full): a #GdkPixbuf containing the icon,
+ *     or %NULL. Use g_object_unref() when finished using the icon.
  *
  * Since: 2.10
  */
@@ -1965,9 +2099,9 @@ gtk_recent_info_get_icon (GtkRecentInfo *info,
     {
       if (info->mime_type &&
           strcmp (info->mime_type, "x-directory/normal") == 0)
-        retval = get_icon_fallback (GTK_STOCK_DIRECTORY, size);
+        retval = get_icon_fallback ("folder", size);
       else
-        retval = get_icon_fallback (GTK_STOCK_FILE, size);
+        retval = get_icon_fallback ("text-x-generic", size);
     }
   
   return retval;
@@ -2281,8 +2415,9 @@ gtk_recent_info_get_age (GtkRecentInfo *info)
  * array of returned group names will be %NULL terminated, so length might
  * optionally be %NULL.
  *
- * Return value:  (array length=length zero-terminated=1): a newly allocated
- * %NULL terminated array of strings.  Use g_strfreev() to free it.
+ * Return value:  (array length=length zero-terminated=1) (transfer full):
+ *     a newly allocated %NULL terminated array of strings.
+ *     Use g_strfreev() to free it.
  *
  * Since: 2.10
  */

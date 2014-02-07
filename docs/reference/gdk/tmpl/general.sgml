@@ -100,6 +100,7 @@ locale.
 
 @void: 
 @Returns: the resulting locale.
+@Deprecated: 2.24: Use setlocale() directly
 
 
 <!-- ##### FUNCTION gdk_set_sm_client_id ##### -->
@@ -405,7 +406,7 @@ Removes the X error trap installed with gdk_error_trap_push().
 
 <!-- ##### MACRO GDK_WINDOWING_X11 ##### -->
 <para>
-This macro is defined if GDK is configured to use the X backend.
+This macro is defined if GDK is configured to use the X11 backend.
 </para>
 
 

@@ -54,13 +54,19 @@ typedef enum
 
 typedef struct _GtkNotebook       GtkNotebook;
 typedef struct _GtkNotebookClass  GtkNotebookClass;
+#if !defined (GTK_DISABLE_DEPRECATED) || defined (GTK_COMPILATION)
 typedef struct _GtkNotebookPage   GtkNotebookPage;
+#endif
 
 struct _GtkNotebook
 {
   GtkContainer container;
   
+#if !defined (GTK_DISABLE_DEPRECATED) || defined (GTK_COMPILATION)
   GtkNotebookPage *GSEAL (cur_page);
+#else
+  gpointer GSEAL (cur_page);
+#endif
   GList *GSEAL (children);
   GList *GSEAL (first_tab);		/* The first tab visible (for scrolling notebooks) */
   GList *GSEAL (focus_tab);
@@ -97,7 +103,11 @@ struct _GtkNotebookClass
   GtkContainerClass parent_class;
 
   void (* switch_page)       (GtkNotebook     *notebook,
+#if !defined (GTK_DISABLE_DEPRECATED) || defined (GTK_COMPILATION)
                               GtkNotebookPage *page,
+#else
+                              gpointer         page,
+#endif
 			      guint            page_num);
 
   /* Action signals for keybindings */
@@ -170,20 +180,22 @@ void gtk_notebook_remove_page       (GtkNotebook *notebook,
  *           Tabs drag and drop                            *
  ***********************************************************/
 
+#ifndef GTK_DISABLE_DEPRECATED
 void gtk_notebook_set_window_creation_hook (GtkNotebookWindowCreationFunc  func,
 					    gpointer                       data,
                                             GDestroyNotify                 destroy);
-#ifndef GTK_DISABLE_DEPRECATED
 void gtk_notebook_set_group_id             (GtkNotebook *notebook,
 					    gint         group_id);
 gint gtk_notebook_get_group_id             (GtkNotebook *notebook);
 
-#endif /* GTK_DISABLE_DEPRECATED */
-
 void gtk_notebook_set_group                (GtkNotebook *notebook,
 					    gpointer     group);
 gpointer gtk_notebook_get_group            (GtkNotebook *notebook);
+#endif /* GTK_DISABLE_DEPRECATED */
 
+void         gtk_notebook_set_group_name   (GtkNotebook *notebook,
+                                            const gchar *group_name);
+const gchar *gtk_notebook_get_group_name   (GtkNotebook *notebook);
 
 
 /***********************************************************
@@ -229,6 +241,8 @@ void     gtk_notebook_set_tab_vborder      (GtkNotebook     *notebook,
 void     gtk_notebook_set_scrollable       (GtkNotebook     *notebook,
 					    gboolean         scrollable);
 gboolean gtk_notebook_get_scrollable       (GtkNotebook     *notebook);
+guint16  gtk_notebook_get_tab_hborder      (GtkNotebook     *notebook);
+guint16  gtk_notebook_get_tab_vborder      (GtkNotebook     *notebook);
 
 /***********************************************************
  *               enable/disable PopupMenu                  *
@@ -249,8 +263,8 @@ void gtk_notebook_set_tab_label           (GtkNotebook *notebook,
 void gtk_notebook_set_tab_label_text      (GtkNotebook *notebook,
 					   GtkWidget   *child,
 					   const gchar *tab_text);
-G_CONST_RETURN gchar *gtk_notebook_get_tab_label_text (GtkNotebook *notebook,
-						       GtkWidget   *child);
+const gchar *gtk_notebook_get_tab_label_text (GtkNotebook *notebook,
+                                              GtkWidget   *child);
 GtkWidget * gtk_notebook_get_menu_label   (GtkNotebook *notebook,
 					   GtkWidget   *child);
 void gtk_notebook_set_menu_label          (GtkNotebook *notebook,
@@ -259,8 +273,8 @@ void gtk_notebook_set_menu_label          (GtkNotebook *notebook,
 void gtk_notebook_set_menu_label_text     (GtkNotebook *notebook,
 					   GtkWidget   *child,
 					   const gchar *menu_text);
-G_CONST_RETURN gchar *gtk_notebook_get_menu_label_text (GtkNotebook *notebook,
-							GtkWidget   *child);
+const gchar *gtk_notebook_get_menu_label_text (GtkNotebook *notebook,
+                                               GtkWidget   *child);
 #ifndef GTK_DISABLE_DEPRECATED
 void gtk_notebook_query_tab_label_packing (GtkNotebook *notebook,
 					   GtkWidget   *child,

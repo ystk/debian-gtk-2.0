@@ -878,7 +878,7 @@ add_pid_to_process_list_store (GtkMountOperation              *mount_operation,
                                     &pixbuf);
 
   if (name == NULL)
-    name = g_strdup_printf (_("Unknown Application (pid %d)"), pid);
+    name = g_strdup_printf (_("Unknown Application (PID %d)"), pid);
 
   if (command_line == NULL)
     command_line = g_strdup ("");
@@ -1171,8 +1171,7 @@ on_button_press_event_for_process_tree_view (GtkWidget      *widget,
 
   ret = FALSE;
 
-  /* Ignore double-clicks and triple-clicks */
-  if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
+  if (_gtk_button_event_triggers_context_menu (event))
     {
       ret = do_popup_menu_for_process_tree_view (widget, event, op);
     }
@@ -1450,7 +1449,7 @@ gtk_mount_operation_set_parent (GtkMountOperation *op,
  *
  * Gets the transient parent used by the #GtkMountOperation
  *
- * Returns: the transient parent for windows shown by @op
+ * Returns: (transfer none): the transient parent for windows shown by @op
  *
  * Since: 2.14
  */
@@ -1500,10 +1499,10 @@ gtk_mount_operation_set_screen (GtkMountOperation *op,
  * gtk_mount_operation_get_screen:
  * @op: a #GtkMountOperation
  *
- * Gets the screen on which windows of the #GtkMountOperation 
+ * Gets the screen on which windows of the #GtkMountOperation
  * will be shown.
  *
- * Returns: the screen on which windows of @op are shown
+ * Returns: (transfer none): the screen on which windows of @op are shown
  *
  * Since: 2.14
  */

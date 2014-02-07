@@ -739,7 +739,7 @@ gtk_file_system_model_sort (GtkFileSystemModel *model)
                   continue;
                 }
 
-              new_order[r] = node->row;
+              new_order[r] = node->row - 1;
               r++;
               node->row = r;
             }
@@ -1150,7 +1150,9 @@ gtk_file_system_model_query_done (GObject *     object,
   if (info == NULL)
     return;
 
+  gdk_threads_enter ();
   _gtk_file_system_model_update_file (model, file, info, TRUE);
+  gdk_threads_leave ();
 }
 
 static void
@@ -1175,7 +1177,9 @@ gtk_file_system_model_monitor_change (GFileMonitor *      monitor,
                                  model);
         break;
       case G_FILE_MONITOR_EVENT_DELETED:
+	gdk_threads_enter ();
         remove_file (model, file);
+	gdk_threads_leave ();
         break;
       case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
         /* FIXME: use freeze/thaw with this somehow? */
@@ -1778,7 +1782,10 @@ _gtk_file_system_model_update_file (GtkFileSystemModel *model,
 
   id = node_get_for_file (model, file);
   if (id == 0)
-    add_file (model, file, info);
+    {
+      add_file (model, file, info);
+      id = node_get_for_file (model, file);
+    }
 
   node = get_node (model, id);
 

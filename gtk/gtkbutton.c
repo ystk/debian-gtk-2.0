@@ -1844,7 +1844,7 @@ gtk_button_set_label (GtkButton   *button,
  * Return value: The text of the label widget. This string is owned
  * by the widget and must not be modified or freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_button_get_label (GtkButton *button)
 {
   g_return_val_if_fail (GTK_IS_BUTTON (button), NULL);
@@ -2027,8 +2027,8 @@ gtk_button_set_alignment (GtkButton *button,
 /**
  * gtk_button_get_alignment:
  * @button: a #GtkButton
- * @xalign: return location for horizontal alignment
- * @yalign: return location for vertical alignment
+ * @xalign: (out): return location for horizontal alignment
+ * @yalign: (out): return location for vertical alignment
  *
  * Gets the alignment of the child in the button.
  *
@@ -2250,7 +2250,7 @@ gtk_button_set_image (GtkButton *button,
  * This may have been explicitly set by gtk_button_set_image()
  * or constructed by gtk_button_new_from_stock().
  *
- * Return value: a #GtkWidget or %NULL in case there is no image
+ * Return value: (transfer none): a #GtkWidget or %NULL in case there is no image
  *
  * Since: 2.6
  */
@@ -2321,6 +2321,25 @@ gtk_button_get_image_position (GtkButton *button)
   return priv->image_position;
 }
 
+
+/**
+ * gtk_button_get_event_window:
+ * @button: a #GtkButton
+ *
+ * Returns the button's event window if it is realized, %NULL otherwise.
+ * This function should be rarely needed.
+ *
+ * Return value: (transfer none): @button's event window.
+ *
+ * Since: 2.22
+ */
+GdkWindow*
+gtk_button_get_event_window (GtkButton *button)
+{
+  g_return_val_if_fail (GTK_IS_BUTTON (button), NULL);
+
+  return button->event_window;
+}
 
 #define __GTK_BUTTON_C__
 #include "gtkaliasdef.c"  

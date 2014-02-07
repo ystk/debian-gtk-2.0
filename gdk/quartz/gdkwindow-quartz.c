@@ -252,17 +252,20 @@ gdk_window_impl_quartz_begin_paint_region (GdkPaintable    *paintable,
 
   gdk_region_get_rectangles (clipped_and_offset_region, &rects, &n_rects);
 
+  if (n_rects == 0)
+    goto done;
+
   if (bg_pixmap == NULL)
     {
       CGContextRef cg_context;
-      CGFloat r, g, b, a;
+      CGColorRef color;
       gint i;
 
       cg_context = gdk_quartz_drawable_get_context (GDK_DRAWABLE (impl), FALSE);
-      _gdk_quartz_colormap_get_rgba_from_pixel (gdk_drawable_get_colormap (window),
-                                                private->bg_color.pixel,
-                                                &r, &g, &b, &a);
-      CGContextSetRGBFillColor (cg_context, r, g, b, a);
+      color = _gdk_quartz_colormap_get_cgcolor_from_pixel (window,
+                                                           private->bg_color.pixel);
+      CGContextSetFillColorWithColor (cg_context, color);
+      CGColorRelease (color);
  
       for (i = 0; i < n_rects; i++)
         {
@@ -383,8 +386,8 @@ _gdk_windowing_window_process_updates_recurse (GdkWindow *window,
     {
       GdkWindow *toplevel;
 
-      toplevel = gdk_window_get_toplevel (window);
-      if (toplevel)
+      toplevel = gdk_window_get_effective_toplevel (window);
+      if (toplevel && WINDOW_IS_TOPLEVEL (toplevel))
         {
           GdkWindowObject *toplevel_private;
           GdkWindowImplQuartz *toplevel_impl;
@@ -406,12 +409,17 @@ _gdk_windowing_window_process_updates_recurse (GdkWindow *window,
         }
     }
 
-  gdk_region_get_rectangles (region, &rects, &n_rects);
+  if (WINDOW_IS_TOPLEVEL (window))
+    {
+      gdk_region_get_rectangles (region, &rects, &n_rects);
 
-  for (i = 0; i < n_rects; i++)
-    _gdk_quartz_window_set_needs_display_in_rect (window, &rects[i]);
+      for (i = 0; i < n_rects; i++)
+        _gdk_quartz_window_set_needs_display_in_rect (window, &rects[i]);
 
-  g_free (rects);
+      g_free (rects);
+    }
+  else
+    _gdk_window_process_updates_recurse (window, region);
 
   /* NOTE: I'm not sure if we should displayIfNeeded here. It slows down a
    * lot (since it triggers the beam syncing) and things seem to work
@@ -580,7 +588,7 @@ _gdk_quartz_window_debug_highlight (GdkWindow *window, gint number)
       return;
     }
 
-  toplevel = gdk_window_get_toplevel (window);
+  toplevel = gdk_window_get_effective_toplevel (window);
   get_ancestor_coordinates_from_child (window, 0, 0, toplevel, &x, &y);
 
   gdk_window_get_origin (toplevel, &tx, &ty);
@@ -813,7 +821,7 @@ _gdk_quartz_window_did_resign_main (GdkWindow *window)
   if (new_window &&
       new_window != window &&
       GDK_WINDOW_IS_MAPPED (new_window) &&
-      GDK_WINDOW_OBJECT (new_window)->window_type != GDK_WINDOW_TEMP)
+      WINDOW_IS_TOPLEVEL (new_window))
     {
       GdkWindowObject *private = (GdkWindowObject *) new_window;
       GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
@@ -1177,7 +1185,7 @@ gdk_window_quartz_show (GdkWindow *window, gboolean already_mapped)
   else
     focus_on_map = TRUE;
 
-  if (impl->toplevel)
+  if (impl->toplevel && WINDOW_IS_TOPLEVEL (window))
     {
       gboolean make_key;
 
@@ -1272,7 +1280,7 @@ gdk_window_quartz_hide (GdkWindow *window)
 
   impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
 
-  if (impl->toplevel) 
+  if (window && WINDOW_IS_TOPLEVEL (window))
     {
      /* Update main window. */
       main_window_stack = g_slist_remove (main_window_stack, window);
@@ -1679,7 +1687,18 @@ gdk_window_quartz_restack_toplevel (GdkWindow *window,
 				    GdkWindow *sibling,
 				    gboolean   above)
 {
-  /* FIXME: Implement this */
+  GdkWindowImplQuartz *impl;
+  gint sibling_num;
+
+  impl = GDK_WINDOW_IMPL_QUARTZ (((GdkWindowObject *)sibling)->impl);
+  sibling_num = [impl->toplevel windowNumber];
+
+  impl = GDK_WINDOW_IMPL_QUARTZ (((GdkWindowObject *)window)->impl);
+
+  if (above)
+    [impl->toplevel orderWindow:NSWindowAbove relativeTo:sibling_num];
+  else
+    [impl->toplevel orderWindow:NSWindowBelow relativeTo:sibling_num];
 }
 
 static void
@@ -1914,7 +1933,7 @@ gdk_window_quartz_get_pointer_helper (GdkWindow       *window,
       return NULL;
     }
   
-  toplevel = GDK_WINDOW_OBJECT (gdk_window_get_toplevel (window));
+  toplevel = GDK_WINDOW_OBJECT (gdk_window_get_effective_toplevel (window));
 
   *mask = _gdk_quartz_events_get_current_event_mask ();
 
@@ -2571,7 +2590,7 @@ gdk_window_get_frame_extents (GdkWindow    *window,
   rect->width = 1;
   rect->height = 1;
   
-  toplevel = gdk_window_get_toplevel (window);
+  toplevel = gdk_window_get_effective_toplevel (window);
   impl = GDK_WINDOW_IMPL_QUARTZ (GDK_WINDOW_OBJECT (toplevel)->impl);
 
   ns_rect = [impl->toplevel frame];
@@ -2583,6 +2602,14 @@ gdk_window_get_frame_extents (GdkWindow    *window,
   rect->width = ns_rect.size.width;
   rect->height = ns_rect.size.height;
 }
+
+/* Fake protocol to make gcc think that it's OK to call setStyleMask
+   even if it isn't. We check to make sure before actually calling
+   it. */
+
+@protocol CanSetStyleMask
+- (void)setStyleMask:(int)mask;
+@end
 
 void
 gdk_window_set_decorations (GdkWindow       *window,
@@ -2614,10 +2641,6 @@ gdk_window_set_decorations (GdkWindow       *window,
 
   old_mask = [impl->toplevel styleMask];
 
-  /* Note, there doesn't seem to be a way to change this without
-   * recreating the toplevel. There might be bad side-effects of doing
-   * that, but it seems alright.
-   */
   if (old_mask != new_mask)
     {
       NSRect rect;
@@ -2641,15 +2664,26 @@ gdk_window_set_decorations (GdkWindow       *window,
           rect = [NSWindow contentRectForFrameRect:rect styleMask:old_mask];
         }
 
-      impl->toplevel = [impl->toplevel initWithContentRect:rect
-                                                 styleMask:new_mask
-                                                   backing:NSBackingStoreBuffered
-                                                     defer:NO];
+      /* Note, before OS 10.6 there doesn't seem to be a way to change this without
+       * recreating the toplevel. There might be bad side-effects of doing
+       * that, but it seems alright.
+       */
+      if ([impl->toplevel respondsToSelector:@selector(setStyleMask:)])
+        {
+          [(id<CanSetStyleMask>)impl->toplevel setStyleMask:new_mask];
+        }
+      else
+        {
+          [impl->toplevel release];
+          impl->toplevel = [[GdkQuartzWindow alloc] initWithContentRect:rect
+                                                                styleMask:new_mask
+                                                                  backing:NSBackingStoreBuffered
+                                                                    defer:NO];
+          [impl->toplevel setHasShadow: window_type_hint_to_shadow (impl->type_hint)];
+          [impl->toplevel setLevel: window_type_hint_to_level (impl->type_hint)];
+          [impl->toplevel setContentView:old_view];
+        }
 
-      [impl->toplevel setHasShadow: window_type_hint_to_shadow (impl->type_hint)];
-      [impl->toplevel setLevel: window_type_hint_to_level (impl->type_hint)];
-
-      [impl->toplevel setContentView:old_view];
       [impl->toplevel setFrame:rect display:YES];
 
       /* Invalidate the window shadow for non-opaque views that have shadow

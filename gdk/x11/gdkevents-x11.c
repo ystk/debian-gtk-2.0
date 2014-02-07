@@ -142,7 +142,12 @@ gdk_display_source_new (GdkDisplay *display)
 {
   GSource *source = g_source_new (&event_funcs, sizeof (GdkDisplaySource));
   GdkDisplaySource *display_source = (GdkDisplaySource *)source;
+  char *name;
   
+  name = g_strdup_printf ("GDK X11 Event source (%s)",
+			  gdk_display_get_name (display));
+  g_source_set_name (source, name);
+  g_free (name);
   display_source->display = display;
   
   return source;
@@ -2875,6 +2880,8 @@ gdk_x11_screen_supports_net_wm_hint (GdkScreen *screen,
  * gdk_x11_screen_supports_net_wm_hint() for complete details.
  * 
  * Return value: %TRUE if the window manager supports @property
+ *
+ * Deprecated:2.24: Use gdk_x11_screen_supports_net_wm_hint() instead
  **/
 gboolean
 gdk_net_wm_supports (GdkAtom property)

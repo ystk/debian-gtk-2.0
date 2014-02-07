@@ -978,10 +978,10 @@ gtk_container_class_install_child_property (GtkContainerClass *cclass,
 
 /**
  * gtk_container_class_find_child_property:
- * @cclass: a #GtkContainerClass
+ * @cclass: (type GtkContainerClass): a #GtkContainerClass
  * @property_name: the name of the child property to find
- * @returns: (allow-none): the #GParamSpec of the child property or %NULL if @class has no
- *   child property with that name.
+ * @returns: (transfer none): the #GParamSpec of the child property or
+ *           %NULL if @class has no child property with that name.
  *
  * Finds a child property of a container class by name.
  */
@@ -1000,9 +1000,10 @@ gtk_container_class_find_child_property (GObjectClass *cclass,
 
 /**
  * gtk_container_class_list_child_properties:
- * @cclass: a #GtkContainerClass
+ * @cclass: (type GtkContainerClass): a #GtkContainerClass
  * @n_properties: location to return the number of child properties found
- * @returns: a newly allocated %NULL-terminated array of #GParamSpec*. 
+ * @returns: (array length=n_properties) (transfer container):  a newly 
+ *           allocated %NULL-terminated array of #GParamSpec*. 
  *           The array must be freed with g_free().
  *
  * Returns all child properties of a container class.
@@ -1056,6 +1057,12 @@ gtk_container_destroy (GtkObject *object)
 
   if (GTK_CONTAINER_RESIZE_PENDING (container))
     _gtk_container_dequeue_resize_handler (container);
+
+  if (container->focus_child)
+    {
+      g_object_unref (container->focus_child);
+      container->focus_child = NULL;
+    }
 
   /* do this before walking child widgets, to avoid
    * removing children from focus chain one by one.
@@ -1503,7 +1510,7 @@ gtk_container_forall (GtkContainer *container,
 /**
  * gtk_container_foreach:
  * @container: a #GtkContainer
- * @callback: a callback
+ * @callback: (scope call):  a callback
  * @callback_data: callback user data
  * 
  * Invokes @callback on each non-internal child of @container. See
@@ -1594,6 +1601,9 @@ gtk_container_foreach_full (GtkContainer       *container,
  * This function emits the GtkContainer::set_focus_child signal of
  * @container. Implementations of #GtkContainer can override the
  * default behaviour by overriding the class closure of this signal.
+ *
+ * This is function is mostly meant to be used by widgets. Applications can use
+ * gtk_widget_grab_focus() to manualy set the focus to a specific widget.
  */
 void
 gtk_container_set_focus_child (GtkContainer *container,
@@ -1610,10 +1620,13 @@ gtk_container_set_focus_child (GtkContainer *container,
  * gtk_container_get_focus_child:
  * @container: a #GtkContainer
  *
- * Returns the current focus child widget inside @container.
+ * Returns the current focus child widget inside @container. This is not the
+ * currently focused widget. That can be obtained by calling
+ * gtk_window_get_focus().
  *
- * Returns: The child widget which has the focus
- *          inside @container, or %NULL if none is set.
+ * Returns: (transfer none): The child widget which will receive the
+ *          focus inside @container when the @conatiner is focussed,
+ *          or %NULL if none is set.
  *
  * Since: 2.14
  **/
@@ -2348,9 +2361,10 @@ chain_widget_destroyed (GtkWidget *widget,
 }
 
 /**
- * gtk_container_set_focus_chain: 
+ * gtk_container_set_focus_chain:
  * @container: a #GtkContainer
- * @focusable_widgets: the new focus chain
+ * @focusable_widgets: (transfer none) (element-type GtkWidget):
+ *     the new focus chain
  *
  * Sets a focus chain, overriding the one computed automatically by GTK+.
  * 
@@ -2697,16 +2711,23 @@ gtk_container_unmap (GtkWidget *widget)
  * When a container receives an expose event, it must send synthetic
  * expose events to all children that don't have their own #GdkWindows.
  * This function provides a convenient way of doing this. A container,
- * when it receives an expose event, calls gtk_container_propagate_expose() 
+ * when it receives an expose event, calls gtk_container_propagate_expose()
  * once for each child, passing in the event the container received.
  *
  * gtk_container_propagate_expose() takes care of deciding whether
  * an expose event needs to be sent to the child, intersecting
  * the event's area with the child area, and sending the event.
- * 
+ *
  * In most cases, a container can simply either simply inherit the
- * #GtkWidget::expose implementation from #GtkContainer, or, do some drawing 
+ * #GtkWidget::expose implementation from #GtkContainer, or, do some drawing
  * and then chain to the ::expose implementation from #GtkContainer.
+ *
+ * Note that the ::expose-event signal has been replaced by a ::draw
+ * signal in GTK+ 3, and consequently, gtk_container_propagate_expose()
+ * has been replaced by gtk_container_propagate_draw().
+ * The <link linkend="http://library.gnome.org/devel/gtk3/3.0/gtk-migrating-2-to-3.html">GTK+ 3 migration guide</link>
+ * for hints on how to port from ::expose-event to ::draw.
+ *
  **/
 void
 gtk_container_propagate_expose (GtkContainer   *container,

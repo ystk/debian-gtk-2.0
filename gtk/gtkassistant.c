@@ -23,6 +23,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/**
+ * SECTION:gtkassistant
+ * @Short_description: A widget used to guide users through multi-step operations
+ * @Title: GtkAssistant
+ *
+ * A #GtkAssistant is a widget used to represent a generally complex
+ * operation splitted in several steps, guiding the user through its pages
+ * and controlling the page flow to collect the necessary data.
+ *
+ * <refsect2 id="GtkAssistant-BUILDER-UI">
+ * <title>GtkAssistant as GtkBuildable</title>
+ * <para>
+ * The GtkAssistant implementation of the GtkBuildable interface exposes the
+ * @action_area as internal children with the name "action_area".
+ *
+ * To add pages to an assistant in GtkBuilder, simply add it as a
+ * &lt;child&gt; to the GtkAssistant object, and set its child properties
+ * as necessary.
+ * </para>
+ * </refsect2>
+ */
+
 #include "config.h"
 
 #include <atk/atk.h>
@@ -81,6 +103,8 @@ struct _GtkAssistantPrivate
   GtkAssistantPageFunc forward_function;
   gpointer forward_function_data;
   GDestroyNotify forward_data_destroy;
+
+  guint committed : 1;
 };
 
 static void     gtk_assistant_class_init         (GtkAssistantClass *class);
@@ -237,7 +261,7 @@ gtk_assistant_class_init (GtkAssistantClass *class)
 
   /**
    * GtkAssistant::apply:
-   * @assistant: the @GtkAssistant
+   * @assistant: the #GtkAssistant
    *
    * The ::apply signal is emitted when the apply button is clicked. The default
    * behavior of the #GtkAssistant is to switch to the page after the current
@@ -245,7 +269,7 @@ gtk_assistant_class_init (GtkAssistantClass *class)
    *
    * A handler for the ::apply signal should carry out the actions for which
    * the wizard has collected data. If the action takes a long time to complete,
-   * you might consider to put a page of type %GTK_ASSISTANT_PAGE_PROGRESS
+   * you might consider putting a page of type %GTK_ASSISTANT_PAGE_PROGRESS
    * after the confirmation page and handle this operation within the
    * #GtkAssistant::prepare signal of the progress page.
    *
@@ -451,6 +475,23 @@ compute_last_button_state (GtkAssistant *assistant)
 }
 
 static void
+compute_progress_state (GtkAssistant *assistant)
+{
+  GtkAssistantPrivate *priv = assistant->priv;
+  gint page_num, n_pages;
+
+  n_pages = gtk_assistant_get_n_pages (assistant);
+  page_num = gtk_assistant_get_current_page (assistant);
+
+  page_num = (priv->forward_function) (page_num, priv->forward_function_data);
+
+  if (page_num >= 0 && page_num < n_pages)
+    gtk_widget_show (assistant->forward);
+  else
+    gtk_widget_hide (assistant->forward);
+}
+
+static void
 set_assistant_header_image (GtkAssistant *assistant)
 {
   GtkAssistantPrivate *priv = assistant->priv;
@@ -487,7 +528,6 @@ set_assistant_buttons_state (GtkAssistant *assistant)
       gtk_widget_set_sensitive (assistant->cancel, TRUE);
       gtk_widget_set_sensitive (assistant->forward, priv->current_page->complete);
       gtk_widget_grab_default (assistant->forward);
-      gtk_widget_show (assistant->cancel);
       gtk_widget_show (assistant->forward);
       gtk_widget_hide (assistant->back);
       gtk_widget_hide (assistant->apply);
@@ -499,7 +539,6 @@ set_assistant_buttons_state (GtkAssistant *assistant)
       gtk_widget_set_sensitive (assistant->back, TRUE);
       gtk_widget_set_sensitive (assistant->apply, priv->current_page->complete);
       gtk_widget_grab_default (assistant->apply);
-      gtk_widget_show (assistant->cancel);
       gtk_widget_show (assistant->back);
       gtk_widget_show (assistant->apply);
       gtk_widget_hide (assistant->forward);
@@ -511,7 +550,6 @@ set_assistant_buttons_state (GtkAssistant *assistant)
       gtk_widget_set_sensitive (assistant->back, TRUE);
       gtk_widget_set_sensitive (assistant->forward, priv->current_page->complete);
       gtk_widget_grab_default (assistant->forward);
-      gtk_widget_show (assistant->cancel);
       gtk_widget_show (assistant->back);
       gtk_widget_show (assistant->forward);
       gtk_widget_hide (assistant->apply);
@@ -522,7 +560,6 @@ set_assistant_buttons_state (GtkAssistant *assistant)
       gtk_widget_set_sensitive (assistant->close, priv->current_page->complete);
       gtk_widget_grab_default (assistant->close);
       gtk_widget_show (assistant->close);
-      gtk_widget_hide (assistant->cancel);
       gtk_widget_hide (assistant->back);
       gtk_widget_hide (assistant->forward);
       gtk_widget_hide (assistant->apply);
@@ -533,16 +570,22 @@ set_assistant_buttons_state (GtkAssistant *assistant)
       gtk_widget_set_sensitive (assistant->back, priv->current_page->complete);
       gtk_widget_set_sensitive (assistant->forward, priv->current_page->complete);
       gtk_widget_grab_default (assistant->forward);
-      gtk_widget_show (assistant->cancel);
       gtk_widget_show (assistant->back);
-      gtk_widget_show (assistant->forward);
       gtk_widget_hide (assistant->apply);
       gtk_widget_hide (assistant->close);
       gtk_widget_hide (assistant->last);
+      compute_progress_state (assistant);
       break;
     default:
       g_assert_not_reached ();
     }
+
+  if (priv->committed)
+    gtk_widget_hide (assistant->cancel);
+  else if (priv->current_page->type == GTK_ASSISTANT_PAGE_SUMMARY)
+    gtk_widget_hide (assistant->cancel);
+  else
+    gtk_widget_show (assistant->cancel);
 
   /* this is quite general, we don't want to
    * go back if it's the first page */
@@ -1602,7 +1645,8 @@ gtk_assistant_get_n_pages (GtkAssistant *assistant)
  *
  * Returns the child widget contained in page number @page_num.
  *
- * Return value: The child widget, or %NULL if @page_num is out of bounds.
+ * Return value: (transfer none): The child widget, or %NULL
+ *     if @page_num is out of bounds.
  *
  * Since: 2.10
  **/
@@ -1882,7 +1926,7 @@ gtk_assistant_set_page_title (GtkAssistant *assistant,
  *
  * Since: 2.10
  **/
-G_CONST_RETURN gchar*
+const gchar*
 gtk_assistant_get_page_title (GtkAssistant *assistant,
 			      GtkWidget    *page)
 {
@@ -2033,11 +2077,11 @@ gtk_assistant_set_page_header_image (GtkAssistant *assistant,
  * gtk_assistant_get_page_header_image:
  * @assistant: a #GtkAssistant
  * @page: a page of @assistant
- * 
- * Gets the header image for @page. 
- * 
- * Return value: the header image for @page, or %NULL
- * if there's no header image for the page.
+ *
+ * Gets the header image for @page.
+ *
+ * Return value: (transfer none): the header image for @page, or %NULL
+ *     if there's no header image for the page.
  *
  * Since: 2.10
  **/
@@ -2113,11 +2157,11 @@ gtk_assistant_set_page_side_image (GtkAssistant *assistant,
  * gtk_assistant_get_page_side_image:
  * @assistant: a #GtkAssistant
  * @page: a page of @assistant
- * 
- * Gets the header image for @page. 
- * 
- * Return value: the side image for @page, or %NULL
- * if there's no side image for the page.
+ *
+ * Gets the header image for @page.
+ *
+ * Return value: (transfer none): the side image for @page, or %NULL
+ *     if there's no side image for the page.
  *
  * Since: 2.10
  **/
@@ -2233,6 +2277,35 @@ void
 gtk_assistant_update_buttons_state (GtkAssistant *assistant)
 {
   g_return_if_fail (GTK_IS_ASSISTANT (assistant));
+
+  set_assistant_buttons_state (assistant);
+}
+
+/**
+ * gtk_assistant_commit:
+ * @assistant: a #GtkAssistant
+ *
+ * Erases the visited page history so the back button is not
+ * shown on the current page, and removes the cancel button
+ * from subsequent pages.
+ *
+ * Use this when the information provided up to the current
+ * page is hereafter deemed permanent and cannot be modified
+ * or undone.  For example, showing a progress page to track
+ * a long-running, unreversible operation after the user has
+ * clicked apply on a confirmation page.
+ *
+ * Since: 2.22
+ **/
+void
+gtk_assistant_commit (GtkAssistant *assistant)
+{
+  g_return_if_fail (GTK_IS_ASSISTANT (assistant));
+
+  g_slist_free (assistant->priv->visited_pages);
+  assistant->priv->visited_pages = NULL;
+
+  assistant->priv->committed = TRUE;
 
   set_assistant_buttons_state (assistant);
 }

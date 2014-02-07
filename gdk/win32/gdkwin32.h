@@ -75,6 +75,10 @@ G_BEGIN_DECLS
 #endif
 
 
+/* Return true if the GdkWindow is a win32 implemented window */
+gboolean      gdk_win32_window_is_win32 (GdkWindow *window);
+HWND          gdk_win32_window_get_impl_hwnd (GdkWindow *window);
+
 /* Return the Gdk* for a particular HANDLE */
 gpointer      gdk_win32_handle_table_lookup (GdkNativeWindow handle);
 
@@ -106,6 +110,19 @@ void          gdk_win32_selection_add_targets (GdkWindow  *owner,
 GdkPixbuf    *gdk_win32_icon_to_pixbuf_libgtk_only (HICON hicon);
 HICON         gdk_win32_pixbuf_to_hicon_libgtk_only (GdkPixbuf *pixbuf);
 void          gdk_win32_set_modal_dialog_libgtk_only (HWND window);
+
+GdkDrawable  *gdk_win32_begin_direct_draw_libgtk_only (GdkDrawable *drawable,
+						       GdkGC *gc,
+						       gpointer *priv_data,
+						       gint *x_offset_out,
+						       gint *y_offset_out);
+void          gdk_win32_end_direct_draw_libgtk_only (gpointer priv_data);
+
+GdkWindow *   gdk_win32_window_foreign_new_for_display (GdkDisplay *display,
+                                                        GdkNativeWindow anid);
+GdkWindow *   gdk_win32_window_lookup_for_display (GdkDisplay *display,
+                                                   GdkNativeWindow anid);
+
 
 G_END_DECLS
 

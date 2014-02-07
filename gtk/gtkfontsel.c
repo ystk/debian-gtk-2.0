@@ -1191,8 +1191,8 @@ gtk_font_selection_get_font_internal (GtkFontSelection *fontsel)
  *
  * This returns the #GtkTreeView that lists font families, for
  * example, 'Sans', 'Serif', etc.
- * 
- * Return value: A #GtkWidget that is part of @fontsel
+ *
+ * Return value: (transfer none): A #GtkWidget that is part of @fontsel
  *
  * Since: 2.14
  */
@@ -1211,7 +1211,7 @@ gtk_font_selection_get_family_list (GtkFontSelection *fontsel)
  * This returns the #GtkTreeView which lists all styles available for
  * the selected font. For example, 'Regular', 'Bold', etc.
  * 
- * Return value: A #GtkWidget that is part of @fontsel
+ * Return value: (transfer none): A #GtkWidget that is part of @fontsel
  *
  * Since: 2.14
  */
@@ -1228,9 +1228,9 @@ gtk_font_selection_get_face_list (GtkFontSelection *fontsel)
  * @fontsel: a #GtkFontSelection
  *
  * This returns the #GtkEntry used to allow the user to edit the font
- * number manually instead of selecting it from the list of font sizes. 
- * 
- * Return value: A #GtkWidget that is part of @fontsel
+ * number manually instead of selecting it from the list of font sizes.
+ *
+ * Return value: (transfer none): A #GtkWidget that is part of @fontsel
  *
  * Since: 2.14
  */
@@ -1246,9 +1246,9 @@ gtk_font_selection_get_size_entry (GtkFontSelection *fontsel)
  * gtk_font_selection_get_size_list:
  * @fontsel: a #GtkFontSelection
  *
- * This returns the #GtkTreeeView used to list font sizes. 
- * 
- * Return value: A #GtkWidget that is part of @fontsel
+ * This returns the #GtkTreeeView used to list font sizes.
+ *
+ * Return value: (transfer none): A #GtkWidget that is part of @fontsel
  *
  * Since: 2.14
  */
@@ -1263,10 +1263,10 @@ gtk_font_selection_get_size_list (GtkFontSelection *fontsel)
 /**
  * gtk_font_selection_get_preview_entry:
  * @fontsel: a #GtkFontSelection
- * 
+ *
  * This returns the #GtkEntry used to display the font as a preview.
  *
- * Return value: A #GtkWidget that is part of @fontsel
+ * Return value: (transfer none): A #GtkWidget that is part of @fontsel
  *
  * Since: 2.14
  */
@@ -1281,13 +1281,13 @@ gtk_font_selection_get_preview_entry (GtkFontSelection *fontsel)
 /**
  * gtk_font_selection_get_family:
  * @fontsel: a #GtkFontSelection
- * 
+ *
  * Gets the #PangoFontFamily representing the selected font family.
  *
- * Return value: A #PangoFontFamily representing the selected font
- *     family. Font families are a collection of font faces. The 
- *     returned object is owned by @fontsel and must not be modified 
- *     or freed.
+ * Return value: (transfer none): A #PangoFontFamily representing the
+ *     selected font family. Font families are a collection of font
+ *     faces. The returned object is owned by @fontsel and must not
+ *     be modified or freed.
  *
  * Since: 2.14
  */
@@ -1302,13 +1302,13 @@ gtk_font_selection_get_family (GtkFontSelection *fontsel)
 /**
  * gtk_font_selection_get_face:
  * @fontsel: a #GtkFontSelection
- * 
- * Gets the #PangoFontFace representing the selected font group
- * details (i.e. family, slant, weight, width, etc).   
  *
- * Return value: A #PangoFontFace representing the selected font 
- *     group details. The returned object is owned by @fontsel and
- *     must not be modified or freed. 
+ * Gets the #PangoFontFace representing the selected font group
+ * details (i.e. family, slant, weight, width, etc).
+ *
+ * Return value: (transfer none): A #PangoFontFace representing the
+ *     selected font group details. The returned object is owned by
+ *     @fontsel and must not be modified or freed.
  *
  * Since: 2.14
  */
@@ -1323,10 +1323,10 @@ gtk_font_selection_get_face (GtkFontSelection *fontsel)
 /**
  * gtk_font_selection_get_size:
  * @fontsel: a #GtkFontSelection
- * 
+ *
  * The selected font size.
  *
- * Return value: A n integer representing the selected font size, 
+ * Return value: A n integer representing the selected font size,
  *     or -1 if no font size is selected.
  *
  * Since: 2.14
@@ -1551,7 +1551,7 @@ gtk_font_selection_set_font_name (GtkFontSelection *fontsel,
  *     This string is owned by the widget and should not be 
  *     modified or freed 
  */
-G_CONST_RETURN gchar*
+const gchar*
 gtk_font_selection_get_preview_text (GtkFontSelection *fontsel)
 {
   g_return_val_if_fail (GTK_IS_FONT_SELECTION (fontsel), NULL);
@@ -1675,12 +1675,31 @@ gtk_font_selection_dialog_new (const gchar *title)
 }
 
 /**
+ * gtk_font_selection_dialog_get_font_selection:
+ * @fsd: a #GtkFontSelectionDialog
+ *
+ * Retrieves the #GtkFontSelection widget embedded in the dialog.
+ *
+ * Returns: (transfer none): the embedded #GtkFontSelection
+ *
+ * Since: 2.22
+ **/
+GtkWidget*
+gtk_font_selection_dialog_get_font_selection (GtkFontSelectionDialog *fsd)
+{
+  g_return_val_if_fail (GTK_IS_FONT_SELECTION_DIALOG (fsd), NULL);
+
+  return fsd->fontsel;
+}
+
+/**
  * gtk_font_selection_dialog_get_ok_button:
  * @fsd: a #GtkFontSelectionDialog
  *
  * Gets the 'OK' button.
  *
- * Return value: the #GtkWidget used in the dialog for the 'OK' button.
+ * Return value: (transfer none): the #GtkWidget used in the dialog
+ *     for the 'OK' button.
  *
  * Since: 2.14
  */
@@ -1718,7 +1737,8 @@ gtk_font_selection_dialog_get_apply_button (GtkFontSelectionDialog *fsd)
  *
  * Gets the 'Cancel' button.
  *
- * Return value: the #GtkWidget used in the dialog for the 'Cancel' button.
+ * Return value: (transfer none): the #GtkWidget used in the dialog
+ *     for the 'Cancel' button.
  *
  * Since: 2.14
  */
@@ -1827,7 +1847,7 @@ gtk_font_selection_dialog_set_font_name (GtkFontSelectionDialog *fsd,
  *     This string is owned by the widget and should not be 
  *     modified or freed 
  */
-G_CONST_RETURN gchar*
+const gchar*
 gtk_font_selection_dialog_get_preview_text (GtkFontSelectionDialog *fsd)
 {
   g_return_val_if_fail (GTK_IS_FONT_SELECTION_DIALOG (fsd), NULL);

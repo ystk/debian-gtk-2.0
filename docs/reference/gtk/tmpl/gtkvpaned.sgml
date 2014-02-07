@@ -2,20 +2,19 @@
 GtkVPaned
 
 <!-- ##### SECTION Short_Description ##### -->
-A container with two panes arranged vertically
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-The VPaned widget is a container widget with two
-children arranged vertically. The division between
-the two panes is adjustable by the user by dragging
-a handle. See #GtkPaned for details.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -25,15 +24,16 @@ a handle. See #GtkPaned for details.
 
 <!-- ##### STRUCT GtkVPaned ##### -->
 <para>
+
 </para>
 
 
 <!-- ##### FUNCTION gtk_vpaned_new ##### -->
 <para>
-Create a new #GtkVPaned
+
 </para>
 
 @void: 
-@Returns: the new #GtkVPaned
+@Returns: 
 
 

@@ -897,7 +897,7 @@ gtk_text_buffer_emit_insert (GtkTextBuffer *buffer,
  * gtk_text_buffer_insert:
  * @buffer: a #GtkTextBuffer
  * @iter: a position in the buffer
- * @text: UTF-8 format text to insert
+ * @text: text in UTF-8 format
  * @len: length of text in bytes, or -1
  *
  * Inserts @len bytes of @text at position @iter.  If @len is -1,
@@ -925,7 +925,7 @@ gtk_text_buffer_insert (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_insert_at_cursor:
  * @buffer: a #GtkTextBuffer
- * @text: some text in UTF-8 format
+ * @text: text in UTF-8 format
  * @len: length of text, in bytes
  *
  * Simply calls gtk_text_buffer_insert(), using the current
@@ -1962,7 +1962,7 @@ gtk_text_buffer_insert_child_anchor (GtkTextBuffer      *buffer,
  * owned by the buffer; no reference count is returned to
  * the caller of gtk_text_buffer_create_child_anchor().
  * 
- * Return value: the created child anchor
+ * Return value: (transfer none): the created child anchor
  **/
 GtkTextChildAnchor*
 gtk_text_buffer_create_child_anchor (GtkTextBuffer *buffer,
@@ -2083,7 +2083,7 @@ gtk_text_buffer_set_mark (GtkTextBuffer     *buffer,
  * Emits the "mark-set" signal as notification of the mark's initial
  * placement.
  *
- * Return value: the new #GtkTextMark object
+ * Return value: (transfer none): the new #GtkTextMark object
  **/
 GtkTextMark*
 gtk_text_buffer_create_mark (GtkTextBuffer     *buffer,
@@ -2159,7 +2159,7 @@ gtk_text_buffer_move_mark (GtkTextBuffer     *buffer,
 /**
  * gtk_text_buffer_get_iter_at_mark:
  * @buffer: a #GtkTextBuffer
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  * @mark: a #GtkTextMark in @buffer
  *
  * Initializes @iter with the current position of @mark.
@@ -2346,7 +2346,7 @@ gtk_text_buffer_get_selection_bound (GtkTextBuffer *buffer)
 /**
  * gtk_text_buffer_get_iter_at_child_anchor:
  * @buffer: a #GtkTextBuffer
- * @iter: an iterator to be initialized
+ * @iter: (out): an iterator to be initialized
  * @anchor: a child anchor that appears in @buffer
  *
  * Obtains the location of @anchor within @buffer.
@@ -2433,7 +2433,6 @@ gtk_text_buffer_select_range (GtkTextBuffer     *buffer,
  * @first_property_name: (allow-none): name of first property to set, or %NULL
  * @Varargs: %NULL-terminated list of property names and values
  *
- *
  * Creates a tag and adds it to the tag table for @buffer.
  * Equivalent to calling gtk_text_tag_new() and then adding the
  * tag to the buffer's tag table. The returned tag is owned by
@@ -2447,8 +2446,8 @@ gtk_text_buffer_select_range (GtkTextBuffer     *buffer,
  * The @first_property_name argument and subsequent arguments are a list
  * of properties to set on the tag, as with g_object_set().
  *
- * Return value: a new tag
- **/
+ * Return value: (transfer none): a new tag
+ */
 GtkTextTag*
 gtk_text_buffer_create_tag (GtkTextBuffer *buffer,
                             const gchar   *tag_name,
@@ -2829,7 +2828,7 @@ gtk_text_buffer_remove_all_tags (GtkTextBuffer     *buffer,
 /**
  * gtk_text_buffer_get_iter_at_line_offset:
  * @buffer: a #GtkTextBuffer
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  * @line_number: line number counting from 0
  * @char_offset: char offset from start of line
  *
@@ -2854,7 +2853,7 @@ gtk_text_buffer_get_iter_at_line_offset (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_iter_at_line_index:
  * @buffer: a #GtkTextBuffer 
- * @iter: iterator to initialize 
+ * @iter: (out): iterator to initialize 
  * @line_number: line number counting from 0
  * @byte_index: byte index from start of line
  *
@@ -2879,7 +2878,7 @@ gtk_text_buffer_get_iter_at_line_index  (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_iter_at_line:
  * @buffer: a #GtkTextBuffer 
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  * @line_number: line number counting from 0
  * 
  * Initializes @iter to the start of the given line.
@@ -2898,7 +2897,7 @@ gtk_text_buffer_get_iter_at_line (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_iter_at_offset:
  * @buffer: a #GtkTextBuffer 
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  * @char_offset: char offset from start of buffer, counting from 0, or -1
  *
  * Initializes @iter to a position @char_offset chars from the start
@@ -2920,7 +2919,7 @@ gtk_text_buffer_get_iter_at_offset (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_start_iter:
  * @buffer: a #GtkTextBuffer
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  *
  * Initialized @iter with the first position in the text buffer. This
  * is the same as using gtk_text_buffer_get_iter_at_offset() to get
@@ -2939,7 +2938,7 @@ gtk_text_buffer_get_start_iter (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_end_iter:
  * @buffer: a #GtkTextBuffer 
- * @iter: iterator to initialize
+ * @iter: (out): iterator to initialize
  *
  * Initializes @iter with the "end iterator," one past the last valid
  * character in the text buffer. If dereferenced with
@@ -2961,8 +2960,8 @@ gtk_text_buffer_get_end_iter (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_bounds:
  * @buffer: a #GtkTextBuffer 
- * @start: iterator to initialize with first position in the buffer
- * @end: iterator to initialize with the end iterator
+ * @start: (out): iterator to initialize with first position in the buffer
+ * @end: (out): iterator to initialize with the end iterator
  *
  * Retrieves the first and last iterators in the buffer, i.e. the
  * entire buffer lies within the range [@start,@end).
@@ -3269,9 +3268,7 @@ get_paste_point (GtkTextBuffer *buffer,
       gtk_text_buffer_get_iter_at_mark (buffer, &insert_point,
                                         paste_point_override);
       if (clear_afterward)
-        gtk_text_buffer_delete_mark (buffer,
-                                     gtk_text_buffer_get_mark (buffer,
-                                                               "gtk_paste_point_override"));
+        gtk_text_buffer_delete_mark (buffer, paste_point_override);
     }
   else
     {
@@ -3369,6 +3366,18 @@ clipboard_text_received (GtkClipboard *clipboard,
 	gtk_text_buffer_end_user_action (buffer);
 
       emit_paste_done (buffer, clipboard);
+    }
+  else
+    {
+      /* It may happen that we set a point override but we are not inserting
+         any text, so we must remove it afterwards */
+      GtkTextMark *paste_point_override;
+
+      paste_point_override = gtk_text_buffer_get_mark (buffer,
+                                                       "gtk_paste_point_override");
+
+      if (paste_point_override != NULL)
+        gtk_text_buffer_delete_mark (buffer, paste_point_override);
     }
 
   free_clipboard_request (request_data);
@@ -3736,10 +3745,10 @@ remove_all_selection_clipboards (GtkTextBuffer *buffer)
  *                     at the cursor
  * @default_editable: whether the buffer is editable by default
  *
- * Pastes the contents of a clipboard at the insertion point, or at
- * @override_location. (Note: pasting is asynchronous, that is, we'll 
- * ask for the paste data and return, and at some point later after 
- * the main loop runs, the paste data will be inserted.)
+ * Pastes the contents of a clipboard at the insertion point, or
+ * at @override_location. (Note: pasting is asynchronous, that is,
+ * we'll ask for the paste data and return, and at some point later
+ * after the main loop runs, the paste data will be inserted.)
  **/
 void
 gtk_text_buffer_paste_clipboard (GtkTextBuffer *buffer,
@@ -4022,8 +4031,8 @@ gtk_text_buffer_copy_clipboard (GtkTextBuffer *buffer,
 /**
  * gtk_text_buffer_get_selection_bounds:
  * @buffer: a #GtkTextBuffer a #GtkTextBuffer
- * @start: iterator to initialize with selection start
- * @end: iterator to initialize with selection end
+ * @start: (out): iterator to initialize with selection start
+ * @end: (out): iterator to initialize with selection end
  *
  * Returns %TRUE if some text is selected; places the bounds
  * of the selection in @start and @end (if the selection has length 0,
@@ -4168,7 +4177,7 @@ gtk_text_buffer_get_target_list (GtkTextBuffer   *buffer,
  * using gtk_target_list_add_rich_text_targets() and
  * gtk_target_list_add_text_targets().
  *
- * Return value: the #GtkTargetList
+ * Return value: (transfer none): the #GtkTargetList
  *
  * Since: 2.10
  **/
@@ -4200,7 +4209,7 @@ gtk_text_buffer_get_copy_target_list (GtkTextBuffer *buffer)
  * using gtk_target_list_add_rich_text_targets() and
  * gtk_target_list_add_text_targets().
  *
- * Return value: the #GtkTargetList
+ * Return value: (transfer none): the #GtkTargetList
  *
  * Since: 2.10
  **/

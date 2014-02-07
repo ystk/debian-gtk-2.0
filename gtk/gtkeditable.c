@@ -70,10 +70,10 @@ gtk_editable_base_init (gpointer g_class)
        * @new_text: the new text to insert
        * @new_text_length: the length of the new text, in bytes,
        *     or -1 if new_text is nul-terminated
-       * @position: the position, in characters, at which to insert
-       *     the new text. this is an in-out parameter.
-       *     After the signal emission is finished, it should
-       *     point after the newly inserted text.
+       * @position: (inout) (type int): the position, in characters,
+       *     at which to insert the new text. this is an in-out
+       *     parameter.  After the signal emission is finished, it
+       *     should point after the newly inserted text.
        *
        * This signal is emitted when text is inserted into
        * the widget by the user. The default handler for
@@ -149,7 +149,7 @@ gtk_editable_base_init (gpointer g_class)
  * @editable: a #GtkEditable
  * @new_text: the text to append
  * @new_text_length: the length of the text in bytes, or -1
- * @position: (in-out): location of the position text will be inserted at
+ * @position: (inout): location of the position text will be inserted at
  *
  * Inserts @new_text_length bytes of @new_text into the contents of the
  * widget, at position @position.

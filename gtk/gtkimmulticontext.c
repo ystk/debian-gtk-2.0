@@ -277,7 +277,7 @@ gtk_im_multicontext_set_client_window (GtkIMContext *context,
 
   if (window)
     {
-      screen = gdk_drawable_get_screen (GDK_DRAWABLE (window));
+      screen = gdk_window_get_screen (window);
       settings = gtk_settings_get_for_screen (screen);
 
       connected = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (settings),
@@ -330,7 +330,7 @@ gtk_im_multicontext_filter_keypress (GtkIMContext *context,
   if (slave)
     return gtk_im_context_filter_keypress (slave, event);
   else if (event->type == GDK_KEY_PRESS &&
-           (event->state & (GDK_MOD1_MASK | GDK_CONTROL_MASK)) == 0)
+           (event->state & GTK_NO_TEXT_INPUT_MOD_MASK) == 0)
     {
       gunichar ch;
 

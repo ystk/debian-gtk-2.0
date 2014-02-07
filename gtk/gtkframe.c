@@ -131,7 +131,7 @@ gtk_frame_class_init (GtkFrameClass *class)
                                                       P_("Deprecated property, use shadow_type instead"),
 						      GTK_TYPE_SHADOW_TYPE,
 						      GTK_SHADOW_ETCHED_IN,
-                                                      GTK_PARAM_READWRITE));
+                                                      GTK_PARAM_READWRITE | G_PARAM_DEPRECATED));
   g_object_class_install_property (gobject_class,
                                    PROP_SHADOW_TYPE,
                                    g_param_spec_enum ("shadow-type",
@@ -344,7 +344,7 @@ gtk_frame_set_label (GtkFrame *frame,
  *               a #GtkLabel. This string is owned by GTK+ and
  *               must not be modified or freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_frame_get_label (GtkFrame *frame)
 {
   g_return_val_if_fail (GTK_IS_FRAME (frame), NULL);
@@ -408,7 +408,7 @@ gtk_frame_set_label_widget (GtkFrame  *frame,
  * Retrieves the label widget for the frame. See
  * gtk_frame_set_label_widget().
  *
- * Return value: the label widget, or %NULL if there is none.
+ * Return value: (transfer none): the label widget, or %NULL if there is none.
  **/
 GtkWidget *
 gtk_frame_get_label_widget (GtkFrame *frame)
@@ -462,8 +462,10 @@ gtk_frame_set_label_align (GtkFrame *frame,
 /**
  * gtk_frame_get_label_align:
  * @frame: a #GtkFrame
- * @xalign: (allow-none): location to store X alignment of frame's label, or %NULL
- * @yalign: (allow-none): location to store X alignment of frame's label, or %NULL
+ * @xalign: (out) (allow-none): location to store X alignment of
+ *     frame's label, or %NULL
+ * @yalign: (out) (allow-none): location to store X alignment of
+ *     frame's label, or %NULL
  * 
  * Retrieves the X and Y alignment of the frame's label. See
  * gtk_frame_set_label_align().

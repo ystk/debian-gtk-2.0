@@ -47,6 +47,7 @@
 *tp++ = gdk_pixbuf_animation_get_type();
 *tp++ = gdk_pixbuf_animation_iter_get_type();
 *tp++ = gdk_pixbuf_error_get_type();
+*tp++ = gdk_pixbuf_format_get_type();
 *tp++ = gdk_pixbuf_get_type();
 *tp++ = gdk_pixbuf_loader_get_type();
 *tp++ = gdk_pixbuf_rotation_get_type();
@@ -131,8 +132,8 @@
 *tp++ = gtk_color_button_get_type();
 *tp++ = gtk_color_selection_dialog_get_type();
 *tp++ = gtk_color_selection_get_type();
-*tp++ = gtk_combo_box_entry_get_type();
 *tp++ = gtk_combo_box_get_type();
+*tp++ = gtk_combo_box_text_get_type();
 *tp++ = gtk_container_get_type();
 *tp++ = gtk_corner_type_get_type();
 *tp++ = gtk_ctree_expander_style_get_type();
@@ -174,7 +175,6 @@
 *tp++ = gtk_hbox_get_type();
 *tp++ = gtk_hbutton_box_get_type();
 *tp++ = gtk_hpaned_get_type();
-*tp++ = gtk_hruler_get_type();
 *tp++ = gtk_hscale_get_type();
 *tp++ = gtk_hscrollbar_get_type();
 *tp++ = gtk_hseparator_get_type();
@@ -279,7 +279,6 @@
 *tp++ = gtk_requisition_get_type();
 *tp++ = gtk_resize_mode_get_type();
 *tp++ = gtk_response_type_get_type();
-*tp++ = gtk_ruler_get_type();
 *tp++ = gtk_scale_button_get_type();
 *tp++ = gtk_scale_get_type();
 *tp++ = gtk_scrollbar_get_type();
@@ -371,7 +370,6 @@
 *tp++ = gtk_visibility_get_type();
 *tp++ = gtk_volume_button_get_type();
 *tp++ = gtk_vpaned_get_type();
-*tp++ = gtk_vruler_get_type();
 *tp++ = gtk_vscale_get_type();
 *tp++ = gtk_vscrollbar_get_type();
 *tp++ = gtk_vseparator_get_type();

@@ -114,6 +114,7 @@ struct _GtkStatusIconPrivate
 #ifdef GDK_WINDOWING_WIN32
   GtkWidget     *dummy_widget;
   NOTIFYICONDATAW nid;
+  gint          taskbar_top;
   gint		last_click_x, last_click_y;
   GtkOrientation orientation;
   gchar         *tooltip_text;
@@ -282,13 +283,20 @@ gtk_status_icon_class_init (GtkStatusIconClass *class)
 							GDK_TYPE_SCREEN,
  							GTK_PARAM_READWRITE));
 
+  /**
+   * GtkStatusIcon:blinking:
+   *
+   * Whether or not the status icon is blinking.
+   *
+   * Deprecated: 2.22: This property will be removed in GTK+ 3
+   */
   g_object_class_install_property (gobject_class,
 				   PROP_BLINKING,
 				   g_param_spec_boolean ("blinking",
 							 P_("Blinking"),
 							 P_("Whether or not the status icon is blinking"),
 							 FALSE,
-							 GTK_PARAM_READWRITE));
+							 GTK_PARAM_READWRITE | G_PARAM_DEPRECATED));
 
   g_object_class_install_property (gobject_class,
 				   PROP_VISIBLE,
@@ -882,6 +890,8 @@ gtk_status_icon_init (GtkStatusIcon *status_icon)
       priv->orientation = GTK_ORIENTATION_VERTICAL;
     else
       priv->orientation = GTK_ORIENTATION_HORIZONTAL;
+
+    priv->taskbar_top = abd.rc.top;
   }
 
   priv->last_click_x = priv->last_click_y = 0;
@@ -899,6 +909,17 @@ gtk_status_icon_init (GtkStatusIcon *status_icon)
   priv->nid.uID = GPOINTER_TO_UINT (status_icon);
   priv->nid.uCallbackMessage = WM_GTK_TRAY_NOTIFICATION;
   priv->nid.uFlags = NIF_MESSAGE;
+
+  /* To help win7 identify the icon create it with an application "unique" tip */
+  if (g_get_prgname ())
+  {
+    WCHAR *wcs = g_utf8_to_utf16 (g_get_prgname (), -1, NULL, NULL, NULL);
+
+    priv->nid.uFlags |= NIF_TIP;
+    wcsncpy (priv->nid.szTip, wcs, G_N_ELEMENTS (priv->nid.szTip) - 1);
+    priv->nid.szTip[G_N_ELEMENTS (priv->nid.szTip) - 1] = 0;
+    g_free (wcs);
+  }
 
   if (!Shell_NotifyIconW (NIM_ADD, &priv->nid))
     {
@@ -1732,14 +1753,14 @@ gtk_status_icon_button_press (GtkStatusIcon  *status_icon,
   if (handled)
     return TRUE;
 
-  if (event->button == 1 && event->type == GDK_BUTTON_PRESS)
-    {
-      emit_activate_signal (status_icon);
-      return TRUE;
-    }
-  else if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
+  if (_gtk_button_event_triggers_context_menu (event))
     {
       emit_popup_menu_signal (status_icon, event->button, event->time);
+      return TRUE;
+    }
+  else if (event->button == 1 && event->type == GDK_BUTTON_PRESS)
+    {
+      emit_activate_signal (status_icon);
       return TRUE;
     }
 
@@ -2019,7 +2040,8 @@ gtk_status_icon_get_storage_type (GtkStatusIcon *status_icon)
  * The caller of this function does not own a reference to the
  * returned pixbuf.
  * 
- * Return value: the displayed pixbuf, or %NULL if the image is empty.
+ * Return value: (transfer none): the displayed pixbuf,
+ *     or %NULL if the image is empty.
  *
  * Since: 2.10
  **/
@@ -2056,7 +2078,7 @@ gtk_status_icon_get_pixbuf (GtkStatusIcon *status_icon)
  *
  * Since: 2.10
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_status_icon_get_stock (GtkStatusIcon *status_icon)
 {
   GtkStatusIconPrivate *priv;
@@ -2088,7 +2110,7 @@ gtk_status_icon_get_stock (GtkStatusIcon *status_icon)
  *
  * Since: 2.10
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_status_icon_get_icon_name (GtkStatusIcon *status_icon)
 {
   GtkStatusIconPrivate *priv;
@@ -2118,7 +2140,7 @@ gtk_status_icon_get_icon_name (GtkStatusIcon *status_icon)
  *
  * If this function fails, @icon is left unchanged;
  *
- * Returns: the displayed icon, or %NULL if the image is empty
+ * Returns: (transfer none): the displayed icon, or %NULL if the image is empty
  *
  * Since: 2.14
  **/
@@ -2187,13 +2209,13 @@ gtk_status_icon_set_screen (GtkStatusIcon *status_icon,
 #endif
 }
 
-/** 
+/**
  * gtk_status_icon_get_screen:
  * @status_icon: a #GtkStatusIcon
  *
  * Returns the #GdkScreen associated with @status_icon.
  *
- * Return value: a #GdkScreen.
+ * Return value: (transfer none): a #GdkScreen.
  *
  * Since: 2.12
  */
@@ -2202,7 +2224,7 @@ gtk_status_icon_get_screen (GtkStatusIcon *status_icon)
 {
   g_return_val_if_fail (GTK_IS_STATUS_ICON (status_icon), NULL);
 
-#ifdef GDK_WINDOWING_X11   
+#ifdef GDK_WINDOWING_X11
   return gtk_window_get_screen (GTK_WINDOW (status_icon->priv->tray_icon));
 #else
   return gdk_screen_get_default ();
@@ -2354,6 +2376,8 @@ gtk_status_icon_get_visible (GtkStatusIcon *status_icon)
  * this setting has no effect.
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.22: This function will be removed in GTK+ 3
  **/
 void
 gtk_status_icon_set_blinking (GtkStatusIcon *status_icon,
@@ -2390,6 +2414,8 @@ gtk_status_icon_set_blinking (GtkStatusIcon *status_icon,
  * Return value: %TRUE if the icon is blinking
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.22: This function will be removed in GTK+ 3
  **/
 gboolean
 gtk_status_icon_get_blinking (GtkStatusIcon *status_icon)
@@ -2545,6 +2571,7 @@ gtk_status_icon_position_menu (GtkMenu  *menu,
 #ifdef GDK_WINDOWING_WIN32
   GtkStatusIcon *status_icon;
   GtkStatusIconPrivate *priv;
+  GtkRequisition menu_req;
   
   g_return_if_fail (GTK_IS_MENU (menu));
   g_return_if_fail (GTK_IS_STATUS_ICON (user_data));
@@ -2552,8 +2579,11 @@ gtk_status_icon_position_menu (GtkMenu  *menu,
   status_icon = GTK_STATUS_ICON (user_data);
   priv = status_icon->priv;
 
+  gtk_widget_size_request (GTK_WIDGET (menu), &menu_req);
+
   *x = priv->last_click_x;
-  *y = priv->last_click_y;
+  *y = priv->taskbar_top - menu_req.height;
+
   *push_in = TRUE;
 #endif
 }
@@ -2948,7 +2978,7 @@ gtk_status_icon_set_title (GtkStatusIcon *status_icon,
  *
  * Since: 2.18
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_status_icon_get_title (GtkStatusIcon *status_icon)
 {
   GtkStatusIconPrivate *priv;
@@ -2992,10 +3022,19 @@ gtk_status_icon_set_name (GtkStatusIcon *status_icon,
   priv = status_icon->priv;
 
 #ifdef GDK_WINDOWING_X11
-  gtk_window_set_wmclass (GTK_WINDOW (priv->tray_icon), name, name);
+  if (gtk_widget_get_realized (priv->tray_icon))
+    {
+      /* gtk_window_set_wmclass() only operates on non-realized windows,
+       * so temporarily unrealize the tray here
+       */
+      gtk_widget_hide (priv->tray_icon);
+      gtk_widget_unrealize (priv->tray_icon);
+      gtk_window_set_wmclass (GTK_WINDOW (priv->tray_icon), name, name);
+      gtk_widget_show (priv->tray_icon);
+    }
+  else
+    gtk_window_set_wmclass (GTK_WINDOW (priv->tray_icon), name, name);
 #endif
-
-  g_object_notify (G_OBJECT (status_icon), "name");
 }
 
 

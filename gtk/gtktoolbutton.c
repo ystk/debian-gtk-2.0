@@ -421,26 +421,29 @@ gtk_tool_button_construct_contents (GtkToolItem *tool_item)
 	  gtk_widget_show (label);
 	}
 
-      gtk_label_set_ellipsize (GTK_LABEL (label),
-			       gtk_tool_item_get_ellipsize_mode (GTK_TOOL_ITEM (button)));
-      text_orientation = gtk_tool_item_get_text_orientation (GTK_TOOL_ITEM (button));
-      if (text_orientation == GTK_ORIENTATION_HORIZONTAL)
-	{
-          gtk_label_set_angle (GTK_LABEL (label), 0);
-          gtk_misc_set_alignment (GTK_MISC (label),
-                                  gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)),
-                                  0.5);
-        }
-      else
+      if (GTK_IS_LABEL (label))
         {
-          gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_NONE);
-	  if (gtk_widget_get_direction (GTK_WIDGET (tool_item)) == GTK_TEXT_DIR_RTL)
-	    gtk_label_set_angle (GTK_LABEL (label), -90);
-	  else
-	    gtk_label_set_angle (GTK_LABEL (label), 90);
-          gtk_misc_set_alignment (GTK_MISC (label),
-                                  0.5,
-                                  1 - gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)));
+          gtk_label_set_ellipsize (GTK_LABEL (label),
+			           gtk_tool_item_get_ellipsize_mode (GTK_TOOL_ITEM (button)));
+          text_orientation = gtk_tool_item_get_text_orientation (GTK_TOOL_ITEM (button));
+          if (text_orientation == GTK_ORIENTATION_HORIZONTAL)
+	    {
+              gtk_label_set_angle (GTK_LABEL (label), 0);
+              gtk_misc_set_alignment (GTK_MISC (label),
+                                      gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)),
+                                      0.5);
+            }
+          else
+            {
+              gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_NONE);
+	      if (gtk_widget_get_direction (GTK_WIDGET (tool_item)) == GTK_TEXT_DIR_RTL)
+	        gtk_label_set_angle (GTK_LABEL (label), -90);
+	      else
+	        gtk_label_set_angle (GTK_LABEL (label), 90);
+              gtk_misc_set_alignment (GTK_MISC (label),
+                                      0.5,
+                                      1 - gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)));
+            }
         }
     }
 
@@ -470,11 +473,11 @@ gtk_tool_button_construct_contents (GtkToolItem *tool_item)
 	  gtk_widget_show (icon);
 	}
 
-      if (icon && text_orientation == GTK_ORIENTATION_HORIZONTAL)
+      if (GTK_IS_MISC (icon) && text_orientation == GTK_ORIENTATION_HORIZONTAL)
 	gtk_misc_set_alignment (GTK_MISC (icon),
 				1.0 - gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)),
 				0.5);
-      else if (icon)
+      else if (GTK_IS_MISC (icon))
 	gtk_misc_set_alignment (GTK_MISC (icon),
 				0.5,
 				gtk_tool_item_get_text_alignment (GTK_TOOL_ITEM (button)));
@@ -1006,7 +1009,7 @@ gtk_tool_button_set_label (GtkToolButton *button,
  * 
  * Since: 2.4
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_tool_button_get_label (GtkToolButton *button)
 {
   g_return_val_if_fail (GTK_IS_TOOL_BUTTON (button), NULL);
@@ -1107,7 +1110,7 @@ gtk_tool_button_set_stock_id (GtkToolButton *button,
  * 
  * Since: 2.4
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_tool_button_get_stock_id (GtkToolButton *button)
 {
   g_return_val_if_fail (GTK_IS_TOOL_BUTTON (button), NULL);
@@ -1158,7 +1161,7 @@ gtk_tool_button_set_icon_name (GtkToolButton *button,
  * 
  * Since: 2.8
  **/
-G_CONST_RETURN gchar*
+const gchar*
 gtk_tool_button_get_icon_name (GtkToolButton *button)
 {
   g_return_val_if_fail (GTK_IS_TOOL_BUTTON (button), NULL);
@@ -1249,12 +1252,13 @@ gtk_tool_button_set_label_widget (GtkToolButton *button,
 /**
  * gtk_tool_button_get_label_widget:
  * @button: a #GtkToolButton
- * 
- * Returns the widget used as label on @button. See
- * gtk_tool_button_set_label_widget().
- * 
- * Return value: The widget used as label on @button, or %NULL.
- * 
+ *
+ * Returns the widget used as label on @button.
+ * See gtk_tool_button_set_label_widget().
+ *
+ * Return value: (transfer none): The widget used as label
+ *     on @button, or %NULL.
+ *
  * Since: 2.4
  **/
 GtkWidget *
@@ -1268,12 +1272,13 @@ gtk_tool_button_get_label_widget (GtkToolButton *button)
 /**
  * gtk_tool_button_get_icon_widget:
  * @button: a #GtkToolButton
- * 
- * Return the widget used as icon widget on @button. See
- * gtk_tool_button_set_icon_widget().
- * 
- * Return value: The widget used as icon on @button, or %NULL.
- * 
+ *
+ * Return the widget used as icon widget on @button.
+ * See gtk_tool_button_set_icon_widget().
+ *
+ * Return value: (transfer none): The widget used as icon
+ *     on @button, or %NULL.
+ *
  * Since: 2.4
  **/
 GtkWidget *
