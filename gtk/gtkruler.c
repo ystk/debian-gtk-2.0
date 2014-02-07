@@ -29,6 +29,9 @@
 #include <math.h>
 #include <string.h>
 
+#undef GDK_DISABLE_DEPRECATED /* We need gdk_drawable_get_size() */
+#undef GTK_DISABLE_DEPRECATED
+
 #include "gtkorientable.h"
 #include "gtkruler.h"
 #include "gtkprivate.h"
@@ -278,26 +281,6 @@ gtk_ruler_get_property (GObject      *object,
     }
 }
 
-#if 0
-/**
- * gtk_ruler_new:
- * @orientation: the ruler's orientation.
- *
- * Creates a new #GtkRuler with the given orientation.
- *
- * Return value: a new #GtkRuler.
- *
- * Since: 2.16
- **/
-GtkWidget *
-gtk_ruler_new (GtkOrientation orientation)
-{
-  return g_object_new (GTK_TYPE_RULER,
-                       "orientation", orientation,
-                       NULL);
-}
-#endif
-
 void
 gtk_ruler_set_metric (GtkRuler      *ruler,
 		      GtkMetricType  metric)
@@ -319,6 +302,9 @@ gtk_ruler_set_metric (GtkRuler      *ruler,
  * Gets the units used for a #GtkRuler. See gtk_ruler_set_metric().
  *
  * Return value: the units currently used for @ruler
+ *
+ * @Deprecated: 2.24: #GtkRuler has been removed from GTK 3 for being
+ *              unmaintained and too specialized. There is no replacement.
  **/
 GtkMetricType
 gtk_ruler_get_metric (GtkRuler *ruler)
@@ -346,6 +332,9 @@ gtk_ruler_get_metric (GtkRuler *ruler)
  * leave for the text
  *
  * This sets the range of the ruler. 
+ *
+ * @Deprecated: 2.24: #GtkRuler has been removed from GTK 3 for being
+ *              unmaintained and too specialized. There is no replacement.
  */
 void
 gtk_ruler_set_range (GtkRuler *ruler,
@@ -394,6 +383,9 @@ gtk_ruler_set_range (GtkRuler *ruler,
  *
  * Retrieves values indicating the range and current position of a #GtkRuler.
  * See gtk_ruler_set_range().
+ *
+ * @Deprecated: 2.24: #GtkRuler has been removed from GTK 3 for being
+ *              unmaintained and too specialized. There is no replacement.
  **/
 void
 gtk_ruler_get_range (GtkRuler *ruler,
@@ -479,12 +471,6 @@ gtk_ruler_unrealize (GtkWidget *widget)
       ruler->backing_store = NULL;
     }
 
-  if (ruler->non_gr_exp_gc)
-    {
-      g_object_unref (ruler->non_gr_exp_gc);
-      ruler->non_gr_exp_gc = NULL;
-    }
-
   GTK_WIDGET_CLASS (gtk_ruler_parent_class)->unrealize (widget);
 }
 
@@ -558,15 +544,15 @@ gtk_ruler_expose (GtkWidget      *widget,
   if (gtk_widget_is_drawable (widget))
     {
       GtkRuler *ruler = GTK_RULER (widget);
+      cairo_t *cr;
 
       gtk_ruler_draw_ticks (ruler);
       
-      gdk_draw_drawable (widget->window,
-			 ruler->non_gr_exp_gc,
-			 ruler->backing_store,
-			 0, 0, 0, 0,
-			 widget->allocation.width,
-			 widget->allocation.height);
+      cr = gdk_cairo_create (widget->window);
+      gdk_cairo_set_source_pixmap (cr, ruler->backing_store, 0, 0);
+      gdk_cairo_rectangle (cr, &event->area);
+      cairo_fill (cr);
+      cairo_destroy (cr);
       
       gtk_ruler_draw_pos (ruler);
     }
@@ -600,12 +586,6 @@ gtk_ruler_make_pixmap (GtkRuler *ruler)
 
   ruler->xsrc = 0;
   ruler->ysrc = 0;
-
-  if (!ruler->non_gr_exp_gc)
-    {
-      ruler->non_gr_exp_gc = gdk_gc_new (widget->window);
-      gdk_gc_set_exposures (ruler->non_gr_exp_gc, FALSE);
-    }
 }
 
 static void
@@ -864,12 +844,15 @@ gtk_ruler_real_draw_pos (GtkRuler *ruler)
 
 	  /*  If a backing store exists, restore the ruler  */
 	  if (ruler->backing_store)
-	    gdk_draw_drawable (widget->window,
-			       widget->style->black_gc,
-			       ruler->backing_store,
-			       ruler->xsrc, ruler->ysrc,
-			       ruler->xsrc, ruler->ysrc,
-			       bs_width, bs_height);
+            {
+              cairo_t *cr = gdk_cairo_create (widget->window);
+
+              gdk_cairo_set_source_pixmap (cr, ruler->backing_store, 0, 0);
+              cairo_rectangle (cr, ruler->xsrc, ruler->ysrc, bs_width, bs_height);
+              cairo_fill (cr);
+
+              cairo_destroy (cr);
+            }
 
           if (private->orientation == GTK_ORIENTATION_HORIZONTAL)
             {

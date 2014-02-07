@@ -17,6 +17,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#undef GTK_DISABLE_DEPRECATED
+
 #include "config.h"
 
 #include <gtk/gtk.h>
@@ -30,7 +32,7 @@ static void         gail_combo_box_real_initialize         (AtkObject      *obj,
 
 static void         gail_combo_box_changed_gtk             (GtkWidget      *widget);
 
-static G_CONST_RETURN gchar* gail_combo_box_get_name       (AtkObject      *obj);
+static const gchar* gail_combo_box_get_name                (AtkObject      *obj);
 static gint         gail_combo_box_get_n_children          (AtkObject      *obj);
 static AtkObject*   gail_combo_box_ref_child               (AtkObject      *obj,
                                                             gint           i);
@@ -41,11 +43,11 @@ static gboolean     gail_combo_box_do_action               (AtkAction      *acti
                                                             gint           i);
 static gboolean     idle_do_action                         (gpointer       data);
 static gint         gail_combo_box_get_n_actions           (AtkAction      *action);
-static G_CONST_RETURN gchar* gail_combo_box_get_description(AtkAction      *action,
+static const gchar* gail_combo_box_get_description         (AtkAction      *action,
                                                             gint           i);
-static G_CONST_RETURN gchar* gail_combo_box_get_keybinding   (AtkAction       *action,
+static const gchar* gail_combo_box_get_keybinding          (AtkAction       *action,
 		                                             gint            i);
-static G_CONST_RETURN gchar* gail_combo_box_action_get_name(AtkAction      *action,
+static const gchar* gail_combo_box_action_get_name         (AtkAction      *action,
                                                             gint           i);
 static gboolean              gail_combo_box_set_description(AtkAction      *action,
                                                             gint           i,
@@ -116,7 +118,7 @@ gail_combo_box_real_initialize (AtkObject *obj,
       atk_object_set_parent (popup, obj);
       gail_combo_box->popup_set = TRUE;
     }
-  if (GTK_IS_COMBO_BOX_ENTRY (combo_box))
+  if (gtk_combo_box_get_has_entry (combo_box))
     atk_object_set_parent (gtk_widget_get_accessible (gtk_bin_get_child (GTK_BIN (combo_box))), obj);
 
   obj->role = ATK_ROLE_COMBO_BOX;
@@ -143,14 +145,14 @@ gail_combo_box_changed_gtk (GtkWidget *widget)
     }
 }
 
-static G_CONST_RETURN gchar* 
+static const gchar*
 gail_combo_box_get_name (AtkObject *obj)
 {
   GtkWidget *widget;
   GtkComboBox *combo_box;
   GailComboBox *gail_combo_box;
   GtkTreeIter iter;
-  G_CONST_RETURN gchar *name;
+  const gchar *name;
   GtkTreeModel *model;
   gint n_columns;
   gint i;
@@ -214,7 +216,8 @@ gail_combo_box_get_n_children (AtkObject* obj)
     return 0;
 
   n_children++;
-  if (GTK_IS_COMBO_BOX_ENTRY (widget))
+  if (gtk_combo_box_get_has_entry (GTK_COMBO_BOX (widget)) ||
+      GTK_IS_COMBO_BOX_ENTRY (widget))
     n_children ++;
 
   return n_children;
@@ -248,7 +251,8 @@ gail_combo_box_ref_child (AtkObject *obj,
           box->popup_set = TRUE;
         }
     }
-  else if (i == 1 && GTK_IS_COMBO_BOX_ENTRY (widget))
+  else if (i == 1 && (gtk_combo_box_get_has_entry (GTK_COMBO_BOX (widget)) ||
+                      GTK_IS_COMBO_BOX_ENTRY (widget)))
     {
       child = gtk_widget_get_accessible (gtk_bin_get_child (GTK_BIN (widget)));
     }
@@ -337,7 +341,7 @@ gail_combo_box_get_n_actions (AtkAction *action)
   return 1;
 }
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_combo_box_get_description (AtkAction *action,
                            gint      i)
 {
@@ -352,7 +356,7 @@ gail_combo_box_get_description (AtkAction *action,
     return NULL;
 }
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_combo_box_get_keybinding (AtkAction *action,
 		                    gint      i)
 {
@@ -406,7 +410,7 @@ gail_combo_box_get_keybinding (AtkAction *action,
 }
 
 
-static G_CONST_RETURN gchar*
+static const gchar*
 gail_combo_box_action_get_name (AtkAction *action,
                                 gint      i)
 {

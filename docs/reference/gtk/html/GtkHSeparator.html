@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>GtkHSeparator</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="index.html" title="GTK+ Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GTK+ 2 Reference Manual">
 <link rel="up" href="Ornaments.html" title="Ornaments">
 <link rel="prev" href="GtkFrame.html" title="GtkFrame">
 <link rel="next" href="GtkVSeparator.html" title="GtkVSeparator">
-<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -17,7 +17,7 @@
 <td><a accesskey="p" href="GtkFrame.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
 <td><a accesskey="u" href="Ornaments.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
-<th width="100%" align="center">GTK+ Reference Manual</th>
+<th width="100%" align="center">GTK+ 2 Reference Manual</th>
 <td><a accesskey="n" href="GtkVSeparator.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
 <tr><td colspan="5" class="shortcuts">
@@ -30,7 +30,7 @@
                   <a href="#GtkHSeparator.implemented-interfaces" class="shortcut">Implemented Interfaces</a>
 </td></tr>
 </table>
-<div class="refentry" title="GtkHSeparator">
+<div class="refentry">
 <a name="GtkHSeparator"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -39,40 +39,40 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv" title="Synopsis">
+<div class="refsynopsisdiv">
 <a name="GtkHSeparator.synopsis"></a><h2>Synopsis</h2>
 <pre class="synopsis">
 #include &lt;gtk/gtk.h&gt;
 
-                    <a class="link" href="GtkHSeparator.html#GtkHSeparator-struct" title="GtkHSeparator">GtkHSeparator</a>;
-<a class="link" href="GtkWidget.html" title="GtkWidget"><span class="returnvalue">GtkWidget</span></a>*          <a class="link" href="GtkHSeparator.html#gtk-hseparator-new" title="gtk_hseparator_new ()">gtk_hseparator_new</a>                  (<em class="parameter"><code><span class="type">void</span></code></em>);
+struct              <a class="link" href="GtkHSeparator.html#GtkHSeparator-struct" title="struct GtkHSeparator">GtkHSeparator</a>;
+<a class="link" href="GtkWidget.html" title="GtkWidget"><span class="returnvalue">GtkWidget</span></a> *         <a class="link" href="GtkHSeparator.html#gtk-hseparator-new" title="gtk_hseparator_new ()">gtk_hseparator_new</a>                  (<em class="parameter"><code><span class="type">void</span></code></em>);
 </pre>
 </div>
-<div class="refsect1" title="Object Hierarchy">
+<div class="refsect1">
 <a name="GtkHSeparator.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
-  <a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject">GObject</a>
-   +----<a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GInitiallyUnowned">GInitiallyUnowned</a>
+  <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
+   +----<a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GInitiallyUnowned">GInitiallyUnowned</a>
          +----<a class="link" href="GtkObject.html" title="GtkObject">GtkObject</a>
                +----<a class="link" href="GtkWidget.html" title="GtkWidget">GtkWidget</a>
                      +----<a class="link" href="GtkSeparator.html" title="GtkSeparator">GtkSeparator</a>
                            +----GtkHSeparator
 </pre>
 </div>
-<div class="refsect1" title="Implemented Interfaces">
+<div class="refsect1">
 <a name="GtkHSeparator.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
 <p>
 GtkHSeparator implements
- AtkImplementorIface,  <a class="link" href="gtk-gtkbuildable.html#GtkBuildable">GtkBuildable</a> and  <a class="link" href="gtk-Orientable.html#GtkOrientable">GtkOrientable</a>.</p>
+ AtkImplementorIface,  <a class="link" href="GtkBuildable.html" title="GtkBuildable">GtkBuildable</a> and  <a class="link" href="gtk-Orientable.html#GtkOrientable">GtkOrientable</a>.</p>
 </div>
-<div class="refsect1" title="Description">
+<div class="refsect1">
 <a name="GtkHSeparator.description"></a><h2>Description</h2>
 <p>
 The <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a> widget is a horizontal separator, used to group the
 widgets within a window. It displays a horizontal line with a shadow to
 make it appear sunken into the interface.
 </p>
-<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;">
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
 <h3 class="title">Note</h3>
 <p>
 The <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a> widget is not used as a separator within menus.
@@ -82,20 +82,20 @@ widget using <a class="link" href="GtkSeparatorMenuItem.html#gtk-separator-menu-
 </p>
 </div>
 </div>
-<div class="refsect1" title="Details">
+<div class="refsect1">
 <a name="GtkHSeparator.details"></a><h2>Details</h2>
-<div class="refsect2" title="GtkHSeparator">
-<a name="GtkHSeparator-struct"></a><h3>GtkHSeparator</h3>
-<pre class="programlisting">typedef struct _GtkHSeparator GtkHSeparator;</pre>
+<div class="refsect2">
+<a name="GtkHSeparator-struct"></a><h3>struct GtkHSeparator</h3>
+<pre class="programlisting">struct GtkHSeparator;</pre>
 <p>
-The <a class="link" href="GtkHSeparator.html#GtkHSeparator-struct" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a> struct contains private data only, and
+The <a class="link" href="GtkHSeparator.html#GtkHSeparator-struct" title="struct GtkHSeparator"><span class="type">GtkHSeparator</span></a> struct contains private data only, and
 should be accessed using the functions below.
 </p>
 </div>
 <hr>
-<div class="refsect2" title="gtk_hseparator_new ()">
+<div class="refsect2">
 <a name="gtk-hseparator-new"></a><h3>gtk_hseparator_new ()</h3>
-<pre class="programlisting"><a class="link" href="GtkWidget.html" title="GtkWidget"><span class="returnvalue">GtkWidget</span></a>*          gtk_hseparator_new                  (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<pre class="programlisting"><a class="link" href="GtkWidget.html" title="GtkWidget"><span class="returnvalue">GtkWidget</span></a> *         gtk_hseparator_new                  (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>
 Creates a new <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a>.
 </p>
@@ -103,13 +103,12 @@ Creates a new <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><s
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a new <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a>.
-</td>
+<td>a new <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><span class="type">GtkHSeparator</span></a>.</td>
 </tr></tbody>
 </table></div>
 </div>
 </div>
-<div class="refsect1" title="See Also">
+<div class="refsect1">
 <a name="GtkHSeparator.see-also"></a><h2>See Also</h2>
 <p>
 </p>
@@ -126,6 +125,6 @@ Creates a new <a class="link" href="GtkHSeparator.html" title="GtkHSeparator"><s
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.14</div>
+          Generated by GTK-Doc V1.18</div>
 </body>
 </html>

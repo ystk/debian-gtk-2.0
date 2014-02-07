@@ -21,6 +21,8 @@
  *	Mark McLoughlin <mark@skynet.ie>
  */
 
+#undef GTK_DISABLE_DEPRECATED
+
 #include <gtk/gtk.h>
 #include <stdlib.h>
 
@@ -75,12 +77,12 @@ update_icons (void)
 
   if (status == TEST_STATUS_INFO)
     {
-      icon_name = GTK_STOCK_DIALOG_INFO;
+      icon_name = "dialog-information";
       tooltip = "Some Information ...";
     }
   else
     {
-      icon_name = GTK_STOCK_DIALOG_QUESTION;
+      icon_name = "dialog-question";
       tooltip = "Some Question ...";
     }
 

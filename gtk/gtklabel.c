@@ -33,6 +33,7 @@
 #include "gtkdnd.h"
 #include "gtkmain.h"
 #include "gtkmarshalers.h"
+#include "gtkpango.h"
 #include "gtkwindow.h"
 #include "gdk/gdkkeysyms.h"
 #include "gtkclipboard.h"
@@ -1731,8 +1732,8 @@ gtk_label_set_mnemonic_widget (GtkLabel  *label,
  * Retrieves the target of the mnemonic (keyboard shortcut) of this
  * label. See gtk_label_set_mnemonic_widget().
  *
- * Return value: the target of the label's mnemonic, or %NULL if none
- *               has been set and the default algorithm will be used.
+ * Return value: (transfer none): the target of the label's mnemonic,
+ *     or %NULL if none has been set and the default algorithm will be used.
  **/
 GtkWidget *
 gtk_label_get_mnemonic_widget (GtkLabel *label)
@@ -1962,7 +1963,8 @@ gtk_label_set_attributes (GtkLabel         *label,
  * effective attributes for the label, use
  * pango_layout_get_attribute (gtk_label_get_layout (label)).
  *
- * Return value: the attribute list, or %NULL if none was set.
+ * Return value: (transfer none): the attribute list, or %NULL
+ *     if none was set.
  **/
 PangoAttrList *
 gtk_label_get_attributes (GtkLabel *label)
@@ -2007,7 +2009,7 @@ gtk_label_set_label (GtkLabel    *label,
  * Return value: the text of the label widget. This string is
  *   owned by the widget and must not be modified or freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_label_get_label (GtkLabel *label)
 {
   g_return_val_if_fail (GTK_IS_LABEL (label), NULL);
@@ -2465,7 +2467,7 @@ gtk_label_set_markup_with_mnemonic (GtkLabel    *label,
  * Return value: the text in the label widget. This is the internal
  *   string used by the label, and must not be modified.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_label_get_text (GtkLabel *label)
 {
   g_return_val_if_fail (GTK_IS_LABEL (label), NULL);
@@ -3582,6 +3584,7 @@ gtk_label_expose (GtkWidget      *widget,
           gint range[2];
           GdkRegion *clip;
 	  GtkStateType state;
+          cairo_t *cr;
 
           range[0] = info->selection_anchor;
           range[1] = info->selection_end;
@@ -3603,21 +3606,23 @@ gtk_label_expose (GtkWidget      *widget,
            * region
            */
 
-          gdk_gc_set_clip_region (widget->style->black_gc, clip);
+          cr = gdk_cairo_create (event->window);
 
+          gdk_cairo_region (cr, clip);
+          cairo_clip (cr);
 
 	  state = GTK_STATE_SELECTED;
 	  if (!gtk_widget_has_focus (widget))
 	    state = GTK_STATE_ACTIVE;
 
-          gdk_draw_layout_with_colors (widget->window,
-                                       widget->style->black_gc,
-                                       x, y,
-                                       label->layout,
-                                       &widget->style->text[state],
-                                       &widget->style->base[state]);
+          gdk_cairo_set_source_color (cr, &widget->style->base[state]);
+          cairo_paint (cr);
 
-          gdk_gc_set_clip_region (widget->style->black_gc, NULL);
+          gdk_cairo_set_source_color (cr, &widget->style->text[state]);
+          cairo_move_to (cr, x, y);
+          _gtk_pango_fill_layout (cr, label->layout);
+
+          cairo_destroy (cr);
           gdk_region_destroy (clip);
         }
       else if (info)
@@ -3638,16 +3643,26 @@ gtk_label_expose (GtkWidget      *widget,
           focus_link = gtk_label_get_focus_link (label);
           active_link = info->active_link;
 
+
           if (active_link)
             {
+              cairo_t *cr;
+
               range[0] = active_link->start;
               range[1] = active_link->end;
+
+              cr = gdk_cairo_create (event->window);
+
+              gdk_cairo_region (cr, event->region);
+              cairo_clip (cr);
 
               clip = gdk_pango_layout_get_clip_region (label->layout,
                                                        x, y,
                                                        range,
                                                        1);
-              gdk_gc_set_clip_region (widget->style->black_gc, clip);
+              gdk_cairo_region (cr, clip);
+              cairo_clip (cr);
+              gdk_region_destroy (clip);
 
               gtk_label_get_link_colors (widget, &link_color, &visited_link_color);
               if (active_link->visited)
@@ -3658,17 +3673,18 @@ gtk_label_expose (GtkWidget      *widget,
                 base_color = &widget->style->base[GTK_STATE_ACTIVE];
               else
                 base_color = &widget->style->base[GTK_STATE_PRELIGHT];
-              gdk_draw_layout_with_colors (widget->window,
-                                           widget->style->black_gc,
-                                           x, y,
-                                           label->layout,
-                                           text_color,
-                                           base_color);
+
+              gdk_cairo_set_source_color (cr, base_color);
+              cairo_paint (cr);
+
+              gdk_cairo_set_source_color (cr, text_color);
+              cairo_move_to (cr, x, y);
+              _gtk_pango_fill_layout (cr, label->layout);
+
               gdk_color_free (link_color);
               gdk_color_free (visited_link_color);
 
-              gdk_gc_set_clip_region (widget->style->black_gc, NULL);
-              gdk_region_destroy (clip);
+              cairo_destroy (cr);
             }
 
           if (focus_link && gtk_widget_has_focus (widget))
@@ -4173,16 +4189,16 @@ gtk_label_button_press (GtkWidget      *widget,
 
   if (info->active_link)
     {
-      if (event->button == 1)
-        {
-          info->link_clicked = 1;
-          gtk_widget_queue_draw (widget);
-        }
-      else if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
+      if (_gtk_button_event_triggers_context_menu (event))
         {
           info->link_clicked = 1;
           gtk_label_do_popup (label, event);
           return TRUE;
+        }
+      else if (event->button == 1)
+        {
+          info->link_clicked = 1;
+          gtk_widget_queue_draw (widget);
         }
     }
 
@@ -4192,7 +4208,13 @@ gtk_label_button_press (GtkWidget      *widget,
   info->in_drag = FALSE;
   info->select_words = FALSE;
 
-  if (event->button == 1)
+  if (_gtk_button_event_triggers_context_menu (event))
+    {
+      gtk_label_do_popup (label, event);
+
+      return TRUE;
+    }
+  else if (event->button == 1)
     {
       if (!gtk_widget_has_focus (widget))
 	{
@@ -4255,12 +4277,7 @@ gtk_label_button_press (GtkWidget      *widget,
 
       return TRUE;
     }
-  else if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
-    {
-      gtk_label_do_popup (label, event);
 
-      return TRUE;
-    }
   return FALSE;
 }
 
@@ -4934,8 +4951,8 @@ gtk_label_select_region  (GtkLabel *label,
 /**
  * gtk_label_get_selection_bounds:
  * @label: a #GtkLabel
- * @start: return location for start of selection, as a character offset
- * @end: return location for end of selection, as a character offset
+ * @start: (out): return location for start of selection, as a character offset
+ * @end: (out): return location for end of selection, as a character offset
  * 
  * Gets the selected range of characters in the label, returning %TRUE
  * if there's a selection.
@@ -5024,8 +5041,8 @@ gtk_label_get_layout (GtkLabel *label)
 /**
  * gtk_label_get_layout_offsets:
  * @label: a #GtkLabel
- * @x: (allow-none): location to store X offset of layout, or %NULL
- * @y: (allow-none): location to store Y offset of layout, or %NULL
+ * @x: (out) (allow-none): location to store X offset of layout, or %NULL
+ * @y: (out) (allow-none): location to store Y offset of layout, or %NULL
  *
  * Obtains the coordinates where the label will draw the #PangoLayout
  * representing the text in the label; useful to convert mouse events
@@ -5904,7 +5921,7 @@ gtk_label_get_current_link (GtkLabel *label)
  *
  * Since: 2.18
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_label_get_current_uri (GtkLabel *label)
 {
   GtkLabelLink *link;

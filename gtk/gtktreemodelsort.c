@@ -324,10 +324,10 @@ gtk_tree_model_sort_drag_source_init (GtkTreeDragSourceIface *iface)
  *
  * Creates a new #GtkTreeModel, with @child_model as the child model.
  *
- * Return value: A new #GtkTreeModel.
+ * Return value: (transfer full): A new #GtkTreeModel.
  */
 GtkTreeModel *
-gtk_tree_model_sort_new_with_model (GtkTreeModel      *child_model)
+gtk_tree_model_sort_new_with_model (GtkTreeModel *child_model)
 {
   GtkTreeModel *retval;
 
@@ -1989,7 +1989,7 @@ gtk_tree_model_sort_set_model (GtkTreeModelSort *tree_model_sort,
  *
  * Returns the model the #GtkTreeModelSort is sorting.
  *
- * Return value: the "child model" being sorted
+ * Return value: (transfer none): the "child model" being sorted
  **/
 GtkTreeModel *
 gtk_tree_model_sort_get_model (GtkTreeModelSort *tree_model)
@@ -2087,7 +2087,7 @@ gtk_tree_model_sort_convert_child_path_to_path (GtkTreeModelSort *tree_model_sor
 /**
  * gtk_tree_model_sort_convert_child_iter_to_iter:
  * @tree_model_sort: A #GtkTreeModelSort
- * @sort_iter: An uninitialized #GtkTreeIter.
+ * @sort_iter: (out): An uninitialized #GtkTreeIter.
  * @child_iter: A valid #GtkTreeIter pointing to a row on the child model
  * 
  * Sets @sort_iter to point to the row in @tree_model_sort that corresponds to
@@ -2194,7 +2194,7 @@ gtk_tree_model_sort_convert_path_to_child_path (GtkTreeModelSort *tree_model_sor
 /**
  * gtk_tree_model_sort_convert_iter_to_child_iter:
  * @tree_model_sort: A #GtkTreeModelSort
- * @child_iter: An uninitialized #GtkTreeIter
+ * @child_iter: (out): An uninitialized #GtkTreeIter
  * @sorted_iter: A valid #GtkTreeIter pointing to a row on @tree_model_sort.
  * 
  * Sets @child_iter to point to the row pointed to by @sorted_iter.

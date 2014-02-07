@@ -50,7 +50,7 @@ static void gtk_image_menu_item_toggle_size_request  (GtkMenuItem      *menu_ite
 						      gint             *requisition);
 static void gtk_image_menu_item_set_label            (GtkMenuItem      *menu_item,
 						      const gchar      *label);
-static G_CONST_RETURN gchar *gtk_image_menu_item_get_label (GtkMenuItem *menu_item);
+static const gchar *gtk_image_menu_item_get_label (GtkMenuItem *menu_item);
 
 static void gtk_image_menu_item_forall               (GtkContainer    *container,
 						      gboolean	       include_internals,
@@ -396,7 +396,7 @@ gtk_image_menu_item_set_label (GtkMenuItem      *menu_item,
     }
 }
 
-static G_CONST_RETURN gchar *
+static const gchar *
 gtk_image_menu_item_get_label (GtkMenuItem *menu_item)
 {
   GtkImageMenuItemPrivate *priv = GET_PRIVATE (menu_item);
@@ -726,8 +726,8 @@ gtk_image_menu_item_new_with_mnemonic (const gchar *label)
 /**
  * gtk_image_menu_item_new_from_stock:
  * @stock_id: the name of the stock item.
- * @accel_group: the #GtkAccelGroup to add the menu items accelerator to,
- *   or %NULL.
+ * @accel_group: (allow-none): the #GtkAccelGroup to add the menu items 
+ *   accelerator to, or %NULL.
  * @returns: a new #GtkImageMenuItem.
  *
  * Creates a new #GtkImageMenuItem containing the image and text from a 
@@ -951,11 +951,12 @@ gtk_image_menu_item_set_image (GtkImageMenuItem *image_menu_item,
 
 /**
  * gtk_image_menu_item_get_image:
- * @image_menu_item: a #GtkImageMenuItem.
- * @returns: the widget set as image of @image_menu_item.
+ * @image_menu_item: a #GtkImageMenuItem
  *
  * Gets the widget that is currently set as the image of @image_menu_item.
  * See gtk_image_menu_item_set_image().
+ *
+ * Return value: (transfer none): the widget set as image of @image_menu_item
  **/
 GtkWidget*
 gtk_image_menu_item_get_image (GtkImageMenuItem *image_menu_item)

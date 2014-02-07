@@ -36,8 +36,8 @@
 #include "gtkstock.h"
 #include "gtkshow.h"
 #include "gtktooltip.h"
-
 #include "gtklinkbutton.h"
+#include "gtkprivate.h"
 
 #include "gtkintl.h"
 #include "gtkalias.h"
@@ -455,7 +455,7 @@ gtk_link_button_button_press (GtkWidget      *widget,
   if (!gtk_widget_has_focus (widget))
     gtk_widget_grab_focus (widget);
 
-  if ((event->button == 3) && (event->type == GDK_BUTTON_PRESS))
+  if (_gtk_button_event_triggers_context_menu (event))
     {
       gtk_link_button_do_popup (GTK_LINK_BUTTON (widget), event);
       
@@ -693,7 +693,7 @@ gtk_link_button_set_uri (GtkLinkButton *link_button,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_link_button_get_uri (GtkLinkButton *link_button)
 {
   g_return_val_if_fail (GTK_IS_LINK_BUTTON (link_button), NULL);
@@ -716,6 +716,8 @@ gtk_link_button_get_uri (GtkLinkButton *link_button)
  * Return value: the previously set hook function.
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.24: Use the #GtkButton::clicked signal instead
  */
 GtkLinkButtonUriFunc
 gtk_link_button_set_uri_hook (GtkLinkButtonUriFunc func,

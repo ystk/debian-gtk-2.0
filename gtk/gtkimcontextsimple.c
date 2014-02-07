@@ -669,7 +669,7 @@ beep_window (GdkWindow *window)
     }
   else
     {
-      GdkScreen *screen = gdk_drawable_get_screen (GDK_DRAWABLE (window));
+      GdkScreen *screen = gdk_window_get_screen (window);
       gboolean   beep;
 
       g_object_get (gtk_settings_get_for_screen (screen),
@@ -744,7 +744,7 @@ is_hex_keyval (guint keyval)
 static guint
 canonical_hex_keyval (GdkEventKey *event)
 {
-  GdkKeymap *keymap = gdk_keymap_get_for_display (gdk_drawable_get_display (event->window));
+  GdkKeymap *keymap = gdk_keymap_get_for_display (gdk_window_get_display (event->window));
   guint keyval;
   guint *keyvals = NULL;
   gint n_vals = 0;
@@ -871,7 +871,7 @@ gtk_im_context_simple_filter_keypress (GtkIMContext *context,
       (context_simple->in_hex_sequence && !hex_keyval && 
        !is_hex_start && !is_hex_end && !is_escape && !is_backspace))
     {
-      if (event->state & (GDK_MOD1_MASK | GDK_CONTROL_MASK) ||
+      if (event->state & GTK_NO_TEXT_INPUT_MOD_MASK ||
 	  (context_simple->in_hex_sequence && context_simple->modifiers_dropped &&
 	   (event->keyval == GDK_Return || 
 	    event->keyval == GDK_ISO_Enter ||

@@ -495,7 +495,7 @@ gtk_paper_size_get_paper_sizes (gboolean include_custom)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_paper_size_get_name (GtkPaperSize *size)
 {
   if (size->name)
@@ -514,7 +514,7 @@ gtk_paper_size_get_name (GtkPaperSize *size)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_paper_size_get_display_name (GtkPaperSize *size)
 {
   const gchar *display_name;
@@ -539,7 +539,7 @@ gtk_paper_size_get_display_name (GtkPaperSize *size)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_paper_size_get_ppd_name (GtkPaperSize *size)
 {
   if (size->ppd_name)
@@ -639,7 +639,7 @@ gtk_paper_size_set_size (GtkPaperSize *size,
  * 
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_paper_size_get_default (void)
 {
   char *locale, *freeme = NULL;
@@ -669,10 +669,11 @@ gtk_paper_size_get_default (void)
   if (!locale)
     return GTK_PAPER_NAME_A4;
 
-  if (g_str_has_prefix (locale, "en_CA") ||
-      g_str_has_prefix (locale, "en_US") ||
-      g_str_has_prefix (locale, "es_PR") ||
-      g_str_has_prefix (locale, "es_US"))
+  /* CLDR 1.8.1
+   * http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/territory_language_information.html
+   */
+  if (g_regex_match_simple("[^_.@]{2,3}_(BZ|CA|CL|CO|CR|GT|MX|NI|PA|PH|PR|SV|US|VE)",
+                           locale, G_REGEX_ANCHORED, G_REGEX_MATCH_ANCHORED))
     paper_size = GTK_PAPER_NAME_LETTER;
   else
     paper_size = GTK_PAPER_NAME_A4;

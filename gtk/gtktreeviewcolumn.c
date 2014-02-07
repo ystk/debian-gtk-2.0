@@ -1293,7 +1293,7 @@ _gtk_tree_view_column_realize_button (GtkTreeViewColumn *column)
 		     GDK_POINTER_MOTION_HINT_MASK |
 		     GDK_KEY_PRESS_MASK);
   attributes_mask = GDK_WA_CURSOR | GDK_WA_X | GDK_WA_Y;
-  attr.cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (tree_view->priv->header_window),
+  attr.cursor = gdk_cursor_new_for_display (gdk_window_get_display (tree_view->priv->header_window),
 					    GDK_SB_H_DOUBLE_ARROW);
   attr.y = 0;
   attr.width = TREE_VIEW_DRAG_WIDTH;
@@ -2137,7 +2137,7 @@ gtk_tree_view_column_set_title (GtkTreeViewColumn *tree_column,
  * Return value: the title of the column. This string should not be
  * modified or freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_tree_view_column_get_title (GtkTreeViewColumn *tree_column)
 {
   g_return_val_if_fail (GTK_IS_TREE_VIEW_COLUMN (tree_column), NULL);
@@ -2271,11 +2271,12 @@ gtk_tree_view_column_set_widget (GtkTreeViewColumn *tree_column,
 /**
  * gtk_tree_view_column_get_widget:
  * @tree_column: A #GtkTreeViewColumn.
- * 
- * Returns the #GtkWidget in the button on the column header.  If a custom
- * widget has not been set then %NULL is returned.
- * 
- * Return value: The #GtkWidget in the column header, or %NULL
+ *
+ * Returns the #GtkWidget in the button on the column header.
+ * If a custom widget has not been set then %NULL is returned.
+ *
+ * Return value: (transfer none): The #GtkWidget in the column
+ *     header, or %NULL
  **/
 GtkWidget *
 gtk_tree_view_column_get_widget (GtkTreeViewColumn *tree_column)
@@ -2599,10 +2600,10 @@ gtk_tree_view_column_cell_set_cell_data (GtkTreeViewColumn *tree_column,
  * gtk_tree_view_column_cell_get_size:
  * @tree_column: A #GtkTreeViewColumn.
  * @cell_area: (allow-none): The area a cell in the column will be allocated, or %NULL
- * @x_offset: (allow-none): location to return x offset of a cell relative to @cell_area, or %NULL
- * @y_offset: (allow-none): location to return y offset of a cell relative to @cell_area, or %NULL
- * @width: (allow-none): location to return width needed to render a cell, or %NULL
- * @height: (allow-none): location to return height needed to render a cell, or %NULL
+ * @x_offset: (out) (allow-none): location to return x offset of a cell relative to @cell_area, or %NULL
+ * @y_offset: (out) (allow-none): location to return y offset of a cell relative to @cell_area, or %NULL
+ * @width: (out) (allow-none): location to return width needed to render a cell, or %NULL
+ * @height: (out) (allow-none): location to return height needed to render a cell, or %NULL
  * 
  * Obtains the width and height needed to render the column.  This is used
  * primarily by the #GtkTreeView.
@@ -3767,12 +3768,12 @@ gtk_tree_view_column_queue_resize (GtkTreeViewColumn *tree_column)
  * gtk_tree_view_column_get_tree_view:
  * @tree_column: A #GtkTreeViewColumn
  *
- * Returns the #GtkTreeView wherein @tree_column has been inserted.  If
- * @column is currently not inserted in any tree view, %NULL is
+ * Returns the #GtkTreeView wherein @tree_column has been inserted.
+ * If @column is currently not inserted in any tree view, %NULL is
  * returned.
  *
- * Return value: The tree view wherein @column has been inserted if any,
- *               %NULL otherwise.
+ * Return value: (transfer none): The tree view wherein @column has
+ *     been inserted if any, %NULL otherwise.
  *
  * Since: 2.12
  */

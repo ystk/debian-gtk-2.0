@@ -161,10 +161,10 @@ static const GOptionEntry gdk_args[] = {
     /* Placeholder in --screen=SCREEN in --help output */      N_("SCREEN") },
 #ifdef G_ENABLE_DEBUG
   { "gdk-debug",    0, 0, G_OPTION_ARG_CALLBACK, gdk_arg_debug_cb,  
-    /* Description of --gdk-debug=FLAGS in --help output */    N_("Gdk debugging flags to set"),
+    /* Description of --gdk-debug=FLAGS in --help output */    N_("GDK debugging flags to set"),
     /* Placeholder in --gdk-debug=FLAGS in --help output */    N_("FLAGS") },
   { "gdk-no-debug", 0, 0, G_OPTION_ARG_CALLBACK, gdk_arg_no_debug_cb, 
-    /* Description of --gdk-no-debug=FLAGS in --help output */ N_("Gdk debugging flags to unset"), 
+    /* Description of --gdk-no-debug=FLAGS in --help output */ N_("GDK debugging flags to unset"),
     /* Placeholder in --gdk-no-debug=FLAGS in --help output */ N_("FLAGS") },
 #endif 
   { NULL }
@@ -225,7 +225,7 @@ gdk_pre_parse_libgtk_only (void)
 /**
  * gdk_parse_args:
  * @argc: the number of command line arguments.
- * @argv: the array of command line arguments.
+ * @argv: (inout) (array length=argc): the array of command line arguments.
  * 
  * Parse command line arguments, and store for future
  * use by calls to gdk_display_open().
@@ -284,7 +284,7 @@ gdk_parse_args (int    *argc,
  *
  * Since: 2.2
  */
-G_CONST_RETURN gchar *
+const gchar *
 gdk_get_display_arg_name (void)
 {
   if (!_gdk_display_arg_name)
@@ -798,7 +798,7 @@ gdk_threads_add_timeout_seconds (guint       interval,
 }
 
 
-G_CONST_RETURN char *
+const char *
 gdk_get_program_class (void)
 {
   return gdk_progclass;

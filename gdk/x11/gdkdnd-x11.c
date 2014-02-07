@@ -30,6 +30,9 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
+#ifdef HAVE_XCOMPOSITE
+#include <X11/extensions/Xcomposite.h>
+#endif
 
 #include <string.h>
 
@@ -67,6 +70,7 @@ typedef struct {
   GHashTable *child_hash;
   guint old_event_mask;
   GdkScreen *screen;
+  gint ref_count;
 } GdkWindowCache;
 
 /* Structure that holds information about a drag in progress.
@@ -102,7 +106,9 @@ struct _GdkDragContextPrivateX11 {
 
 /* Forward declarations */
 
-static void gdk_window_cache_destroy (GdkWindowCache *cache);
+static GdkWindowCache *gdk_window_cache_get   (GdkScreen      *screen);
+static GdkWindowCache *gdk_window_cache_ref   (GdkWindowCache *cache);
+static void            gdk_window_cache_unref (GdkWindowCache *cache);
 
 static void motif_read_target_table (GdkDisplay *display);
 
@@ -136,6 +142,7 @@ static void   xdnd_manage_source_filter (GdkDragContext *context,
 static void gdk_drag_context_finalize   (GObject              *object);
 
 static GList *contexts;
+static GSList *window_caches;
 
 static const struct {
   const char *atom_name;
@@ -180,7 +187,6 @@ gdk_drag_context_finalize (GObject *object)
 {
   GdkDragContext *context = GDK_DRAG_CONTEXT (object);
   GdkDragContextPrivateX11 *private = PRIVATE_DATA (context);
-  GSList *tmp_list;
   
   g_list_free (context->targets);
 
@@ -196,9 +202,8 @@ gdk_drag_context_finalize (GObject *object)
   if (context->dest_window)
     g_object_unref (context->dest_window);
 
-  for (tmp_list = private->window_caches; tmp_list; tmp_list = tmp_list->next)
-    gdk_window_cache_destroy (tmp_list->data);
-  g_slist_free (private->window_caches);
+  g_slist_free_full (private->window_caches, (GDestroyNotify)gdk_window_cache_unref);
+  private->window_caches = NULL;
   
   contexts = g_list_remove (contexts, context);
 
@@ -213,6 +218,9 @@ gdk_drag_context_finalize (GObject *object)
  * Creates a new #GdkDragContext.
  * 
  * Return value: the newly created #GdkDragContext.
+ *
+ * Deprecated: 2.24: This function is not useful, you always
+ *   obtain drag contexts by gdk_drag_begin() or similar.
  **/
 GdkDragContext *
 gdk_drag_context_new (void)
@@ -520,12 +528,14 @@ gdk_window_cache_new (GdkScreen *screen)
   GdkWindow *root_window = gdk_screen_get_root_window (screen);
   GdkChildInfoX11 *children;
   guint nchildren, i;
+  Window cow;
   
   GdkWindowCache *result = g_new (GdkWindowCache, 1);
 
   result->children = NULL;
   result->child_hash = g_hash_table_new (g_direct_hash, NULL);
   result->screen = screen;
+  result->ref_count = 1;
 
   XGetWindowAttributes (xdisplay, GDK_WINDOW_XWINDOW (root_window), &xwa);
   result->old_event_mask = xwa.your_event_mask;
@@ -568,6 +578,22 @@ gdk_window_cache_new (GdkScreen *screen)
 
   g_free (children);
 
+#ifdef HAVE_XCOMPOSITE
+  /*
+   * Add the composite overlay window to the cache, as this can be a reasonable
+   * Xdnd proxy as well.
+   * This is only done when the screen is composited in order to avoid mapping
+   * the COW. We assume that the CM is using the COW (which is true for pretty
+   * much any CM currently in use).
+   */
+  if (gdk_screen_is_composited (screen))
+    {
+      cow = XCompositeGetOverlayWindow (xdisplay, GDK_WINDOW_XWINDOW (root_window));
+      gdk_window_cache_add (result, cow, 0, 0, gdk_screen_get_width (screen), gdk_screen_get_height (screen), TRUE);
+      XCompositeReleaseOverlayWindow (xdisplay, GDK_WINDOW_XWINDOW (root_window));
+    }
+#endif
+
   return result;
 }
 
@@ -596,6 +622,49 @@ gdk_window_cache_destroy (GdkWindowCache *cache)
   g_free (cache);
 }
 
+static GdkWindowCache *
+gdk_window_cache_ref (GdkWindowCache *cache)
+{
+  cache->ref_count += 1;
+
+  return cache;
+}
+
+static void
+gdk_window_cache_unref (GdkWindowCache *cache)
+{
+  g_assert (cache->ref_count > 0);
+
+  cache->ref_count -= 1;
+
+  if (cache->ref_count == 0)
+    {
+      window_caches = g_slist_remove (window_caches, cache);
+      gdk_window_cache_destroy (cache);
+    }
+}
+
+GdkWindowCache *
+gdk_window_cache_get (GdkScreen *screen)
+{
+  GSList *list;
+  GdkWindowCache *cache;
+
+  for (list = window_caches; list; list = list->next)
+    {
+      cache = list->data;
+      if (cache->screen == screen)
+        return gdk_window_cache_ref (cache);
+    }
+
+  cache = gdk_window_cache_new (screen);
+
+  window_caches = g_slist_prepend (window_caches, cache);
+
+  return cache;
+}
+
+
 static gboolean
 is_pointer_within_shape (GdkDisplay    *display,
                          GdkCacheChild *child,
@@ -614,11 +683,16 @@ is_pointer_within_shape (GdkDisplay    *display,
       GdkDisplayX11 *display_x11 = GDK_DISPLAY_X11 (display);
       GdkRegion *input_shape;
 
-      child->shape = _xwindow_get_shape (display_x11->xdisplay,
-                                         child->xid, ShapeBounding);
+      child->shape = NULL;
+      if (gdk_display_supports_shapes (display))
+        child->shape = _xwindow_get_shape (display_x11->xdisplay,
+                                           child->xid, ShapeBounding);
 #ifdef ShapeInput
-      input_shape = _xwindow_get_shape (display_x11->xdisplay,
-                                        child->xid, ShapeInput);
+      input_shape = NULL;
+      if (gdk_display_supports_input_shapes (display))
+        input_shape = _xwindow_get_shape (display_x11->xdisplay,
+                                          child->xid, ShapeInput);
+
       if (child->shape && input_shape)
         {
           gdk_region_intersect (child->shape, input_shape);
@@ -3105,7 +3179,8 @@ gdk_drag_do_leave (GdkDragContext *context, guint32 time)
 /**
  * gdk_drag_begin:
  * @window: the source window for this drag.
- * @targets: the offered targets, as list of #GdkAtom<!-- -->s
+ * @targets: (transfer none) (element-type GdkAtom): the offered targets,
+ *     as list of #GdkAtom<!-- -->s
  * 
  * Starts a drag and creates a new drag context for it.
  *
@@ -3280,7 +3355,7 @@ drag_context_find_window_cache (GdkDragContext  *context,
 	return cache;
     }
 
-  cache = gdk_window_cache_new (screen);
+  cache = gdk_window_cache_get (screen);
   private->window_caches = g_slist_prepend (private->window_caches, cache);
   
   return cache;
@@ -3878,6 +3953,9 @@ gdk_window_register_dnd (GdkWindow      *window)
   GdkDisplay *display = gdk_drawable_get_display (window);
 
   g_return_if_fail (window != NULL);
+
+  if (gdk_window_get_window_type (window) == GDK_WINDOW_OFFSCREEN)
+    return;
 
   base_precache_atoms (display);
 

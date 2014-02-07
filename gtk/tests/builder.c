@@ -1309,6 +1309,7 @@ test_combo_box (void)
   g_object_unref (builder);
 }
 
+#if 0
 static void
 test_combo_box_entry (void)
 {
@@ -1333,8 +1334,9 @@ test_combo_box_entry (void)
     "  </object>"
     "  <object class=\"GtkWindow\" id=\"window1\">"
     "    <child>"
-    "      <object class=\"GtkComboBoxEntry\" id=\"comboboxentry1\">"
+    "      <object class=\"GtkComboBox\" id=\"comboboxentry1\">"
     "        <property name=\"model\">liststore1</property>"
+    "        <property name=\"has-entry\">True</property>"
     "        <property name=\"visible\">True</property>"
     "        <child>"
     "          <object class=\"GtkCellRendererText\" id=\"renderer1\"/>"
@@ -1378,6 +1380,7 @@ test_combo_box_entry (void)
 
   g_object_unref (builder);
 }
+#endif
 
 static void
 test_cell_view (void)
@@ -1489,6 +1492,36 @@ test_dialog (void)
   button_cancel = gtk_builder_get_object (builder, "button_cancel");
   g_assert (gtk_dialog_get_response_for_widget (GTK_DIALOG (dialog1), GTK_WIDGET (button_cancel)) == -5);
   
+  gtk_widget_destroy (GTK_WIDGET (dialog1));
+  g_object_unref (builder);
+}
+
+static void
+test_message_dialog (void)
+{
+  GtkBuilder * builder;
+  const gchar buffer1[] =
+    "<interface>"
+    "  <object class=\"GtkMessageDialog\" id=\"dialog1\">"
+    "    <child internal-child=\"message_area\">"
+    "      <object class=\"GtkVBox\" id=\"dialog-message-area\">"
+    "        <child>"
+    "          <object class=\"GtkExpander\" id=\"expander\"/>"
+    "        </child>"
+    "      </object>"
+    "    </child>"
+    "  </object>"
+    "</interface>";
+
+  GObject *dialog1;
+  GObject *expander;
+
+  builder = builder_new_from_string (buffer1, -1, NULL);
+  dialog1 = gtk_builder_get_object (builder, "dialog1");
+  expander = gtk_builder_get_object (builder, "expander");
+  g_assert (GTK_IS_EXPANDER (expander));
+  g_assert (gtk_widget_get_parent (GTK_WIDGET (expander)) == gtk_message_dialog_get_message_area (GTK_MESSAGE_DIALOG (dialog1)));
+
   gtk_widget_destroy (GTK_WIDGET (dialog1));
   g_object_unref (builder);
 }
@@ -2572,7 +2605,9 @@ main (int argc, char **argv)
   g_test_add_func ("/Builder/TreeView Column", test_treeview_column);
   g_test_add_func ("/Builder/IconView", test_icon_view);
   g_test_add_func ("/Builder/ComboBox", test_combo_box);
+#if 0
   g_test_add_func ("/Builder/ComboBox Entry", test_combo_box_entry);
+#endif
   g_test_add_func ("/Builder/CellView", test_cell_view);
   g_test_add_func ("/Builder/Dialog", test_dialog);
   g_test_add_func ("/Builder/Accelerators", test_accelerators);
@@ -2586,6 +2621,7 @@ main (int argc, char **argv)
   g_test_add_func ("/Builder/AddObjects", test_add_objects);
   g_test_add_func ("/Builder/Menus", test_menus);
   g_test_add_func ("/Builder/MessageArea", test_message_area);
+  g_test_add_func ("/Builder/MessageDialog", test_message_dialog);
 
   return g_test_run();
 }

@@ -469,6 +469,8 @@ Compress(GdkRegion *r,
  *
  * Resizes a region by the specified amount.
  * Positive values shrink the region. Negative values expand it.
+ *
+ * Deprecated: 2.22: There is no replacement for this function.
  */
 void
 gdk_region_shrink (GdkRegion *region,
@@ -1591,6 +1593,9 @@ gdk_region_equal (const GdkRegion *region1,
  * Returns: %TRUE if @region and @rectangle are equal.
  *
  * Since: 2.18
+ *
+ * Deprecated: 2.22: Use gdk_region_new_rect() and gdk_region_equal() to 
+ *             achieve the same effect.
  */
 gboolean
 gdk_region_rect_equal (const GdkRegion    *region,
@@ -1804,6 +1809,8 @@ gdk_region_unsorted_spans_intersect_foreach (GdkRegion     *region,
  * @data: data to pass to @function
  *
  * Calls a function on each span in the intersection of @region and @spans.
+ *
+ * Deprecated: 2.22: There is no replacement.
  */
 void
 gdk_region_spans_intersect_foreach (GdkRegion     *region,

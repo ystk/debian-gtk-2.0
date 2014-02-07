@@ -482,9 +482,9 @@ gdk_x11_screen_get_monitor_output (GdkScreen *screen,
 
 /**
  * gdk_screen_get_monitor_geometry:
- * @screen : a #GdkScreen
+ * @screen: a #GdkScreen
  * @monitor_num: the monitor number, between 0 and gdk_screen_get_n_monitors (screen)
- * @dest : a #GdkRectangle to be filled with the monitor geometry
+ * @dest: a #GdkRectangle to be filled with the monitor geometry
  *
  * Retrieves the #GdkRectangle representing the size and position of
  * the individual monitor within the entire screen area.
@@ -713,6 +713,7 @@ free_monitors (GdkX11Monitor *monitors,
   g_free (monitors);
 }
 
+#ifdef HAVE_RANDR
 static int
 monitor_compare_function (GdkX11Monitor *monitor1,
                           GdkX11Monitor *monitor2)
@@ -737,6 +738,7 @@ monitor_compare_function (GdkX11Monitor *monitor1,
 
   return 0;
 }
+#endif
 
 static gboolean
 init_randr13 (GdkScreen *screen)
@@ -1137,9 +1139,11 @@ process_monitors_change (GdkScreen *screen)
 {
   GdkScreenX11 *screen_x11 = GDK_SCREEN_X11 (screen);
   gint		 n_monitors;
+  gint		 primary_monitor;
   GdkX11Monitor	*monitors;
   gboolean changed;
 
+  primary_monitor = screen_x11->primary_monitor;
   n_monitors = screen_x11->n_monitors;
   monitors = screen_x11->monitors;
 
@@ -1148,8 +1152,10 @@ process_monitors_change (GdkScreen *screen)
 
   init_multihead (screen);
 
-  changed = !compare_monitors (monitors, n_monitors,
-                               screen_x11->monitors, screen_x11->n_monitors);
+  changed =
+    !compare_monitors (monitors, n_monitors,
+		       screen_x11->monitors, screen_x11->n_monitors) ||
+    screen_x11->primary_monitor != primary_monitor;
 
   free_monitors (monitors, n_monitors);
 
@@ -1162,7 +1168,9 @@ _gdk_x11_screen_size_changed (GdkScreen *screen,
 			      XEvent    *event)
 {
   gint width, height;
+#ifdef HAVE_RANDR
   GdkDisplayX11 *display_x11;
+#endif
 
   width = gdk_screen_get_width (screen);
   height = gdk_screen_get_height (screen);
@@ -1171,10 +1179,7 @@ _gdk_x11_screen_size_changed (GdkScreen *screen,
   display_x11 = GDK_DISPLAY_X11 (gdk_screen_get_display (screen));
 
   if (display_x11->have_randr13 && event->type == ConfigureNotify)
-    {
-      g_signal_emit_by_name (screen, "monitors-changed");
-      return;
-    }
+    return;
 
   XRRUpdateConfiguration (event);
 #else
@@ -1182,7 +1187,7 @@ _gdk_x11_screen_size_changed (GdkScreen *screen,
     {
       XConfigureEvent *rcevent = (XConfigureEvent *) event;
       Screen	    *xscreen = gdk_x11_screen_get_xscreen (screen);
-      
+
       xscreen->width   = rcevent->width;
       xscreen->height  = rcevent->height;
     }
@@ -1359,7 +1364,7 @@ gdk_screen_get_active_window (GdkScreen *screen)
 }
 
 /**
- * gdk_screen_get_window_stack
+ * gdk_screen_get_window_stack:
  * @screen: a #GdkScreen
  *
  * Returns a #GList of #GdkWindow<!-- -->s representing the current
@@ -1378,7 +1383,8 @@ gdk_screen_get_active_window (GdkScreen *screen)
  * windows it contains, so it should be freed using g_list_free() and
  * its windows unrefed using g_object_unref() when no longer needed.
  *
- * Return value: a list of #GdkWindow<!-- -->s for the current window stack,
+ * Return value: (transfer full) (element-type GdkWindow):
+ *     a list of #GdkWindow<!-- -->s for the current window stack,
  *               or %NULL.
  *
  * Since: 2.10

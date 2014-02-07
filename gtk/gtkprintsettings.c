@@ -107,10 +107,10 @@ copy_hash_entry  (gpointer  key,
 /**
  * gtk_print_settings_copy:
  * @other: a #GtkPrintSettings
- * 
+ *
  * Copies a #GtkPrintSettings object.
- * 
- * Return value: a newly allocated copy of @other
+ *
+ * Return value: (transfer full): a newly allocated copy of @other
  *
  * Since: 2.10
  */
@@ -144,7 +144,7 @@ gtk_print_settings_copy (GtkPrintSettings *other)
  * 
  * Since: 2.10
  */
-G_CONST_RETURN gchar *        
+const gchar *
 gtk_print_settings_get (GtkPrintSettings *settings,
 			const gchar      *key)
 {
@@ -473,7 +473,7 @@ gtk_print_settings_set_int (GtkPrintSettings *settings,
 /**
  * gtk_print_settings_foreach:
  * @settings: a #GtkPrintSettings
- * @func: (scope call) the function to call
+ * @func: (scope call): the function to call
  * @user_data: user data for @func
  *
  * Calls @func for each key-value pair of @settings.
@@ -499,7 +499,7 @@ gtk_print_settings_foreach (GtkPrintSettings    *settings,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *       
+const gchar *
 gtk_print_settings_get_printer (GtkPrintSettings *settings)
 {
   return gtk_print_settings_get (settings, GTK_PRINT_SETTINGS_PRINTER);
@@ -1402,16 +1402,17 @@ gtk_print_settings_set_print_pages (GtkPrintSettings *settings,
   
   gtk_print_settings_set (settings, GTK_PRINT_SETTINGS_PRINT_PAGES, str);
 }
-     
+
 /**
  * gtk_print_settings_get_page_ranges:
  * @settings: a #GtkPrintSettings
- * @num_ranges: return location for the length of the returned array
- * 
+ * @num_ranges: (out): return location for the length of the returned array
+ *
  * Gets the value of %GTK_PRINT_SETTINGS_PAGE_RANGES.
- * 
- * Return value: an array of #GtkPageRange<!-- -->s. Use g_free()
- *   to free the array when it is no longer needed. 
+ *
+ * Return value: (array length=num_ranges) (transfer full): an array
+ *     of #GtkPageRange<!-- -->s.  Use g_free() to free the array when
+ *     it is no longer needed.
  *
  * Since: 2.10
  */
@@ -1468,7 +1469,7 @@ gtk_print_settings_get_page_ranges (GtkPrintSettings *settings,
 /**
  * gtk_print_settings_set_page_ranges:
  * @settings: a #GtkPrintSettings
- * @page_ranges: an array of #GtkPageRange<!-- -->s
+ * @page_ranges: (array length=num_ranges): an array of #GtkPageRange<!-- -->s
  * @num_ranges: the length of @page_ranges
  * 
  * Sets the value of %GTK_PRINT_SETTINGS_PAGE_RANGES.
@@ -1514,7 +1515,7 @@ gtk_print_settings_set_page_ranges  (GtkPrintSettings *settings,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_print_settings_get_default_source (GtkPrintSettings *settings)
 {
   return gtk_print_settings_get (settings, GTK_PRINT_SETTINGS_DEFAULT_SOURCE);
@@ -1549,7 +1550,7 @@ gtk_print_settings_set_default_source (GtkPrintSettings *settings,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_print_settings_get_media_type (GtkPrintSettings *settings)
 {
   return gtk_print_settings_get (settings, GTK_PRINT_SETTINGS_MEDIA_TYPE);
@@ -1584,7 +1585,7 @@ gtk_print_settings_set_media_type (GtkPrintSettings *settings,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_print_settings_get_dither (GtkPrintSettings *settings)
 {
   return gtk_print_settings_get (settings, GTK_PRINT_SETTINGS_DITHER);
@@ -1648,7 +1649,7 @@ gtk_print_settings_set_finishings (GtkPrintSettings *settings,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_print_settings_get_output_bin (GtkPrintSettings *settings)
 {
   return gtk_print_settings_get (settings, GTK_PRINT_SETTINGS_OUTPUT_BIN);
@@ -1782,7 +1783,7 @@ gtk_print_settings_load_key_file (GtkPrintSettings *settings,
       gchar *value;
 
       value = g_key_file_get_string (key_file,
-				     KEYFILE_GROUP_NAME,
+				     group_name,
 				     keys[i],
 				     NULL);
       if (!value)

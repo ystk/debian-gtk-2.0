@@ -7,11 +7,14 @@
 <!--ENTITY index-Objects-Grouped SYSTEM "objects_grouped.sgml"-->
 <book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
   <bookinfo>
-    <title>GTK+ Reference Manual</title>
+    <title>GTK+ 2 Reference Manual</title>
     <releaseinfo>
-      for GTK+ &version;
-      The latest version of this documentation can be found on-line at
-      <ulink role="online-location" url="http://library.gnome.org/devel/gtk/unstable/">http://library.gnome.org/devel/gtk/unstable/</ulink>.
+      This document is for the GTK+ 2 library; the latest versions can be found online at
+      <ulink role="online-location"
+      url="http://library.gnome.org/devel/gtk/">http://library.gnome.org/devel/gtk</ulink>.
+      If you're looking for the newer GTK+ 3 series of libraries,
+      see <ulink role="online-location"
+      url="http://library.gnome.org/devel/gtk3/">http://library.gnome.org/devel/gtk3/</ulink>.
     </releaseinfo>
   </bookinfo>
 
@@ -229,6 +232,7 @@ that is, GUI components such as #GtkButton or #GtkTextView.
     <chapter id="MenusAndCombos">
       <title>Menus, Combo Box, Toolbar</title>
       <xi:include href="xml/gtkcombobox.xml" />
+      <xi:include href="xml/gtkcomboboxtext.xml" />
       <xi:include href="xml/gtkcomboboxentry.xml" />
       <xi:include href="xml/gtkmenu.xml" />
       <xi:include href="xml/gtkmenubar.xml" />
@@ -499,6 +503,14 @@ that is, GUI components such as #GtkButton or #GtkTextView.
   <index id="api-index-2-20" role="2.20">
     <title>Index of new symbols in 2.20</title>
     <xi:include href="xml/api-index-2.20.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-2-22" role="2.22">
+    <title>Index of new symbols in 2.22</title>
+    <xi:include href="xml/api-index-2.22.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-2-24" role="2.24">
+    <title>Index of new symbols in 2.24</title>
+    <xi:include href="xml/api-index-2.24.xml"><xi:fallback /></xi:include>
   </index>
 
   <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>

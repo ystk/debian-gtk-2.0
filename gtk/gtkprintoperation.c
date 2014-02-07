@@ -881,8 +881,8 @@ gtk_print_operation_class_init (GtkPrintOperationClass *class)
    * signal is emitted on the operation. Then you can read out any 
    * information you need from the widgets.
    *
-   * Returns: A custom widget that gets embedded in the print dialog,
-   *          or %NULL
+   * Returns: (transfer none): A custom widget that gets embedded in
+   *          the print dialog, or %NULL
    *
    * Since: 2.10
    */
@@ -1294,7 +1294,7 @@ gtk_print_operation_class_init (GtkPrintOperationClass *class)
 				   PROP_HAS_SELECTION,
 				   g_param_spec_boolean ("has-selection",
 							 P_("Has Selection"),
-							 P_("TRUE if a selecion exists."),
+							 P_("TRUE if a selection exists."),
 							 FALSE,
 							 GTK_PARAM_READWRITE));
 
@@ -1401,10 +1401,10 @@ gtk_print_operation_set_default_page_setup (GtkPrintOperation *op,
  * gtk_print_operation_get_default_page_setup:
  * @op: a #GtkPrintOperation
  *
- * Returns the default page setup, see 
+ * Returns the default page setup, see
  * gtk_print_operation_set_default_page_setup().
  *
- * Returns: the default page setup 
+ * Returns: (transfer none): the default page setup
  *
  * Since: 2.10
  */
@@ -1457,15 +1457,15 @@ gtk_print_operation_set_print_settings (GtkPrintOperation *op,
 /**
  * gtk_print_operation_get_print_settings:
  * @op: a #GtkPrintOperation
- * 
- * Returns the current print settings. 
  *
- * Note that the return value is %NULL until either 
- * gtk_print_operation_set_print_settings() or 
+ * Returns the current print settings.
+ *
+ * Note that the return value is %NULL until either
+ * gtk_print_operation_set_print_settings() or
  * gtk_print_operation_run() have been called.
- * 
- * Return value: the current print settings of @op.
- * 
+ *
+ * Return value: (transfer none): the current print settings of @op.
+ *
  * Since: 2.10
  **/
 GtkPrintSettings *
@@ -1752,7 +1752,7 @@ gtk_print_operation_get_status (GtkPrintOperation *op)
  *
  * Since: 2.10
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_print_operation_get_status_string (GtkPrintOperation *op)
 {
   g_return_val_if_fail (GTK_IS_PRINT_OPERATION (op), "");

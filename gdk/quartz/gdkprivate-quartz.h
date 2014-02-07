@@ -27,6 +27,7 @@
 #include <gdk/gdkprivate.h>
 #include <gdk/quartz/gdkpixmap-quartz.h>
 #include <gdk/quartz/gdkwindow-quartz.h>
+#include <gdk/quartz/gdkquartz.h>
 
 #include <gdk/gdk.h>
 
@@ -71,6 +72,7 @@ struct _GdkGCQuartz
   CGFloat           dash_phase;
 
   CGPatternRef      ts_pattern;
+  void             *ts_pattern_info;
 
   guint             is_window : 1;
 };
@@ -123,18 +125,14 @@ GType  _gdk_gc_quartz_get_type          (void);
 GdkGC *_gdk_quartz_gc_new               (GdkDrawable                *drawable,
 					 GdkGCValues                *values,
 					 GdkGCValuesMask             values_mask);
-void   _gdk_quartz_gc_update_cg_context (GdkGC                      *gc,
-					 GdkDrawable                *drawable,
-					 CGContextRef                context,
-					 GdkQuartzContextValuesMask  mask);
+gboolean _gdk_quartz_gc_update_cg_context (GdkGC                      *gc,
+					   GdkDrawable                *drawable,
+					   CGContextRef                context,
+					   GdkQuartzContextValuesMask  mask);
 
 /* Colormap */
-void _gdk_quartz_colormap_get_rgba_from_pixel (GdkColormap *colormap,
-					       guint32      pixel,
-					       CGFloat     *red,
-					       CGFloat     *green,
-					       CGFloat     *blue,
-					       CGFloat     *alpha);
+CGColorRef _gdk_quartz_colormap_get_cgcolor_from_pixel (GdkDrawable *drawable,
+                                                        guint32      pixel);
 
 /* Window */
 gboolean    _gdk_quartz_window_is_ancestor          (GdkWindow *ancestor,
@@ -175,6 +173,9 @@ void         _gdk_quartz_events_update_focus_window    (GdkWindow *new_window,
 void         _gdk_quartz_events_send_map_event         (GdkWindow *window);
 GdkEventMask _gdk_quartz_events_get_current_event_mask (void);
 
+GdkModifierType _gdk_quartz_events_get_current_keyboard_modifiers (void);
+GdkModifierType _gdk_quartz_events_get_current_mouse_modifiers    (void);
+
 void         _gdk_quartz_events_send_enter_notify_event (GdkWindow *window);
 
 /* Event loop */
@@ -211,5 +212,8 @@ void        _gdk_quartz_window_queue_translation (GdkWindow *window,
                                                   gint       dy);
 gboolean    _gdk_quartz_window_queue_antiexpose  (GdkWindow *window,
                                                   GdkRegion *area);
+
+/* Pixmap */
+CGImageRef _gdk_pixmap_get_cgimage (GdkPixmap *pixmap);
 
 #endif /* __GDK_PRIVATE_QUARTZ_H__ */

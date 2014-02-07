@@ -1749,6 +1749,8 @@ gtk_entry_class_init (GtkEntryClass *class)
     * drawing the shadow and the widget background.
     *
     * Since: 2.16
+    *
+    * Deprecated: 2.22: This style property will be removed in GTK+ 3
     */
    gtk_widget_class_install_style_property (widget_class,
                                             g_param_spec_boolean ("state-hint",
@@ -2998,7 +3000,7 @@ gtk_entry_get_text_area_size (GtkEntry *entry,
   _gtk_entry_get_borders (entry, &xborder, &yborder);
 
   if (gtk_widget_get_realized (widget))
-    gdk_drawable_get_size (widget->window, NULL, &frame_height);
+    frame_height = gdk_window_get_height (widget->window);
   else
     frame_height = requisition.height;
 
@@ -3208,6 +3210,7 @@ draw_icon (GtkWidget            *widget,
   EntryIconInfo *icon_info = priv->icons[icon_pos];
   GdkPixbuf *pixbuf;
   gint x, y, width, height;
+  cairo_t *cr;
 
   if (!icon_info)
     return;
@@ -3217,7 +3220,8 @@ draw_icon (GtkWidget            *widget,
   if (icon_info->pixbuf == NULL)
     return;
 
-  gdk_drawable_get_size (icon_info->window, &width, &height);
+  width = gdk_window_get_width (icon_info->window);
+  height = gdk_window_get_height (icon_info->window);
 
   /* size_allocate hasn't been called yet. These are the default values.
    */
@@ -3265,9 +3269,10 @@ draw_icon (GtkWidget            *widget,
       pixbuf = temp_pixbuf;
     }
 
-  gdk_draw_pixbuf (icon_info->window, widget->style->black_gc, pixbuf,
-                   0, 0, x, y, -1, -1,
-                   GDK_RGB_DITHER_NORMAL, 0, 0);
+  cr = gdk_cairo_create (icon_info->window);
+  gdk_cairo_set_source_pixbuf (cr, pixbuf, x, y);
+  cairo_paint (cr);
+  cairo_destroy (cr);
 
   g_object_unref (pixbuf);
 }
@@ -3282,7 +3287,8 @@ gtk_entry_draw_frame (GtkWidget      *widget,
   gboolean state_hint;
   GtkStateType state;
 
-  gdk_drawable_get_size (widget->window, &width, &height);
+  width = gdk_window_get_width (widget->window);
+  height = gdk_window_get_height (widget->window);
 
   /* Fix a problem with some themes which assume that entry->text_area's
    * width equals widget->window's width */
@@ -3334,53 +3340,36 @@ gtk_entry_draw_frame (GtkWidget      *widget,
 }
 
 static void
-gtk_entry_get_progress_border (GtkWidget *widget,
-                               GtkBorder *progress_border)
-{
-  GtkBorder *tmp_border;
-
-  gtk_widget_style_get (widget, "progress-border", &tmp_border, NULL);
-  if (tmp_border)
-    {
-      *progress_border = *tmp_border;
-      gtk_border_free (tmp_border);
-    }
-  else
-    {
-      progress_border->left = widget->style->xthickness;
-      progress_border->right = widget->style->xthickness;
-      progress_border->top = widget->style->ythickness;
-      progress_border->bottom = widget->style->ythickness;
-    }
-}
-
-static void
 get_progress_area (GtkWidget *widget,
-                  gint       *x,
-                  gint       *y,
-                  gint       *width,
-                  gint       *height)
+                   gint       *x,
+                   gint       *y,
+                   gint       *width,
+                   gint       *height)
 {
   GtkEntryPrivate *private = GTK_ENTRY_GET_PRIVATE (widget);
   GtkEntry *entry = GTK_ENTRY (widget);
-  GtkBorder progress_border;
+  GtkBorder *progress_border;
 
-  gtk_entry_get_progress_border (widget, &progress_border);
+  get_text_area_size (entry, x, y, width, height);
 
-  *x = progress_border.left;
-  *y = progress_border.top;
-
-  gdk_drawable_get_size (widget->window, width, height);
-
-  *width -= progress_border.left + progress_border.right;
-  *height -= progress_border.top + progress_border.bottom;
-
-  if (gtk_widget_has_focus (widget) && !private->interior_focus)
+  if (!private->interior_focus)
     {
-      *x += private->focus_width;
-      *y += private->focus_width;
-      *width -= 2 * private->focus_width;
-      *height -= 2 * private->focus_width;
+      *x -= private->focus_width;
+      *y -= private->focus_width;
+      *width += 2 * private->focus_width;
+      *height += 2 * private->focus_width;
+    }
+
+  gtk_widget_style_get (widget, "progress-border", &progress_border, NULL);
+
+  if (progress_border)
+    {
+      *x += progress_border->left;
+      *y += progress_border->top;
+      *width -= progress_border->left + progress_border->right;
+      *height -= progress_border->top + progress_border->bottom;
+
+      gtk_border_free (progress_border);
     }
 
   if (private->progress_pulse_mode)
@@ -3471,7 +3460,8 @@ gtk_entry_expose (GtkWidget      *widget,
     {
       gint width, height;
 
-      gdk_drawable_get_size (entry->text_area, &width, &height);
+      width = gdk_window_get_width (entry->text_area);
+      height = gdk_window_get_height (entry->text_area);
 
       gtk_paint_flat_box (widget->style, entry->text_area, 
 			  state, GTK_SHADOW_NONE,
@@ -3503,7 +3493,8 @@ gtk_entry_expose (GtkWidget      *widget,
             {
               gint width, height;
 
-              gdk_drawable_get_size (icon_info->window, &width, &height);
+              width = gdk_window_get_width (icon_info->window);
+              height = gdk_window_get_height (icon_info->window);
 
               gtk_paint_flat_box (widget->style, icon_info->window,
                                   gtk_widget_get_state (widget), GTK_SHADOW_NONE,
@@ -3697,15 +3688,22 @@ gtk_entry_button_press (GtkWidget      *widget,
     }
   
   tmp_pos = gtk_entry_find_position (entry, event->x + entry->scroll_offset);
-    
-  if (event->button == 1)
+
+  if (_gtk_button_event_triggers_context_menu (event))
+    {
+      gtk_entry_do_popup (entry, event);
+      entry->button = 0;	/* Don't wait for release, since the menu will gtk_grab_add */
+
+      return TRUE;
+    }
+  else if (event->button == 1)
     {
       gboolean have_selection = gtk_editable_get_selection_bounds (editable, &sel_start, &sel_end);
       
       entry->select_words = FALSE;
       entry->select_lines = FALSE;
 
-      if (event->state & GDK_SHIFT_MASK)
+      if (event->state & GTK_EXTEND_SELECTION_MOD_MASK)
 	{
 	  _gtk_entry_reset_im_context (entry);
 	  
@@ -3819,13 +3817,6 @@ gtk_entry_button_press (GtkWidget      *widget,
           gtk_widget_error_bell (widget);
         }
     }
-  else if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
-    {
-      gtk_entry_do_popup (entry, event);
-      entry->button = 0;	/* Don't wait for release, since the menu will gtk_grab_add */
-
-      return TRUE;
-    }
 
   return FALSE;
 }
@@ -3850,7 +3841,8 @@ gtk_entry_button_release (GtkWidget      *widget,
         {
           gint width, height;
 
-          gdk_drawable_get_size (icon_info->window, &width, &height);
+          width = gdk_window_get_width (icon_info->window);
+          height = gdk_window_get_height (icon_info->window);
 
           icon_info->pressed = FALSE;
 
@@ -4003,7 +3995,8 @@ gtk_entry_motion_notify (GtkWidget      *widget,
   else
     {
       gint height;
-      gdk_drawable_get_size (entry->text_area, NULL, &height);
+
+      height = gdk_window_get_height (entry->text_area);
 
       if (event->y < 0)
 	tmp_pos = 0;
@@ -4063,7 +4056,7 @@ set_invisible_cursor (GdkWindow *window)
   GdkDisplay *display;
   GdkCursor *cursor;
 
-  display = gdk_drawable_get_display (window);
+  display = gdk_window_get_display (window);
   cursor = gdk_cursor_new_for_display (display, GDK_BLANK_CURSOR);
 
   gdk_window_set_cursor (window, cursor);
@@ -5095,7 +5088,7 @@ static void
 gtk_entry_paste_clipboard (GtkEntry *entry)
 {
   if (entry->editable)
-    gtk_entry_paste (entry, GDK_NONE);
+    gtk_entry_paste (entry, GDK_SELECTION_CLIPBOARD);
   else
     gtk_widget_error_bell (GTK_WIDGET (entry));
 }
@@ -5615,7 +5608,8 @@ gtk_entry_draw_text (GtkEntry *entry)
         }
       else
         {
-          gdk_drawable_get_size (entry->text_area, &width, &height);
+          width = gdk_window_get_width (entry->text_area);
+          height = gdk_window_get_height (entry->text_area);
 
           cairo_rectangle (cr, 0, 0, width, height);
           cairo_clip (cr);
@@ -5693,7 +5687,7 @@ gtk_entry_draw_cursor (GtkEntry  *entry,
 
       xoffset = inner_border.left - entry->scroll_offset;
 
-      gdk_drawable_get_size (entry->text_area, NULL, &text_area_height);
+      text_area_height = gdk_window_get_height (entry->text_area);
 
       layout = gtk_entry_ensure_layout (entry, TRUE);
       text = pango_layout_get_text (layout);
@@ -5807,6 +5801,55 @@ _gtk_entry_reset_im_context (GtkEntry *entry)
     }
 }
 
+/**
+ * gtk_entry_reset_im_context:
+ * @entry: a #GtkEntry
+ *
+ * Reset the input method context of the entry if needed.
+ *
+ * This can be necessary in the case where modifying the buffer
+ * would confuse on-going input method behavior.
+ *
+ * Since: 2.22
+ */
+void
+gtk_entry_reset_im_context (GtkEntry *entry)
+{
+  g_return_if_fail (GTK_IS_ENTRY (entry));
+
+  _gtk_entry_reset_im_context (entry);
+}
+
+/**
+ * gtk_entry_im_context_filter_keypress:
+ * @entry: a #GtkEntry
+ * @event: the key event
+ *
+ * Allow the #GtkEntry input method to internally handle key press
+ * and release events. If this function returns %TRUE, then no further
+ * processing should be done for this key event. See
+ * gtk_im_context_filter_keypress().
+ *
+ * Note that you are expected to call this function from your handler
+ * when overriding key event handling. This is needed in the case when
+ * you need to insert your own key handling between the input method
+ * and the default key event handling of the #GtkEntry.
+ * See gtk_text_view_reset_im_context() for an example of use.
+ *
+ * Return value: %TRUE if the input method handled the key event.
+ *
+ * Since: 2.22
+ */
+gboolean
+gtk_entry_im_context_filter_keypress (GtkEntry    *entry,
+                                      GdkEventKey *event)
+{
+  g_return_val_if_fail (GTK_IS_ENTRY (entry), FALSE);
+
+  return gtk_im_context_filter_keypress (entry->im_context, event);
+}
+
+
 static gint
 gtk_entry_find_position (GtkEntry *entry,
 			 gint      x)
@@ -5916,7 +5959,7 @@ gtk_entry_adjust_scroll (GtkEntry *entry)
 
   _gtk_entry_effective_inner_border (entry, &inner_border);
 
-  gdk_drawable_get_size (entry->text_area, &text_area_width, NULL);
+  text_area_width = gdk_window_get_width (entry->text_area);
   text_area_width -= inner_border.left + inner_border.right;
   if (text_area_width < 0)
     text_area_width = 0;
@@ -6642,7 +6685,7 @@ get_buffer (GtkEntry *entry)
  *
  * Since: 2.18
  *
- * Returns: A #GtkEntryBuffer object.
+ * Returns: (transfer none): A #GtkEntryBuffer object.
  */
 GtkEntryBuffer*
 gtk_entry_get_buffer (GtkEntry *entry)
@@ -6727,7 +6770,10 @@ gtk_entry_set_buffer (GtkEntry       *entry,
  *
  * See also gtk_entry_get_icon_window().
  *
- * Return value: the entry's text window.
+ * Note that GTK+ 3 does not have this function anymore; it has
+ * been replaced by gtk_entry_get_text_area().
+ *
+ * Return value: (transfer none): the entry's text window.
  *
  * Since: 2.20
  **/
@@ -7072,7 +7118,7 @@ gtk_entry_get_overwrite_mode (GtkEntry *entry)
  *      storage in the widget and must not be freed, modified or
  *      stored.
  **/
-G_CONST_RETURN gchar*
+const gchar*
 gtk_entry_get_text (GtkEntry *entry)
 {
   g_return_val_if_fail (GTK_IS_ENTRY (entry), NULL);
@@ -7343,7 +7389,7 @@ gtk_entry_set_inner_border (GtkEntry        *entry,
  *
  * Since: 2.10
  **/
-G_CONST_RETURN GtkBorder *
+const GtkBorder *
 gtk_entry_get_inner_border (GtkEntry *entry)
 {
   g_return_val_if_fail (GTK_IS_ENTRY (entry), NULL);
@@ -7451,8 +7497,8 @@ gtk_entry_text_index_to_layout_index (GtkEntry *entry,
 /**
  * gtk_entry_get_layout_offsets:
  * @entry: a #GtkEntry
- * @x: (allow-none): location to store X offset of layout, or %NULL
- * @y: (allow-none): location to store Y offset of layout, or %NULL
+ * @x: (out) (allow-none): location to store X offset of layout, or %NULL
+ * @y: (out) (allow-none): location to store Y offset of layout, or %NULL
  *
  *
  * Obtains the position of the #PangoLayout used to render text
@@ -7901,7 +7947,8 @@ gtk_entry_get_icon_activatable (GtkEntry             *entry,
  * method will work regardless of whether the icon was set using a
  * #GdkPixbuf, a #GIcon, a stock item, or an icon name.
  *
- * Returns: A #GdkPixbuf, or %NULL if no icon is set for this position.
+ * Returns: (transfer none): A #GdkPixbuf, or %NULL if no icon is
+ *     set for this position.
  *
  * Since: 2.16
  */
@@ -7935,8 +7982,8 @@ gtk_entry_get_icon_pixbuf (GtkEntry             *entry,
  * no icon or if the icon was set by some other method (e.g., by
  * stock, pixbuf, or icon name).
  *
- * Returns: A #GIcon, or %NULL if no icon is set or if the icon
- *          is not a #GIcon
+ * Returns: (transfer none): A #GIcon, or %NULL if no icon is set
+ *     or if the icon is not a #GIcon
  *
  * Since: 2.16
  */
@@ -8266,7 +8313,10 @@ gtk_entry_get_current_icon_drag_source (GtkEntry *entry)
  *
  * See also gtk_entry_get_text_window().
  *
- * Return value: the entry's icon window at @icon_pos.
+ * Note that GTK+ 3 does not have this function anymore; it has
+ * been replaced by gtk_entry_get_icon_area().
+ *
+ * Return value: (transfer none): the entry's icon window at @icon_pos.
  *
  * Since: 2.20
  */
@@ -8380,8 +8430,8 @@ gtk_entry_set_icon_tooltip_text (GtkEntry             *entry,
 
   priv = GTK_ENTRY_GET_PRIVATE (entry);
 
-  if (!(icon_info = priv->icons[icon_pos]))
-    icon_info = priv->icons[icon_pos];
+  if ((icon_info = priv->icons[icon_pos]) == NULL)
+    icon_info = construct_icon_info (GTK_WIDGET (entry), icon_pos);
 
   if (icon_info->tooltip)
     g_free (icon_info->tooltip);
@@ -8459,8 +8509,8 @@ gtk_entry_set_icon_tooltip_markup (GtkEntry             *entry,
 
   priv = GTK_ENTRY_GET_PRIVATE (entry);
 
-  if (!(icon_info = priv->icons[icon_pos]))
-    icon_info = priv->icons[icon_pos];
+  if ((icon_info = priv->icons[icon_pos]) == NULL)
+    icon_info = construct_icon_info (GTK_WIDGET (entry), icon_pos);
 
   if (icon_info->tooltip)
     g_free (icon_info->tooltip);
@@ -8588,7 +8638,7 @@ popup_position_func (GtkMenu   *menu,
 
   gdk_screen_get_monitor_geometry (screen, monitor_num, &monitor);
   gtk_widget_size_request (entry->popup_menu, &menu_req);
-  gdk_drawable_get_size (entry->text_area, NULL, &height);
+  height = gdk_window_get_height (entry->text_area);
   gtk_entry_get_cursor_locations (entry, CURSOR_STANDARD, &strong_x, NULL);
   _gtk_entry_effective_inner_border (entry, &inner_border);
 
@@ -8890,7 +8940,7 @@ gtk_entry_drag_motion (GtkWidget        *widget,
       gtk_drag_dest_find_target (widget, context, NULL) != GDK_NONE)
     {
       source_widget = gtk_drag_get_source_widget (context);
-      suggested_action = context->suggested_action;
+      suggested_action = gdk_drag_context_get_suggested_action (context);
 
       if (!gtk_editable_get_selection_bounds (GTK_EDITABLE (entry), &sel1, &sel2) ||
           new_position < sel1 || new_position > sel2)
@@ -8900,7 +8950,7 @@ gtk_entry_drag_motion (GtkWidget        *widget,
 	      /* Default to MOVE, unless the user has
 	       * pressed ctrl or alt to affect available actions
 	       */
-	      if ((context->actions & GDK_ACTION_MOVE) != 0)
+	      if ((gdk_drag_context_get_actions (context) & GDK_ACTION_MOVE) != 0)
 	        suggested_action = GDK_ACTION_MOVE;
 	    }
               
@@ -8974,7 +9024,7 @@ gtk_entry_drag_data_received (GtkWidget        *widget,
           end_change (entry);
 	}
       
-      gtk_drag_finish (context, TRUE, context->action == GDK_ACTION_MOVE, time);
+      gtk_drag_finish (context, TRUE, gdk_drag_context_get_selected_action (context) == GDK_ACTION_MOVE, time);
     }
   else
     {
@@ -9790,7 +9840,8 @@ gtk_entry_set_completion (GtkEntry           *entry,
  *
  * Returns the auxiliary completion object currently in use by @entry.
  *
- * Return value: The auxiliary completion object currently in use by @entry.
+ * Return value: (transfer none): The auxiliary completion object currently
+ *     in use by @entry.
  *
  * Since: 2.4
  */

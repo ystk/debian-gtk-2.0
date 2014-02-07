@@ -179,7 +179,7 @@ GType      gtk_window_get_type                 (void) G_GNUC_CONST;
 GtkWidget* gtk_window_new                      (GtkWindowType        type);
 void       gtk_window_set_title                (GtkWindow           *window,
 						const gchar         *title);
-G_CONST_RETURN gchar *gtk_window_get_title     (GtkWindow           *window);
+const gchar *gtk_window_get_title              (GtkWindow           *window);
 void       gtk_window_set_wmclass              (GtkWindow           *window,
 						const gchar         *wmclass_name,
 						const gchar         *wmclass_class);
@@ -187,7 +187,7 @@ void       gtk_window_set_role                 (GtkWindow           *window,
                                                 const gchar         *role);
 void       gtk_window_set_startup_id           (GtkWindow           *window,
                                                 const gchar         *startup_id);
-G_CONST_RETURN gchar *gtk_window_get_role      (GtkWindow           *window);
+const gchar *gtk_window_get_role               (GtkWindow           *window);
 void       gtk_window_add_accel_group          (GtkWindow           *window,
 						GtkAccelGroup	    *accel_group);
 void       gtk_window_remove_accel_group       (GtkWindow           *window,
@@ -256,7 +256,7 @@ gboolean   gtk_window_is_active                (GtkWindow           *window);
 gboolean   gtk_window_has_toplevel_focus       (GtkWindow           *window);
 
 
-
+#ifndef GTK_DISABLE_DEPRECATED
 /* gtk_window_set_has_frame () must be called before realizing the window_*/
 void       gtk_window_set_has_frame            (GtkWindow *window, 
 						gboolean   setting);
@@ -271,6 +271,7 @@ void       gtk_window_get_frame_dimensions     (GtkWindow *window,
 						gint      *top,
 						gint      *right,
 						gint      *bottom);
+#endif
 void       gtk_window_set_decorated            (GtkWindow *window,
                                                 gboolean   setting);
 gboolean   gtk_window_get_decorated            (GtkWindow *window);
@@ -289,14 +290,14 @@ gboolean   gtk_window_set_icon_from_file           (GtkWindow   *window,
 						    const gchar *filename,
 						    GError     **err);
 GdkPixbuf* gtk_window_get_icon                     (GtkWindow  *window);
-G_CONST_RETURN 
-gchar     *gtk_window_get_icon_name                (GtkWindow  *window);
+const gchar *
+           gtk_window_get_icon_name                (GtkWindow  *window);
 void       gtk_window_set_default_icon_list        (GList      *list);
 GList*     gtk_window_get_default_icon_list        (void);
 void       gtk_window_set_default_icon             (GdkPixbuf  *icon);
 void       gtk_window_set_default_icon_name        (const gchar *name);
-G_CONST_RETURN
-gchar     *gtk_window_get_default_icon_name        (void);
+const gchar *
+           gtk_window_get_default_icon_name        (void);
 gboolean   gtk_window_set_default_icon_from_file   (const gchar *filename,
 						    GError     **err);
 
@@ -384,6 +385,7 @@ void     gtk_window_get_position     (GtkWindow   *window,
 gboolean gtk_window_parse_geometry   (GtkWindow   *window,
                                       const gchar *geometry);
 GtkWindowGroup *gtk_window_get_group (GtkWindow   *window);
+gboolean gtk_window_has_group        (GtkWindow   *window);
 
 /* Ignore this unless you are writing a GUI builder */
 void     gtk_window_reshow_with_initial_size (GtkWindow *window);
@@ -417,7 +419,7 @@ void            _gtk_window_constrain_size     (GtkWindow *window,
 						gint       height,
 						gint      *new_width,
 						gint      *new_height);
-GtkWidget      *_gtk_window_group_get_current_grab (GtkWindowGroup *window_group);
+GtkWidget      *gtk_window_group_get_current_grab (GtkWindowGroup *window_group);
 
 void            _gtk_window_set_has_toplevel_focus (GtkWindow *window,
 						    gboolean   has_toplevel_focus);

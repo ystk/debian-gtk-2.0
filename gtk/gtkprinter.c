@@ -131,7 +131,7 @@ gtk_printer_class_init (GtkPrinterClass *class)
                                    g_param_spec_boolean ("accepts-pdf",
 							 P_("Accepts PDF"),
 							 P_("TRUE if this printer can accept PDF"),
-							 TRUE,
+							 FALSE,
 							 GTK_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
   g_object_class_install_property (G_OBJECT_CLASS (class),
                                    PROP_ACCEPTS_PS,
@@ -240,7 +240,7 @@ gtk_printer_init (GtkPrinter *printer)
   priv->is_accepting_jobs = TRUE;
   priv->is_new = TRUE;
   priv->has_details = FALSE;
-  priv->accepts_pdf = TRUE;
+  priv->accepts_pdf = FALSE;
   priv->accepts_ps = TRUE;
 
   priv->state_message = NULL;  
@@ -398,7 +398,7 @@ gtk_printer_new (const gchar     *name,
  * 
  * Returns the backend of the printer.
  * 
- * Return value: the backend of @printer
+ * Return value: (transfer none): the backend of @printer
  * 
  * Since: 2.10
  */
@@ -420,7 +420,7 @@ gtk_printer_get_backend (GtkPrinter *printer)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_printer_get_name (GtkPrinter *printer)
 {
   g_return_val_if_fail (GTK_IS_PRINTER (printer), NULL);
@@ -438,7 +438,7 @@ gtk_printer_get_name (GtkPrinter *printer)
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_printer_get_description (GtkPrinter *printer)
 {
   g_return_val_if_fail (GTK_IS_PRINTER (printer), NULL);
@@ -476,7 +476,7 @@ gtk_printer_set_description (GtkPrinter  *printer,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_printer_get_state_message (GtkPrinter *printer)
 {
   g_return_val_if_fail (GTK_IS_PRINTER (printer), NULL);
@@ -514,7 +514,7 @@ gtk_printer_set_state_message (GtkPrinter  *printer,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar *
+const gchar *
 gtk_printer_get_location (GtkPrinter *printer)
 {
   g_return_val_if_fail (GTK_IS_PRINTER (printer), NULL);
@@ -552,7 +552,7 @@ gtk_printer_set_location (GtkPrinter  *printer,
  *
  * Since: 2.10
  */
-G_CONST_RETURN gchar * 
+const gchar *
 gtk_printer_get_icon_name (GtkPrinter *printer)
 {
   g_return_val_if_fail (GTK_IS_PRINTER (printer), NULL);
@@ -779,6 +779,15 @@ gtk_printer_accepts_pdf (GtkPrinter *printer)
   return printer->priv->accepts_pdf;
 }
 
+void
+gtk_printer_set_accepts_pdf (GtkPrinter *printer,
+			     gboolean val)
+{
+  g_return_if_fail (GTK_IS_PRINTER (printer));
+
+  printer->priv->accepts_pdf = val;
+}
+
 /**
  * gtk_printer_accepts_ps:
  * @printer: a #GtkPrinter
@@ -796,6 +805,15 @@ gtk_printer_accepts_ps (GtkPrinter *printer)
   g_return_val_if_fail (GTK_IS_PRINTER (printer), TRUE);
   
   return printer->priv->accepts_ps;
+}
+
+void
+gtk_printer_set_accepts_ps (GtkPrinter *printer,
+			    gboolean val)
+{
+  g_return_if_fail (GTK_IS_PRINTER (printer));
+
+  printer->priv->accepts_ps = val;
 }
 
 gboolean
@@ -960,10 +978,10 @@ gtk_printer_get_default_page_size (GtkPrinter *printer)
 /**
  * gtk_printer_get_hard_margins:
  * @printer: a #GtkPrinter
- * @top: a location to store the top margin in
- * @bottom: a location to store the bottom margin in
- * @left: a location to store the left margin in
- * @right: a location to store the right margin in
+ * @top: (out): a location to store the top margin in
+ * @bottom: (out): a location to store the bottom margin in
+ * @left: (out): a location to store the left margin in
+ * @right: (out): a location to store the right margin in
  *
  * Retrieve the hard margins of @printer, i.e. the margins that define
  * the area at the borders of the paper that the printer cannot print to.

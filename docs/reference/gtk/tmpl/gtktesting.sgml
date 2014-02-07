@@ -2,17 +2,19 @@
 Testing
 
 <!-- ##### SECTION Short_Description ##### -->
-Utilities for testing GTK+ applications
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -37,7 +39,7 @@ Utilities for testing GTK+ applications
 
 @widget_type: 
 @first_property_name: 
-@Varargs: 
+@...: 
 @Returns: 
 
 
@@ -48,7 +50,7 @@ Utilities for testing GTK+ applications
 
 @window_title: 
 @dialog_text: 
-@Varargs: 
+@...: 
 @Returns: 
 
 
@@ -90,7 +92,7 @@ Utilities for testing GTK+ applications
 
 @argcp: 
 @argvp: 
-@Varargs: 
+@...: 
 
 
 <!-- ##### FUNCTION gtk_test_list_all_types ##### -->

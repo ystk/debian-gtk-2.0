@@ -788,15 +788,19 @@ gtk_entry_completion_default_completion_func (GtkEntryCompletion *completion,
   if (item != NULL)
     {
       normalized_string = g_utf8_normalize (item, -1, G_NORMALIZE_ALL);
-      case_normalized_string = g_utf8_casefold (normalized_string, -1);
-      
-      if (!strncmp (key, case_normalized_string, strlen (key)))
-	ret = TRUE;
-      
-      g_free (item);
+
+      if (normalized_string != NULL)
+        {
+          case_normalized_string = g_utf8_casefold (normalized_string, -1);
+
+          if (!strncmp (key, case_normalized_string, strlen (key)))
+	    ret = TRUE;
+
+          g_free (case_normalized_string);
+        }
       g_free (normalized_string);
-      g_free (case_normalized_string);
     }
+  g_free (item);
 
   return ret;
 }
@@ -998,7 +1002,7 @@ gtk_entry_completion_new (void)
  *
  * Gets the entry @completion has been attached to.
  *
- * Return value: The entry @completion has been attached to.
+ * Return value: (transfer none): The entry @completion has been attached to.
  *
  * Since: 2.4
  */
@@ -1062,7 +1066,8 @@ gtk_entry_completion_set_model (GtkEntryCompletion *completion,
  * Returns the model the #GtkEntryCompletion is using as data source.
  * Returns %NULL if the model is unset.
  *
- * Return value: A #GtkTreeModel, or %NULL if none is currently being used.
+ * Return value: (transfer none): A #GtkTreeModel, or %NULL if none
+ *     is currently being used.
  *
  * Since: 2.4
  */
@@ -1073,7 +1078,7 @@ gtk_entry_completion_get_model (GtkEntryCompletion *completion)
 
   if (!completion->priv->filter_model)
     return NULL;
-  
+
   return gtk_tree_model_filter_get_model (completion->priv->filter_model);
 }
 

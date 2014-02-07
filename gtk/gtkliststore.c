@@ -926,7 +926,9 @@ gtk_list_store_set_valist (GtkListStore *list_store,
  * The list is terminated by a -1. For example, to set column 0 with type
  * %G_TYPE_STRING to "Foo", you would write <literal>gtk_list_store_set (store, iter,
  * 0, "Foo", -1)</literal>.
- * The value will be copied or referenced by the store if appropriate.
+ *
+ * The value will be referenced by the store if it is a %G_TYPE_OBJECT, and it
+ * will be copied if it is a %G_TYPE_STRING or %G_TYPE_BOXED.
  **/
 void
 gtk_list_store_set (GtkListStore *list_store,
@@ -990,7 +992,7 @@ gtk_list_store_remove (GtkListStore *list_store,
 /**
  * gtk_list_store_insert:
  * @list_store: A #GtkListStore
- * @iter: An unset #GtkTreeIter to set to the new row
+ * @iter: (out): An unset #GtkTreeIter to set to the new row
  * @position: position to insert the new row
  *
  * Creates a new row at @position.  @iter will be changed to point to this new
@@ -1041,7 +1043,7 @@ gtk_list_store_insert (GtkListStore *list_store,
 /**
  * gtk_list_store_insert_before:
  * @list_store: A #GtkListStore
- * @iter: An unset #GtkTreeIter to set to the new row
+ * @iter: (out): An unset #GtkTreeIter to set to the new row
  * @sibling: (allow-none): A valid #GtkTreeIter, or %NULL
  *
  * Inserts a new row before @sibling. If @sibling is %NULL, then the row will 
@@ -1073,7 +1075,7 @@ gtk_list_store_insert_before (GtkListStore *list_store,
 /**
  * gtk_list_store_insert_after:
  * @list_store: A #GtkListStore
- * @iter: An unset #GtkTreeIter to set to the new row
+ * @iter: (out): An unset #GtkTreeIter to set to the new row
  * @sibling: (allow-none): A valid #GtkTreeIter, or %NULL
  *
  * Inserts a new row after @sibling. If @sibling is %NULL, then the row will be
@@ -1105,7 +1107,7 @@ gtk_list_store_insert_after (GtkListStore *list_store,
 /**
  * gtk_list_store_prepend:
  * @list_store: A #GtkListStore
- * @iter: An unset #GtkTreeIter to set to the prepend row
+ * @iter: (out): An unset #GtkTreeIter to set to the prepend row
  *
  * Prepends a new row to @list_store. @iter will be changed to point to this new
  * row. The row will be empty after this function is called. To fill in
@@ -1125,7 +1127,7 @@ gtk_list_store_prepend (GtkListStore *list_store,
 /**
  * gtk_list_store_append:
  * @list_store: A #GtkListStore
- * @iter: An unset #GtkTreeIter to set to the appended row
+ * @iter: (out): An unset #GtkTreeIter to set to the appended row
  *
  * Appends a new row to @list_store.  @iter will be changed to point to this new
  * row.  The row will be empty after this function is called.  To fill in
@@ -1422,7 +1424,7 @@ gtk_list_store_reorder_func (GSequenceIter *a,
 /**
  * gtk_list_store_reorder:
  * @store: A #GtkListStore.
- * @new_order: an array of integers mapping the new position of each child
+ * @new_order: (array): an array of integers mapping the new position of each child
  *      to its old position before the re-ordering,
  *      i.e. @new_order<literal>[newpos] = oldpos</literal>.
  *
@@ -1883,7 +1885,7 @@ gtk_list_store_has_default_sort_func (GtkTreeSortable *sortable)
 /**
  * gtk_list_store_insert_with_values:
  * @list_store: A #GtkListStore
- * @iter: (allow-none): An unset #GtkTreeIter to set to the new row, or %NULL.
+ * @iter: (out) (allow-none): An unset #GtkTreeIter to set to the new row, or %NULL.
  * @position: position to insert the new row
  * @Varargs: pairs of column number and value, terminated with -1
  *
@@ -1969,10 +1971,10 @@ gtk_list_store_insert_with_values (GtkListStore *list_store,
 /**
  * gtk_list_store_insert_with_valuesv:
  * @list_store: A #GtkListStore
- * @iter: (allow-none): An unset #GtkTreeIter to set to the new row, or %NULL.
+ * @iter: (out) (allow-none): An unset #GtkTreeIter to set to the new row, or %NULL.
  * @position: position to insert the new row
- * @columns: an array of column numbers
- * @values: an array of GValues 
+ * @columns: (array length=n_values): an array of column numbers
+ * @values: (array length=n_values): an array of GValues 
  * @n_values: the length of the @columns and @values arrays
  * 
  * A variant of gtk_list_store_insert_with_values() which

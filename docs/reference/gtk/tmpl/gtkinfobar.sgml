@@ -9,10 +9,12 @@ GtkInfoBar
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -81,7 +83,7 @@ GtkInfoBar
 </para>
 
 @first_button_text: 
-@Varargs: 
+@...: 
 @Returns: 
 
 
@@ -113,7 +115,7 @@ GtkInfoBar
 
 @info_bar: 
 @first_button_text: 
-@Varargs: 
+@...: 
 
 
 <!-- ##### FUNCTION gtk_info_bar_set_response_sensitive ##### -->

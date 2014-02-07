@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "gtkmodules.h"
+#include "gtkmain.h"
 #include "gtksettings.h"
 #include "gtkdebug.h"
 #include "gtkprivate.h" /* GTK_LIBDIR */
@@ -237,7 +238,16 @@ find_module (const gchar *name)
     }
 
   module = g_module_open (module_name, G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
-  g_free(module_name);
+
+  if (_gtk_module_has_mixed_deps (module))
+    {
+      g_warning ("GTK+ module %s cannot be loaded.\n"
+                 "GTK+ 2.x symbols detected. Using GTK+ 2.x and GTK+ 3 in the same process is not supported.", module_name);
+      g_module_close (module);
+      module = NULL;
+    }
+
+  g_free (module_name);
 
   return module;
 }
@@ -271,6 +281,7 @@ load_module (GSList      *module_list,
 	      info->ref_count++;
 	      
 	      success = TRUE;
+              break;
 	    }
 	}
 
@@ -352,10 +363,17 @@ load_module (GSList      *module_list,
 	{
 	  module_list = g_slist_prepend (module_list, info);
 	}
+      else
+        info->ref_count--;
     }
   else
-    g_message ("Failed to load module \"%s\": %s", name, g_module_error ());
-  
+   {
+      const gchar *error = g_module_error ();
+
+      g_message ("Failed to load module \"%s\"%s%s",
+                 name, error ? ": " : "", error ? error : "");
+    }
+
   return module_list;
 }
 

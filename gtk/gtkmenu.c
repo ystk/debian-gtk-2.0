@@ -93,6 +93,12 @@ struct _GtkMenuPrivate
   GtkStateType lower_arrow_state;
   GtkStateType upper_arrow_state;
 
+  /* navigation region */
+  int navigation_x;
+  int navigation_y;
+  int navigation_width;
+  int navigation_height;
+
   guint have_layout           : 1;
   guint seen_item_enter       : 1;
   guint have_position         : 1;
@@ -1219,8 +1225,18 @@ gtk_menu_attach_to_widget (GtkMenu	       *menu,
 
   /* Fallback title for menu comes from attach widget */
   gtk_menu_update_title (menu);
+
+  g_object_notify (G_OBJECT (menu), "attach-widget");
 }
 
+/**
+ * gtk_menu_get_attach_widget:
+ * @menu: a #GtkMenu
+ *
+ * Returns the #GtkWidget that the menu is attached to.
+ *
+ * Returns: (transfer none): the #GtkWidget that the menu is attached to
+ */
 GtkWidget*
 gtk_menu_get_attach_widget (GtkMenu *menu)
 {
@@ -1337,27 +1353,26 @@ gtk_menu_tearoff_bg_copy (GtkMenu *menu)
   if (menu->torn_off)
     {
       GdkPixmap *pixmap;
-      GdkGC *gc;
-      GdkGCValues gc_values;
+      cairo_t *cr;
 
       menu->tearoff_active = FALSE;
       menu->saved_scroll_offset = menu->scroll_offset;
       
-      gc_values.subwindow_mode = GDK_INCLUDE_INFERIORS;
-      gc = gdk_gc_new_with_values (widget->window,
-				   &gc_values, GDK_GC_SUBWINDOW);
-      
-      gdk_drawable_get_size (menu->tearoff_window->window, &width, &height);
+      width = gdk_window_get_width (menu->tearoff_window->window);
+      height = gdk_window_get_height (menu->tearoff_window->window);
       
       pixmap = gdk_pixmap_new (menu->tearoff_window->window,
 			       width,
 			       height,
 			       -1);
 
-      gdk_draw_drawable (pixmap, gc,
-			 menu->tearoff_window->window,
-			 0, 0, 0, 0, -1, -1);
-      g_object_unref (gc);
+      cr = gdk_cairo_create (pixmap);
+      /* Let's hope that function never notices we're not passing it a pixmap */
+      gdk_cairo_set_source_pixmap (cr,
+                                   menu->tearoff_window->window,
+                                   0, 0);
+      cairo_paint (cr);
+      cairo_destroy (cr);
 
       gtk_widget_set_size_request (menu->tearoff_window,
 				   width,
@@ -1385,7 +1400,7 @@ popup_grab_on_window (GdkWindow *window,
 	return TRUE;
       else
 	{
-	  gdk_display_pointer_ungrab (gdk_drawable_get_display (window),
+	  gdk_display_pointer_ungrab (gdk_window_get_display (window),
 				      activate_time);
 	  return FALSE;
 	}
@@ -1705,6 +1720,17 @@ gtk_menu_popdown (GtkMenu *menu)
   menu_grab_transfer_window_destroy (menu);
 }
 
+/**
+ * gtk_menu_get_active:
+ * @menu: a #GtkMenu
+ *
+ * Returns the selected menu item from the menu.  This is used by the
+ * #GtkOptionMenu.
+ *
+ * Returns: (transfer none): the #GtkMenuItem that was last selected
+ *          in the menu.  If a selection has not yet been made, the
+ *          first menu item is selected.
+ */
 GtkWidget*
 gtk_menu_get_active (GtkMenu *menu)
 {
@@ -1781,6 +1807,15 @@ gtk_menu_set_accel_group (GtkMenu	*menu,
     }
 }
 
+/**
+ * gtk_menu_get_accel_group:
+ * @menu a #GtkMenu
+ *
+ * Gets the #GtkAccelGroup which holds global accelerators for the
+ * menu.  See gtk_menu_set_accel_group().
+ *
+ * Returns: (transfer none): the #GtkAccelGroup associated with the menu.
+ */
 GtkAccelGroup*
 gtk_menu_get_accel_group (GtkMenu *menu)
 {
@@ -2048,7 +2083,9 @@ gtk_menu_set_tearoff_state (GtkMenu  *menu,
 	      menu->tearoff_hbox = gtk_hbox_new (FALSE, FALSE);
 	      gtk_container_add (GTK_CONTAINER (menu->tearoff_window), menu->tearoff_hbox);
 
-	      gdk_drawable_get_size (GTK_WIDGET (menu)->window, &width, &height);
+              width = gdk_window_get_width (GTK_WIDGET (menu)->window);
+              height = gdk_window_get_height (GTK_WIDGET (menu)->window);
+
 	      menu->tearoff_adjustment =
 		GTK_ADJUSTMENT (gtk_adjustment_new (0,
 						    0,
@@ -2073,7 +2110,7 @@ gtk_menu_set_tearoff_state (GtkMenu  *menu,
 	  
 	  gtk_menu_reparent (menu, menu->tearoff_hbox, FALSE);
 
-	  gdk_drawable_get_size (GTK_WIDGET (menu)->window, &width, NULL);
+          width = gdk_window_get_width (GTK_WIDGET (menu)->window);
 
 	  /* Update menu->requisition
 	   */
@@ -2164,7 +2201,7 @@ gtk_menu_set_title (GtkMenu     *menu,
  * title set on it. This string is owned by the widget and should
  * not be modified or freed.
  **/
-G_CONST_RETURN gchar *
+const gchar *
 gtk_menu_get_title (GtkMenu *menu)
 {
   GtkMenuPrivate *priv;
@@ -2708,7 +2745,8 @@ get_arrows_visible_area (GtkMenu      *menu,
 
   border->x = GTK_CONTAINER (widget)->border_width + widget->style->xthickness + horizontal_padding;
   border->y = GTK_CONTAINER (widget)->border_width + widget->style->ythickness + vertical_padding;
-  gdk_drawable_get_size (widget->window, &border->width, &border->height);
+  border->width = gdk_window_get_width (widget->window);
+  border->height = gdk_window_get_height (widget->window);
 
   switch (arrow_placement)
     {
@@ -3110,19 +3148,24 @@ gtk_menu_key_press (GtkWidget	*widget,
     }
 
   /* Figure out what modifiers went into determining the key symbol */
-  gdk_keymap_translate_keyboard_state (gdk_keymap_get_for_display (display),
-				       event->hardware_keycode, event->state, event->group,
-				       NULL, NULL, NULL, &consumed_modifiers);
+  _gtk_translate_keyboard_accel_state (gdk_keymap_get_for_display (display),
+                                       event->hardware_keycode,
+                                       event->state,
+                                       gtk_accelerator_get_default_mod_mask (),
+                                       event->group,
+                                       &accel_key, NULL, NULL, &consumed_modifiers);
 
-  accel_key = gdk_keyval_to_lower (event->keyval);
+  accel_key = gdk_keyval_to_lower (accel_key);
   accel_mods = event->state & gtk_accelerator_get_default_mod_mask () & ~consumed_modifiers;
 
-  /* If lowercasing affects the keysym, then we need to include SHIFT in the modifiers,
-   * We re-upper case when we match against the keyval, but display and save in caseless form.
+  /* If lowercasing affects the keysym, then we need to include SHIFT
+   * in the modifiers, We re-upper case when we match against the
+   * keyval, but display and save in caseless form.
    */
   if (accel_key != event->keyval)
     accel_mods |= GDK_SHIFT_MASK;
-  
+
+
   /* Modify the accelerators */
   if (can_change_accels &&
       menu_shell->active_menu_item &&
@@ -3200,13 +3243,24 @@ definitely_within_item (GtkWidget *widget,
   GdkWindow *window = GTK_MENU_ITEM (widget)->event_window;
   int w, h;
 
-  gdk_drawable_get_size (window, &w, &h);
+  w = gdk_window_get_width (window);
+  h = gdk_window_get_height (window);
   
   return
     check_threshold (widget, 0, 0, x, y) &&
     check_threshold (widget, w - 1, 0, x, y) &&
     check_threshold (widget, w - 1, h - 1, x, y) &&
     check_threshold (widget, 0, h - 1, x, y);
+}
+
+static gboolean
+gtk_menu_has_navigation_triangle (GtkMenu *menu)
+{
+  GtkMenuPrivate *priv;
+
+  priv = gtk_menu_get_private (menu);
+
+  return priv->navigation_height && priv->navigation_width;
 }
 
 static gboolean
@@ -3250,7 +3304,7 @@ gtk_menu_motion_notify (GtkWidget      *widget,
   if (definitely_within_item (menu_item, event->x, event->y))
     menu_shell->activate_time = 0;
 
-  need_enter = (menu->navigation_region != NULL || menu_shell->ignore_enter);
+  need_enter = (gtk_menu_has_navigation_triangle (menu) || menu_shell->ignore_enter);
 
   /* Check to see if we are within an active submenu's navigation region
    */
@@ -3278,7 +3332,8 @@ gtk_menu_motion_notify (GtkWidget      *widget,
       
       menu_shell->ignore_enter = FALSE; 
       
-      gdk_drawable_get_size (event->window, &width, &height);
+      width = gdk_window_get_width (event->window);
+      height = gdk_window_get_height (event->window);
       if (event->x >= 0 && event->x < width &&
 	  event->y >= 0 && event->y < height)
 	{
@@ -3359,7 +3414,8 @@ gtk_menu_scroll_by (GtkMenu *menu,
   if ((menu->scroll_offset >= 0) && (offset < 0))
     offset = 0;
 
-  gdk_drawable_get_size (widget->window, &view_width, &view_height);
+  view_width = gdk_window_get_width (widget->window);
+  view_height = gdk_window_get_height (widget->window);
 
   if (menu->scroll_offset == 0 &&
       view_height >= widget->requisition.height)
@@ -3501,7 +3557,8 @@ get_arrows_sensitive_area (GtkMenu      *menu,
   gint scroll_arrow_height;
   GtkArrowPlacement arrow_placement;
 
-  gdk_drawable_get_size (GTK_WIDGET (menu)->window, &width, &height);
+  width = gdk_window_get_width (GTK_WIDGET (menu)->window);
+  height = gdk_window_get_height (GTK_WIDGET (menu)->window);
 
   gtk_widget_style_get (GTK_WIDGET (menu),
                         "vertical-padding", &vertical_padding,
@@ -3949,11 +4006,13 @@ gtk_menu_leave_notify (GtkWidget        *widget,
 static void 
 gtk_menu_stop_navigating_submenu (GtkMenu *menu)
 {
-  if (menu->navigation_region) 
-    {
-      gdk_region_destroy (menu->navigation_region);
-      menu->navigation_region = NULL;
-    }  
+  GtkMenuPrivate *priv = gtk_menu_get_private (menu);
+
+  priv->navigation_x = 0;
+  priv->navigation_y = 0;
+  priv->navigation_width = 0;
+  priv->navigation_height = 0;
+
   if (menu->navigation_timeout)
     {
       g_source_remove (menu->navigation_timeout);
@@ -3998,82 +4057,47 @@ gtk_menu_navigating_submenu (GtkMenu *menu,
 			     gint     event_x,
 			     gint     event_y)
 {
-  if (menu->navigation_region)
+  GtkMenuPrivate *priv;
+  int width, height;
+
+  if (!gtk_menu_has_navigation_triangle (menu))
+    return FALSE;
+
+  priv = gtk_menu_get_private (menu);
+  width = priv->navigation_width;
+  height = priv->navigation_height;
+
+  /* check if x/y are in the triangle spanned by the navigation parameters */
+
+  /* 1) Move the coordinates so the triangle starts at 0,0 */
+  event_x -= priv->navigation_x;
+  event_y -= priv->navigation_y;
+
+  /* 2) Ensure both legs move along the positive axis */
+  if (width < 0)
     {
-      if (gdk_region_point_in (menu->navigation_region, event_x, event_y))
-	return TRUE;
-      else
-	{
-	  gtk_menu_stop_navigating_submenu (menu);
-	  return FALSE;
-	}
+      event_x = -event_x;
+      width = -width;
     }
-  return FALSE;
-}
-
-#undef DRAW_STAY_UP_TRIANGLE
-
-#ifdef DRAW_STAY_UP_TRIANGLE
-
-static void
-draw_stay_up_triangle (GdkWindow *window,
-		       GdkRegion *region)
-{
-  /* Draw ugly color all over the stay-up triangle */
-  GdkColor ugly_color = { 0, 50000, 10000, 10000 };
-  GdkGCValues gc_values;
-  GdkGC *ugly_gc;
-  GdkRectangle clipbox;
-
-  gc_values.subwindow_mode = GDK_INCLUDE_INFERIORS;
-  ugly_gc = gdk_gc_new_with_values (window, &gc_values, 0 | GDK_GC_SUBWINDOW);
-  gdk_gc_set_rgb_fg_color (ugly_gc, &ugly_color);
-  gdk_gc_set_clip_region (ugly_gc, region);
-
-  gdk_region_get_clipbox (region, &clipbox);
-  
-  gdk_draw_rectangle (window,
-                     ugly_gc,
-                     TRUE,
-                     clipbox.x, clipbox.y,
-                     clipbox.width, clipbox.height);
-  
-  g_object_unref (ugly_gc);
-}
-#endif
-
-static GdkRegion *
-flip_region (GdkRegion *region,
-	     gboolean   flip_x,
-	     gboolean   flip_y)
-{
-  gint n_rectangles;
-  GdkRectangle *rectangles;
-  GdkRectangle clipbox;
-  GdkRegion *new_region;
-  gint i;
-
-  new_region = gdk_region_new ();
-  
-  gdk_region_get_rectangles (region, &rectangles, &n_rectangles);
-  gdk_region_get_clipbox (region, &clipbox);
-
-  for (i = 0; i < n_rectangles; ++i)
+  if (height < 0)
     {
-      GdkRectangle rect = rectangles[i];
-
-      if (flip_y)
-	rect.y -= 2 * (rect.y - clipbox.y) + rect.height;
-
-      if (flip_x)
-	rect.x -= 2 * (rect.x - clipbox.x) + rect.width;
-
-      gdk_region_union_with_rect (new_region, &rect);
+      event_y = -event_y;
+      height = -height;
     }
 
-  g_free (rectangles);
-
-  return new_region;
+  /* 3) Check that the given coordinate is inside the triangle. The formula
+   * is a transformed form of this formula: x/w + y/h <= 1
+   */
+  if (event_x >= 0 && event_y >= 0 &&
+      event_x * height + event_y * width <= width * height)
+    {
+      return TRUE;
+    }
+  else
+    {
+      gtk_menu_stop_navigating_submenu (menu);
+      return FALSE;
+    }
 }
 
 static void
@@ -4087,76 +4111,67 @@ gtk_menu_set_submenu_navigation_region (GtkMenu          *menu,
   gint submenu_bottom = 0;
   gint width = 0;
   gint height = 0;
-  GdkPoint point[3];
   GtkWidget *event_widget;
+  GtkMenuPrivate *priv;
 
   g_return_if_fail (menu_item->submenu != NULL);
   g_return_if_fail (event != NULL);
   
+  priv = gtk_menu_get_private (menu);
+
   event_widget = gtk_get_event_widget ((GdkEvent*) event);
   
   gdk_window_get_origin (menu_item->submenu->window, &submenu_left, &submenu_top);
-  gdk_drawable_get_size (menu_item->submenu->window, &width, &height);
+  width = gdk_window_get_width (menu_item->submenu->window);
+  height = gdk_window_get_height (menu_item->submenu->window);
   
   submenu_right = submenu_left + width;
   submenu_bottom = submenu_top + height;
   
-  gdk_drawable_get_size (event_widget->window, &width, &height);
+  width = gdk_window_get_width (event_widget->window);
+  height = gdk_window_get_height (event_widget->window);
   
   if (event->x >= 0 && event->x < width)
     {
       gint popdown_delay;
-      gboolean flip_y = FALSE;
-      gboolean flip_x = FALSE;
       
       gtk_menu_stop_navigating_submenu (menu);
+
+      /* The navigation region is the triangle closest to the x/y
+       * location of the rectangle. This is why the width or height
+       * can be negative.
+       */
 
       if (menu_item->submenu_direction == GTK_DIRECTION_RIGHT)
 	{
 	  /* right */
-	  point[0].x = event->x_root;
-	  point[1].x = submenu_left;
+          priv->navigation_x = submenu_left;
+          priv->navigation_width = event->x_root - submenu_left;
 	}
       else
 	{
 	  /* left */
-	  point[0].x = event->x_root + 1;
-	  point[1].x = 2 * (event->x_root + 1) - submenu_right;
-
-	  flip_x = TRUE;
+          priv->navigation_x = submenu_right;
+          priv->navigation_width = event->x_root - submenu_right;
 	}
 
       if (event->y < 0)
 	{
 	  /* top */
-	  point[0].y = event->y_root + 1;
-	  point[1].y = 2 * (event->y_root + 1) - submenu_top + NAVIGATION_REGION_OVERSHOOT;
+          priv->navigation_y = event->y_root;
+          priv->navigation_height = submenu_top - event->y_root - NAVIGATION_REGION_OVERSHOOT;
 
-	  if (point[0].y >= point[1].y - NAVIGATION_REGION_OVERSHOOT)
+	  if (priv->navigation_height >= 0)
 	    return;
-
-	  flip_y = TRUE;
 	}
       else
 	{
 	  /* bottom */
-	  point[0].y = event->y_root;
-	  point[1].y = submenu_bottom + NAVIGATION_REGION_OVERSHOOT;
+          priv->navigation_y = event->y_root;
+          priv->navigation_height = submenu_bottom - event->y_root + NAVIGATION_REGION_OVERSHOOT;
 
-	  if (point[0].y >= submenu_bottom)
+	  if (priv->navigation_height <= 0)
 	    return;
-	}
-
-      point[2].x = point[1].x;
-      point[2].y = point[0].y;
-
-      menu->navigation_region = gdk_region_polygon (point, 3, GDK_WINDING_RULE);
-
-      if (flip_x || flip_y)
-	{
-	  GdkRegion *new_region = flip_region (menu->navigation_region, flip_x, flip_y);
-	  gdk_region_destroy (menu->navigation_region);
-	  menu->navigation_region = new_region;
 	}
 
       g_object_get (gtk_widget_get_settings (GTK_WIDGET (menu)),
@@ -4166,11 +4181,6 @@ gtk_menu_set_submenu_navigation_region (GtkMenu          *menu,
       menu->navigation_timeout = gdk_threads_add_timeout (popdown_delay,
                                                           gtk_menu_stop_navigating_submenu_cb,
                                                           menu);
-
-#ifdef DRAW_STAY_UP_TRIANGLE
-      draw_stay_up_triangle (gdk_get_default_root_window(),
-			     menu->navigation_region);
-#endif
     }
 }
 
@@ -4692,7 +4702,8 @@ gtk_menu_scroll_item_visible (GtkMenuShell *menu_shell,
       gboolean double_arrows;
       
       y = menu->scroll_offset;
-      gdk_drawable_get_size (GTK_WIDGET (menu)->window, &width, &height);
+      width = gdk_window_get_width (GTK_WIDGET (menu)->window);
+      height = gdk_window_get_height (GTK_WIDGET (menu)->window);
 
       gtk_widget_style_get (GTK_WIDGET (menu),
 			    "vertical-padding", &vertical_padding,
@@ -5327,7 +5338,7 @@ gtk_menu_grab_notify (GtkWidget *widget,
 
   toplevel = gtk_widget_get_toplevel (widget);
   group = gtk_window_get_group (GTK_WINDOW (toplevel));
-  grab = _gtk_window_group_get_current_grab (group); 
+  grab = gtk_window_group_get_current_grab (group);
 
   if (!was_grabbed)
     {

@@ -24,6 +24,8 @@
  * GTK+ at ftp://ftp.gtk.org/pub/gtk/.
  */
 
+#undef GTK_DISABLE_DEPRECATED
+
 #include <stdlib.h>
 #include <string.h>
 #include "config.h"
@@ -138,14 +140,16 @@ gtk_dialog_class_init (GtkDialogClass *class)
    * GtkDialog:has-separator:
    *
    * When %TRUE, the dialog has a separator bar above its buttons.
+   *
+   * Deprecated: 2.22: This property will be removed in GTK+ 3.
    */
   g_object_class_install_property (gobject_class,
                                    PROP_HAS_SEPARATOR,
                                    g_param_spec_boolean ("has-separator",
 							 P_("Has separator"),
 							 P_("The dialog has a separator bar above its buttons"),
-                                                         TRUE,
-                                                         GTK_PARAM_READWRITE));
+                                                         FALSE,
+                                                         GTK_PARAM_READWRITE | G_PARAM_DEPRECATED));
 
   /**
    * GtkDialog::response:
@@ -294,12 +298,10 @@ gtk_dialog_init (GtkDialog *dialog)
                     FALSE, TRUE, 0);
   gtk_widget_show (dialog->action_area);
 
-  dialog->separator = gtk_hseparator_new ();
-  gtk_box_pack_end (GTK_BOX (dialog->vbox), dialog->separator, FALSE, TRUE, 0);
-  gtk_widget_show (dialog->separator);
+  dialog->separator = NULL;
 
   gtk_window_set_type_hint (GTK_WINDOW (dialog),
-			    GDK_WINDOW_TYPE_HINT_DIALOG);
+                            GDK_WINDOW_TYPE_HINT_DIALOG);
   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER_ON_PARENT);
 }
 
@@ -694,7 +696,7 @@ gtk_dialog_add_action_widget (GtkDialog *dialog,
  * appended to the end of the dialog's action area. The button widget is 
  * returned, but usually you don't need it.
  *
- * Return value: the button widget that was added
+ * Return value: (transfer none): the button widget that was added
  **/
 GtkWidget*
 gtk_dialog_add_button (GtkDialog   *dialog,
@@ -851,7 +853,8 @@ gtk_dialog_set_default_response (GtkDialog *dialog,
  * @setting: %TRUE to have a separator
  *
  * Sets whether the dialog has a separator above the buttons.
- * %TRUE by default.
+ *
+ * Deprecated: 2.22: This function will be removed in GTK+ 3
  **/
 void
 gtk_dialog_set_has_separator (GtkDialog *dialog,
@@ -899,6 +902,8 @@ gtk_dialog_set_has_separator (GtkDialog *dialog,
  * Accessor for whether the dialog has a separator.
  * 
  * Return value: %TRUE if the dialog has a separator
+ *
+ * Deprecated: 2.22: This function will be removed in GTK+ 3
  **/
 gboolean
 gtk_dialog_get_has_separator (GtkDialog *dialog)
@@ -1127,7 +1132,7 @@ _gtk_dialog_set_ignore_separator (GtkDialog *dialog,
  * Gets the widget button that uses the given response ID in the action area
  * of a dialog.
  *
- * Returns: the @widget button that uses the given @response_id, or %NULL.
+ * Returns: (transfer none):the @widget button that uses the given @response_id, or %NULL.
  *
  * Since: 2.20
  */
@@ -1314,7 +1319,8 @@ gtk_dialog_set_alternative_button_order (GtkDialog *dialog,
  * gtk_dialog_set_alternative_button_order_from_array:
  * @dialog: a #GtkDialog
  * @n_params: the number of response ids in @new_order
- * @new_order: an array of response ids of @dialog's buttons
+ * @new_order: (array length=n_params): an array of response ids of
+ *     @dialog's buttons
  *
  * Sets an alternative button order. If the 
  * #GtkSettings:gtk-alternative-button-order setting is set to %TRUE, 

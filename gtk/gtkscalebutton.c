@@ -546,8 +546,9 @@ gtk_scale_button_dispose (GObject *object)
  * @max: the maximum value of the scale (usually 100)
  * @step: the stepping of value when a scroll-wheel event,
  *        or up/down arrow event occurs (usually 2)
- * @icons: (allow-none): a %NULL-terminated array of icon names, or %NULL if
- *         you want to set the list later with gtk_scale_button_set_icons()
+ * @icons: (allow-none) (array zero-terminated=1): a %NULL-terminated
+ *         array of icon names, or %NULL if you want to set the list
+ *         later with gtk_scale_button_set_icons()
  *
  * Creates a #GtkScaleButton, with a range between @min and @max, with
  * a stepping of @step.
@@ -627,7 +628,7 @@ gtk_scale_button_set_value (GtkScaleButton *button,
 /**
  * gtk_scale_button_set_icons:
  * @button: a #GtkScaleButton
- * @icons: a %NULL-terminated array of icon names
+ * @icons: (array zero-terminated=1): a %NULL-terminated array of icon names
  *
  * Sets the icons to be used by the scale button.
  * For details, see the #GtkScaleButton:icons property.
@@ -660,7 +661,7 @@ gtk_scale_button_set_icons (GtkScaleButton  *button,
  * Gets the #GtkAdjustment associated with the #GtkScaleButton's scale.
  * See gtk_range_get_adjustment() for details.
  *
- * Returns: the adjustment associated with the scale
+ * Returns: (transfer none): the adjustment associated with the scale
  *
  * Since: 2.12
  */
@@ -752,7 +753,7 @@ gtk_scale_button_set_orientation (GtkScaleButton *button,
  *
  * Retrieves the plus button of the #GtkScaleButton.
  *
- * Returns: the plus button of the #GtkScaleButton.
+ * Returns: (transfer none): the plus button of the #GtkScaleButton
  *
  * Since: 2.14
  */
@@ -770,7 +771,7 @@ gtk_scale_button_get_plus_button (GtkScaleButton *button)
  *
  * Retrieves the minus button of the #GtkScaleButton.
  *
- * Returns: the minus button of the #GtkScaleButton.
+ * Returns: (transfer none): the minus button of the #GtkScaleButton
  *
  * Since: 2.14
  */
@@ -788,7 +789,7 @@ gtk_scale_button_get_minus_button (GtkScaleButton *button)
  *
  * Retrieves the popup of the #GtkScaleButton.
  *
- * Returns: the popup of the #GtkScaleButton
+ * Returns: (transfer none): the popup of the #GtkScaleButton
  *
  * Since: 2.14
  */

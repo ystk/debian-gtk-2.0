@@ -9,10 +9,12 @@ GtkImage
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -193,13 +195,11 @@ GtkImage
 @Returns: 
 
 
-<!-- ##### FUNCTION gtk_image_new_from_file ##### -->
+<!-- ##### MACRO gtk_image_new_from_file ##### -->
 <para>
 
 </para>
 
-@filename: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gtk_image_new_from_icon_set ##### -->
@@ -280,13 +280,11 @@ GtkImage
 @Returns: 
 
 
-<!-- ##### FUNCTION gtk_image_set_from_file ##### -->
+<!-- ##### MACRO gtk_image_set_from_file ##### -->
 <para>
 
 </para>
 
-@image: 
-@filename: 
 
 
 <!-- ##### FUNCTION gtk_image_set_from_icon_set ##### -->

@@ -26,9 +26,31 @@
 
 #include "config.h"
 
+#undef GTK_DISABLE_DEPRECATED
+
 #include "gtkorientable.h"
 #include "gtkvruler.h"
 #include "gtkalias.h"
+
+/**
+ * SECTION:gtkvruler
+ * @Short_description: A vertical ruler
+ * @Title: GtkVRuler
+ *
+ * <note>
+ *  This widget is considered too specialized/little-used for
+ *  GTK+, and will be removed in GTK 3.  If your application needs this widget,
+ *  feel free to use it, as the widget is useful in some applications; it's just
+ *  not of general interest. However, we are not accepting new features for the
+ *  widget, and it will move out of the GTK+ distribution.
+ * </note>
+ *
+ * The VRuler widget is a widget arranged vertically creating a ruler that is
+ * utilized around other widgets such as a text widget. The ruler is used to show
+ * the location of the mouse on the window and to show the size of the window in
+ * specified units. The available units of measurement are GTK_PIXELS, GTK_INCHES
+ * and GTK_CENTIMETERS. GTK_PIXELS is the default unit of measurement.
+ */
 
 G_DEFINE_TYPE (GtkVRuler, gtk_vruler, GTK_TYPE_RULER)
 
@@ -44,6 +66,16 @@ gtk_vruler_init (GtkVRuler *vruler)
                                   GTK_ORIENTATION_VERTICAL);
 }
 
+/**
+ * gtk_vruler_new:
+ *
+ * Creates a new vertical ruler
+ *
+ * Returns: a new #GtkVRuler.
+ *
+ * @Deprecated: 2.24: #GtkRuler has been removed from GTK 3 for being
+ *              unmaintained and too specialized. There is no replacement.
+ */
 GtkWidget *
 gtk_vruler_new (void)
 {

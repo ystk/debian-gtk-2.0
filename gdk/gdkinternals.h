@@ -274,6 +274,8 @@ struct _GdkWindowObject
   
   cairo_surface_t *cairo_surface;
   guint outstanding_surfaces; /* only set on impl window */
+
+  cairo_pattern_t *background;
 };
 
 #define GDK_WINDOW_TYPE(d) (((GdkWindowObject*)(GDK_WINDOW (d)))->window_type)
@@ -422,6 +424,14 @@ void       _gdk_gc_set_clip_region_internal (GdkGC     *gc,
 					     GdkRegion *region,
 					     gboolean reset_origin);
 GdkSubwindowMode _gdk_gc_get_subwindow (GdkGC *gc);
+
+GdkDrawable *_gdk_drawable_begin_direct_draw (GdkDrawable *drawable,
+					      GdkGC *gc,
+					      gpointer *priv_data,
+					      gint *x_offset_out,
+					      gint *y_offset_out);
+void         _gdk_drawable_end_direct_draw (gpointer priv_data);
+
 
 /*****************************************
  * Interfaces provided by windowing code *
@@ -662,6 +672,7 @@ gboolean    _gdk_window_has_impl (GdkWindow *window);
 GdkWindow * _gdk_window_get_impl_window (GdkWindow *window);
 GdkWindow *_gdk_window_get_input_window_for_event (GdkWindow *native_window,
 						   GdkEventType event_type,
+						   GdkModifierType mask,
 						   int x, int y,
 						   gulong serial);
 GdkRegion  *_gdk_region_new_from_yxbanded_rects (GdkRectangle *rects, int n_rects);
@@ -669,7 +680,12 @@ GdkRegion  *_gdk_region_new_from_yxbanded_rects (GdkRectangle *rects, int n_rect
 /*****************************
  * offscreen window routines *
  *****************************/
+typedef struct _GdkOffscreenWindow      GdkOffscreenWindow;
+#define GDK_TYPE_OFFSCREEN_WINDOW            (gdk_offscreen_window_get_type())
+#define GDK_OFFSCREEN_WINDOW(object)         (G_TYPE_CHECK_INSTANCE_CAST ((object), GDK_TYPE_OFFSCREEN_WINDOW, GdkOffscreenWindow))
+#define GDK_IS_OFFSCREEN_WINDOW(object)      (G_TYPE_CHECK_INSTANCE_TYPE ((object), GDK_TYPE_OFFSCREEN_WINDOW))
 GType gdk_offscreen_window_get_type (void);
+GdkDrawable * _gdk_offscreen_window_get_real_drawable (GdkOffscreenWindow *window);
 void       _gdk_offscreen_window_new                 (GdkWindow     *window,
 						      GdkScreen     *screen,
 						      GdkVisual     *visual,

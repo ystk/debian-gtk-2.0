@@ -31,6 +31,25 @@
 #include "gtkprivate.h"
 #include "gtkalias.h"
 
+/**
+ * SECTION:gtkviewport
+ * @Short_description: An adapter which makes widgets scrollable
+ * @Title: GtkViewport
+ * @See_also:#GtkScrolledWindow, #GtkAdjustment
+ *
+ * The #GtkViewport widget acts as an adaptor class, implementing
+ * scrollability for child widgets that lack their own scrolling
+ * capabilities. Use #GtkViewport to scroll child widgets such as
+ * #GtkTable, #GtkBox, and so on.
+ *
+ * If a widget has native scrolling abilities, such as #GtkTextView,
+ * #GtkTreeView or #GtkIconview, it can be added to a #GtkScrolledWindow
+ * with gtk_container_add(). If a widget does not, you must first add the
+ * widget to a #GtkViewport, then add the viewport to the scrolled window.
+ * The convenience function gtk_scrolled_window_add_with_viewport() does
+ * exactly this, so you can ignore the presence of the viewport.
+ */
+
 enum {
   PROP_0,
   PROP_HADJUSTMENT,
@@ -283,10 +302,10 @@ gtk_viewport_destroy (GtkObject *object)
 /**
  * gtk_viewport_get_hadjustment:
  * @viewport: a #GtkViewport.
- * 
+ *
  * Returns the horizontal adjustment of the viewport.
  *
- * Return value: the horizontal adjustment of @viewport.
+ * Return value: (transfer none): the horizontal adjustment of @viewport.
  **/
 GtkAdjustment*
 gtk_viewport_get_hadjustment (GtkViewport *viewport)
@@ -305,7 +324,7 @@ gtk_viewport_get_hadjustment (GtkViewport *viewport)
  * 
  * Returns the vertical adjustment of the viewport.
  *
- * Return value: the vertical adjustment of @viewport.
+ * Return value: (transfer none): the vertical adjustment of @viewport.
  **/
 GtkAdjustment*
 gtk_viewport_get_vadjustment (GtkViewport *viewport)
@@ -562,7 +581,7 @@ gtk_viewport_get_shadow_type (GtkViewport *viewport)
  *
  * Gets the bin window of the #GtkViewport.
  *
- * Return value: a #GdkWindow
+ * Return value: (transfer none): a #GdkWindow
  *
  * Since: 2.20
  **/
@@ -572,6 +591,24 @@ gtk_viewport_get_bin_window (GtkViewport *viewport)
   g_return_val_if_fail (GTK_IS_VIEWPORT (viewport), NULL);
 
   return viewport->bin_window;
+}
+
+/**
+ * gtk_viewport_get_view_window:
+ * @viewport: a #GtkViewport
+ *
+ * Gets the view window of the #GtkViewport.
+ *
+ * Return value: (transfer none): a #GdkWindow
+ *
+ * Since: 2.22
+ **/
+GdkWindow*
+gtk_viewport_get_view_window (GtkViewport *viewport)
+{
+  g_return_val_if_fail (GTK_IS_VIEWPORT (viewport), NULL);
+
+  return viewport->view_window;
 }
 
 static void

@@ -846,6 +846,42 @@ multiple views.
 @Returns: 
 
 
+<!-- ##### FUNCTION gtk_text_view_im_context_filter_keypress ##### -->
+<para>
+
+</para>
+
+@text_view: 
+@event: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gtk_text_view_reset_im_context ##### -->
+<para>
+
+</para>
+
+@text_view: 
+
+
+<!-- ##### FUNCTION gtk_text_view_get_hadjustment ##### -->
+<para>
+
+</para>
+
+@text_view: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gtk_text_view_get_vadjustment ##### -->
+<para>
+
+</para>
+
+@text_view: 
+@Returns: 
+
+
 <!-- ##### MACRO GTK_TEXT_VIEW_PRIORITY_VALIDATE ##### -->
 <para>
 The priority at which the text view validates onscreen lines

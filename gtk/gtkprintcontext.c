@@ -254,7 +254,7 @@ _gtk_print_context_set_page_setup (GtkPrintContext *context,
  * Obtains the cairo context that is associated with the
  * #GtkPrintContext.
  *
- * Return value: the cairo context of @context
+ * Return value: (transfer none): the cairo context of @context
  *
  * Since: 2.10
  */
@@ -273,7 +273,7 @@ gtk_print_context_get_cairo_context (GtkPrintContext *context)
  * Obtains the #GtkPageSetup that determines the page
  * dimensions of the #GtkPrintContext.
  *
- * Return value: the page setup of @context
+ * Return value: (transfer none): the page setup of @context
  *
  * Since: 2.10
  */
@@ -384,10 +384,10 @@ gtk_print_context_get_dpi_y (GtkPrintContext *context)
 /**
  * gtk_print_context_get_hard_margins:
  * @context: a #GtkPrintContext
- * @top: top hardware printer margin
- * @bottom: bottom hardware printer margin
- * @left: left hardware printer margin
- * @right: right hardware printer margin
+ * @top: (out): top hardware printer margin
+ * @bottom: (out): bottom hardware printer margin
+ * @left: (out): left hardware printer margin
+ * @right: (out): right hardware printer margin
  *
  * Obtains the hardware printer margins of the #GtkPrintContext, in units.
  *
@@ -441,10 +441,10 @@ _gtk_print_context_set_hard_margins (GtkPrintContext *context,
  * gtk_print_context_get_pango_fontmap:
  * @context: a #GtkPrintContext
  *
- * Returns a #PangoFontMap that is suitable for use 
+ * Returns a #PangoFontMap that is suitable for use
  * with the #GtkPrintContext.
  *
- * Return value: the font map of @context
+ * Return value: (transfer none): the font map of @context
  *
  * Since: 2.10
  */
@@ -458,12 +458,12 @@ gtk_print_context_get_pango_fontmap (GtkPrintContext *context)
 
 /**
  * gtk_print_context_create_pango_context:
- * @context: a #GtkPrintContext 
+ * @context: a #GtkPrintContext
  *
  * Creates a new #PangoContext that can be used with the
  * #GtkPrintContext.
  *
- * Return value: a new Pango context for @context
+ * Return value: (transfer full): a new Pango context for @context
  * 
  * Since: 2.10
  */
@@ -475,7 +475,7 @@ gtk_print_context_create_pango_context (GtkPrintContext *context)
 
   g_return_val_if_fail (GTK_IS_PRINT_CONTEXT (context), NULL);
   
-  pango_context = pango_cairo_font_map_create_context (PANGO_CAIRO_FONT_MAP (_gtk_print_context_get_fontmap (context)));
+  pango_context = pango_font_map_create_context (_gtk_print_context_get_fontmap (context));
 
   options = cairo_font_options_create ();
   cairo_font_options_set_hint_metrics (options, CAIRO_HINT_METRICS_OFF);
@@ -497,7 +497,7 @@ gtk_print_context_create_pango_context (GtkPrintContext *context)
  * Creates a new #PangoLayout that is suitable for use
  * with the #GtkPrintContext.
  * 
- * Return value: a new Pango layout for @context
+ * Return value: (transfer full): a new Pango layout for @context
  *
  * Since: 2.10
  */

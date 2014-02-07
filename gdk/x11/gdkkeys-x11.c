@@ -736,8 +736,11 @@ _gdk_keymap_keys_changed (GdkDisplay *display)
  *
  * Returns the direction of effective layout of the keymap.
  *
- * Returns: %PANGO_DIRECTION_LTR or %PANGO_DIRECTION_RTL 
- *   if it can determine the direction. %PANGO_DIRECTION_NEUTRAL 
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
+ *
+ * Returns: %PANGO_DIRECTION_LTR or %PANGO_DIRECTION_RTL
+ *   if it can determine the direction. %PANGO_DIRECTION_NEUTRAL
  *   otherwise.
  **/
 PangoDirection
@@ -773,6 +776,9 @@ gdk_keymap_get_direction (GdkKeymap *keymap)
  *
  * Determines if keyboard layouts for both right-to-left and left-to-right
  * languages are in use.
+ *
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
  *
  * Returns: %TRUE if there are layouts in both directions, %FALSE otherwise
  *
@@ -850,6 +856,9 @@ gdk_keymap_get_caps_lock_state (GdkKeymap *keymap)
  * keyboard group. The level is computed from the modifier mask.
  * The returned array should be freed
  * with g_free().
+ *
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
  *
  * Return value: %TRUE if keys were found and returned
  **/
@@ -996,6 +1005,9 @@ gdk_keymap_get_entries_for_keyval (GdkKeymap     *keymap,
  * When a keycode is pressed by the user, the keyval from
  * this list of entries is selected by considering the effective
  * keyboard group and level. See gdk_keymap_translate_keyboard_state().
+ *
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
  *
  * Returns: %TRUE if there were any entries
  **/
@@ -1153,6 +1165,9 @@ gdk_keymap_get_entries_for_keycode (GdkKeymap     *keymap,
  * this function, since the effective group/level may not be
  * the same as the current keyboard state.
  * 
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
+ *
  * Return value: a keyval, or 0 if none was mapped to the given @key
  **/
 guint
@@ -1472,6 +1487,9 @@ translate_keysym (GdkKeymapX11   *keymap_x11,
  * not <literal>&lt;Control&gt;&lt;Shift&gt;plus</literal>,
  * </para></note>
  * 
+ * Note that passing %NULL for @keymap is deprecated and will stop
+ * to work in GTK+ 3.0. Use gdk_keymap_get_for_display() instead.
+ *
  * Return value: %TRUE if there was a keyval bound to the keycode/state/group
  **/
 gboolean
@@ -1666,13 +1684,12 @@ _gdk_keymap_add_virtual_modifiers_compat (GdkKeymap       *keymap,
   keymap = GET_EFFECTIVE_KEYMAP (keymap);
   keymap_x11 = GDK_KEYMAP_X11 (keymap);
 
-  for (i = 3; i < 8; i++)
+  /* See comment in add_virtual_modifiers() */
+  for (i = 4; i < 8; i++)
     {
       if ((1 << i) & *modifiers)
         {
-	  if (keymap_x11->modmap[i] & GDK_MOD1_MASK)
-	    *modifiers |= GDK_MOD1_MASK;
-	  else if (keymap_x11->modmap[i] & GDK_SUPER_MASK)
+	  if (keymap_x11->modmap[i] & GDK_SUPER_MASK)
 	    *modifiers |= GDK_SUPER_MASK;
 	  else if (keymap_x11->modmap[i] & GDK_HYPER_MASK)
 	    *modifiers |= GDK_HYPER_MASK;
@@ -1711,12 +1728,16 @@ gdk_keymap_add_virtual_modifiers (GdkKeymap       *keymap,
   keymap = GET_EFFECTIVE_KEYMAP (keymap);
   keymap_x11 = GDK_KEYMAP_X11 (keymap);
 
-  for (i = 3; i < 8; i++)
+  /*  This loop used to start at 3, which included MOD1 in the
+   *  virtual mapping. However, all of GTK+ treats MOD1 as a
+   *  synonym for Alt, and does not expect it to be mapped around,
+   *  therefore it's more sane to simply treat MOD1 like SHIFT and
+   *  CONTROL, which are not mappable either.
+   */
+  for (i = 4; i < 8; i++)
     {
       if ((1 << i) & *state)
         {
-	  if (keymap_x11->modmap[i] & GDK_MOD1_MASK)
-	    *state |= GDK_MOD1_MASK;
 	  if (keymap_x11->modmap[i] & GDK_SUPER_MASK)
 	    *state |= GDK_SUPER_MASK;
 	  if (keymap_x11->modmap[i] & GDK_HYPER_MASK)
@@ -1795,13 +1816,17 @@ gdk_keymap_map_virtual_modifiers (GdkKeymap       *keymap,
   keymap = GET_EFFECTIVE_KEYMAP (keymap);
   keymap_x11 = GDK_KEYMAP_X11 (keymap);
 
+  if (KEYMAP_USE_XKB (keymap))
+    get_xkb (keymap_x11);
+
   retval = TRUE;
 
   for (j = 0; j < 3; j++)
     {
       if (*state & vmods[j])
         {
-          for (i = 3; i < 8; i++)
+          /* See comment in add_virtual_modifiers() */
+          for (i = 4; i < 8; i++)
             {
               if (keymap_x11->modmap[i] & vmods[j])
                 {

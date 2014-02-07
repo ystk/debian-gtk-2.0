@@ -154,6 +154,8 @@ gtk_accel_label_accelerator_width
 <TITLE>GtkAccessible</TITLE>
 GtkAccessible
 gtk_accessible_connect_widget_destroyed
+gtk_accessible_get_widget
+gtk_accessible_set_widget
 
 <SUBSECTION Standard>
 GTK_ACCESSIBLE
@@ -371,6 +373,7 @@ gtk_assistant_get_page_complete
 gtk_assistant_add_action_widget
 gtk_assistant_remove_action_widget
 gtk_assistant_update_buttons_state
+gtk_assistant_commit
 
 <SUBSECTION Standard>
 GtkAssistantClass
@@ -575,6 +578,7 @@ gtk_button_set_image
 gtk_button_get_image
 gtk_button_set_image_position
 gtk_button_get_image_position
+gtk_button_get_event_window
 
 <SUBSECTION Standard>
 GTK_BUTTON
@@ -928,7 +932,9 @@ gtk_combo_get_type
 <TITLE>GtkComboBox</TITLE>
 GtkComboBox
 gtk_combo_box_new
+gtk_combo_box_new_with_entry
 gtk_combo_box_new_with_model
+gtk_combo_box_new_with_model_and_entry
 gtk_combo_box_get_wrap_width
 gtk_combo_box_set_wrap_width
 gtk_combo_box_get_row_span_column
@@ -960,6 +966,9 @@ gtk_combo_box_set_focus_on_click
 gtk_combo_box_get_focus_on_click
 gtk_combo_box_set_button_sensitivity
 gtk_combo_box_get_button_sensitivity
+gtk_combo_box_get_has_entry
+gtk_combo_box_set_entry_text_column
+gtk_combo_box_get_entry_text_column
 <SUBSECTION Standard>
 GTK_TYPE_COMBO_BOX
 GTK_COMBO_BOX
@@ -991,6 +1000,31 @@ GTK_COMBO_BOX_ENTRY_GET_CLASS
 <SUBSECTION Private>
 GtkComboBoxEntryPrivate
 gtk_combo_box_entry_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gtkcomboboxtext</FILE>
+<TITLE>GtkComboBoxText</TITLE>
+GtkComboBoxText
+gtk_combo_box_text_new
+gtk_combo_box_text_new_with_entry
+gtk_combo_box_text_append_text
+gtk_combo_box_text_insert_text
+gtk_combo_box_text_prepend_text
+gtk_combo_box_text_remove
+gtk_combo_box_text_get_active_text
+
+<SUBSECTION Standard>
+GTK_TYPE_COMBO_BOX_TEXT
+GTK_COMBO_BOX_TEXT
+GTK_IS_COMBO_BOX_TEXT
+GTK_COMBO_BOX_TEXT_CLASS
+GTK_IS_COMBO_BOX_TEXT_CLASS
+GTK_COMBO_BOX_TEXT_GET_CLASS
+
+<SUBSECTION Private>
+GtkComboBoxTextPrivate
+gtk_combo_box_text_get_type
 </SECTION>
 
 <SECTION>
@@ -1315,6 +1349,8 @@ gtk_entry_get_progress_fraction
 gtk_entry_set_progress_pulse_step
 gtk_entry_get_progress_pulse_step
 gtk_entry_progress_pulse
+gtk_entry_im_context_filter_keypress
+gtk_entry_reset_im_context
 GtkEntryIconPosition
 gtk_entry_set_icon_from_pixbuf
 gtk_entry_set_icon_from_stock
@@ -1375,6 +1411,7 @@ GTK_IS_ENTRY_BUFFER_CLASS
 GTK_ENTRY_BUFFER_GET_CLASS
 GTK_ENTRY_BUFFER_MAX_SIZE
 <SUBSECTION Private>
+GtkEntryBufferPrivate
 gtk_entry_buffer_get_type
 </SECTION>
 
@@ -1458,6 +1495,8 @@ gtk_expander_set_use_markup
 gtk_expander_get_use_markup
 gtk_expander_set_label_widget
 gtk_expander_get_label_widget
+gtk_expander_set_label_fill
+gtk_expander_get_label_fill
 <SUBSECTION Standard>
 GTK_TYPE_EXPANDER
 GTK_EXPANDER_CLASS
@@ -1748,6 +1787,7 @@ gtk_font_selection_dialog_set_preview_text
 gtk_font_selection_dialog_get_apply_button
 gtk_font_selection_dialog_get_cancel_button
 gtk_font_selection_dialog_get_ok_button
+gtk_font_selection_dialog_get_font_selection
 
 <SUBSECTION Standard>
 GTK_FONT_SELECTION_DIALOG
@@ -1965,6 +2005,8 @@ gtk_icon_view_set_selection_mode
 gtk_icon_view_get_selection_mode
 gtk_icon_view_set_orientation
 gtk_icon_view_get_orientation
+gtk_icon_view_set_item_orientation
+gtk_icon_view_get_item_orientation
 gtk_icon_view_set_columns
 gtk_icon_view_get_columns
 gtk_icon_view_set_item_width
@@ -1993,6 +2035,8 @@ gtk_icon_view_set_tooltip_cell
 gtk_icon_view_get_tooltip_context
 gtk_icon_view_set_tooltip_column
 gtk_icon_view_get_tooltip_column
+gtk_icon_view_get_item_row
+gtk_icon_view_get_item_column
 <SUBSECTION Dnd>
 GtkIconViewDropPosition
 gtk_icon_view_enable_model_drag_source
@@ -2619,6 +2663,7 @@ gtk_message_dialog_new_with_markup
 gtk_message_dialog_set_markup
 gtk_message_dialog_set_image
 gtk_message_dialog_get_image
+gtk_message_dialog_get_message_area
 gtk_message_dialog_format_secondary_text
 gtk_message_dialog_format_secondary_markup
 <SUBSECTION Standard>
@@ -2659,7 +2704,7 @@ GTK_INFO_BAR_GET_CLASS
 
 <SUBSECTION Private>
 gtk_info_bar_get_type
-GtkMessageAreaPrivate
+GtkInfoBarPrivate
 </SECTION>
 
 <SECTION>
@@ -2731,11 +2776,15 @@ gtk_notebook_get_tab_label_text
 gtk_notebook_get_tab_pos
 gtk_notebook_get_tab_reorderable
 gtk_notebook_get_tab_detachable
+gtk_notebook_get_tab_hborder
+gtk_notebook_get_tab_vborder
 gtk_notebook_set_current_page
 gtk_notebook_set_group_id
 gtk_notebook_get_group_id
 gtk_notebook_set_group
 gtk_notebook_get_group
+gtk_notebook_set_group_name
+gtk_notebook_get_group_name
 gtk_notebook_set_action_widget
 gtk_notebook_get_action_widget
 GtkNotebookWindowCreationFunc
@@ -3090,10 +3139,12 @@ gtk_range_set_adjustment
 gtk_range_get_inverted
 gtk_range_set_inverted
 gtk_range_get_update_policy
-gtk_range_get_value
 gtk_range_set_increments
 gtk_range_set_range
+gtk_range_get_value
 gtk_range_set_value
+gtk_range_get_round_digits
+gtk_range_set_round_digits
 GtkSensitivityType
 gtk_range_set_lower_stepper_sensitivity
 gtk_range_get_lower_stepper_sensitivity
@@ -3626,6 +3677,7 @@ GTK_SPINNER_CLASS
 GTK_IS_SPINER_CLASS
 GTK_SPINNER_GET_CLASS
 <SUBSECTION Private>
+GtkSpinnerPrivate
 gtk_spinner_get_type
 </SECTION>
 
@@ -3638,6 +3690,7 @@ gtk_statusbar_get_context_id
 gtk_statusbar_push
 gtk_statusbar_pop
 gtk_statusbar_remove
+gtk_statusbar_remove_all
 gtk_statusbar_set_has_resize_grip
 gtk_statusbar_get_has_resize_grip
 gtk_statusbar_get_message_area
@@ -3724,6 +3777,7 @@ gtk_table_get_homogeneous
 gtk_table_get_row_spacing
 gtk_table_get_col_spacing
 gtk_table_get_default_col_spacing
+gtk_table_get_size
 <SUBSECTION Standard>
 GTK_TABLE
 GTK_IS_TABLE
@@ -4120,6 +4174,10 @@ gtk_text_view_get_tabs
 gtk_text_view_set_accepts_tab
 gtk_text_view_get_accepts_tab
 gtk_text_view_get_default_attributes
+gtk_text_view_im_context_filter_keypress
+gtk_text_view_reset_im_context
+gtk_text_view_get_hadjustment
+gtk_text_view_get_vadjustment
 GTK_TEXT_VIEW_PRIORITY_VALIDATE
 <SUBSECTION Standard>
 GTK_TEXT_VIEW
@@ -4521,6 +4579,7 @@ GTK_TOOL_ITEM_GROUP_CLASS
 GTK_IS_TOOL_ITEM_GROUP_CLASS
 GTK_TOOL_ITEM_GROUP_GET_CLASS
 <SUBSECTION Private>
+GtkToolItemGroupPrivate
 gtk_tool_item_group_get_type
 </SECTION>
 
@@ -4663,6 +4722,7 @@ gtk_tree_path_append_index
 gtk_tree_path_prepend_index
 gtk_tree_path_get_depth
 gtk_tree_path_get_indices
+gtk_tree_path_get_indices_with_depth
 gtk_tree_path_free
 gtk_tree_path_copy
 gtk_tree_path_compare
@@ -5426,6 +5486,7 @@ gtk_viewport_set_vadjustment
 gtk_viewport_set_shadow_type
 gtk_viewport_get_shadow_type
 gtk_viewport_get_bin_window
+gtk_viewport_get_view_window
 <SUBSECTION Standard>
 GTK_VIEWPORT
 GTK_IS_VIEWPORT
@@ -5683,6 +5744,7 @@ gtk_widget_class_find_style_property
 gtk_widget_class_list_style_properties
 gtk_widget_region_intersect
 gtk_widget_send_expose
+gtk_widget_send_focus_change
 gtk_widget_style_get
 gtk_widget_style_get_property
 gtk_widget_style_get_valist
@@ -5863,6 +5925,7 @@ gtk_window_get_urgency_hint
 gtk_window_get_accept_focus
 gtk_window_get_focus_on_map
 gtk_window_get_group
+gtk_window_has_group
 gtk_window_get_window_type
 gtk_window_move
 gtk_window_parse_geometry
@@ -5906,6 +5969,7 @@ gtk_window_group_new
 gtk_window_group_add_window
 gtk_window_group_remove_window
 gtk_window_group_list_windows
+gtk_window_group_get_current_grab
 <SUBSECTION Standard>
 GTK_IS_WINDOW_GROUP
 GTK_IS_WINDOW_GROUP_CLASS

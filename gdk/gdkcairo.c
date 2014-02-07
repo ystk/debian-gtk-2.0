@@ -23,6 +23,13 @@
 #include "gdkregion-generic.h"
 #include "gdkalias.h"
 
+static void
+gdk_ensure_surface_flush (gpointer surface)
+{
+  cairo_surface_flush (surface);
+  cairo_surface_destroy (surface);
+}
+
 /**
  * gdk_cairo_create:
  * @drawable: a #GdkDrawable
@@ -43,6 +50,7 @@
 cairo_t *
 gdk_cairo_create (GdkDrawable *drawable)
 {
+  static const cairo_user_data_key_t key;
   cairo_surface_t *surface;
   cairo_t *cr;
     
@@ -54,7 +62,12 @@ gdk_cairo_create (GdkDrawable *drawable)
   if (GDK_DRAWABLE_GET_CLASS (drawable)->set_cairo_clip)
     GDK_DRAWABLE_GET_CLASS (drawable)->set_cairo_clip (drawable, cr);
     
-  cairo_surface_destroy (surface);
+  /* Ugly workaround for GTK not ensuring to flush surfaces before
+   * directly accessing the drawable backed by the surface. Not visible
+   * on X11 (where flushing is a no-op). For details, see
+   * https://bugzilla.gnome.org/show_bug.cgi?id=628291
+   */
+  cairo_set_user_data (cr, &key, surface, gdk_ensure_surface_flush);
 
   return cr;
 }
@@ -277,6 +290,10 @@ gdk_cairo_set_source_pixbuf (cairo_t         *cr,
  * so that the origin of @pixmap is @pixmap_x, @pixmap_y
  *
  * Since: 2.10
+ *
+ * Deprecated: 2.24: This function is being removed in GTK+ 3 (together
+ *     with #GdkPixmap). Instead, use gdk_cairo_set_source_window() where
+ *     appropriate.
  **/
 void
 gdk_cairo_set_source_pixmap (cairo_t   *cr,
@@ -288,6 +305,39 @@ gdk_cairo_set_source_pixmap (cairo_t   *cr,
   
   surface = _gdk_drawable_ref_cairo_surface (GDK_DRAWABLE (pixmap));
   cairo_set_source_surface (cr, surface, pixmap_x, pixmap_y);
+  cairo_surface_destroy (surface);
+}
+
+/**
+ * gdk_cairo_set_source_window:
+ * @cr: a #Cairo context
+ * @window: a #GdkWindow
+ * @x: X coordinate of location to place upper left corner of @window
+ * @y: Y coordinate of location to place upper left corner of @window
+ *
+ * Sets the given window as the source pattern for the Cairo context.
+ * The pattern has an extend mode of %CAIRO_EXTEND_NONE and is aligned
+ * so that the origin of @window is @x, @y. The window contains all its
+ * subwindows when rendering.
+ *
+ * Note that the contents of @window are undefined outside of the
+ * visible part of @window, so use this function with care.
+ *
+ * Since: 2.24
+ **/
+void
+gdk_cairo_set_source_window (cairo_t   *cr,
+                             GdkWindow *window,
+                             double     x,
+                             double     y)
+{
+  cairo_surface_t *surface;
+
+  g_return_if_fail (cr != NULL);
+  g_return_if_fail (GDK_IS_WINDOW (window));
+
+  surface = _gdk_drawable_ref_cairo_surface (GDK_DRAWABLE (window));
+  cairo_set_source_surface (cr, surface, x, y);
   cairo_surface_destroy (surface);
 }
 

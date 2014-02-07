@@ -1002,7 +1002,7 @@ gtk_text_iter_get_pixbuf (const GtkTextIter *iter)
  * anchor is returned (with no new reference count added). Otherwise,
  * %NULL is returned.
  *
- * Return value: the anchor at @iter
+ * Return value: (transfer none): the anchor at @iter
  **/
 GtkTextChildAnchor*
 gtk_text_iter_get_child_anchor (const GtkTextIter *iter)
@@ -1714,7 +1714,7 @@ gtk_text_iter_get_bytes_in_line (const GtkTextIter   *iter)
 /**
  * gtk_text_iter_get_attributes:
  * @iter: an iterator
- * @values: a #GtkTextAttributes to be filled in
+ * @values: (out): a #GtkTextAttributes to be filled in
  *
  * Computes the effect of any tags applied to this spot in the
  * text. The @values parameter should be initialized to the default
@@ -3239,7 +3239,7 @@ gtk_text_iter_forward_word_ends (GtkTextIter      *iter,
 }
 
 /**
- * gtk_text_iter_backward_word_starts
+ * gtk_text_iter_backward_word_starts:
  * @iter: a #GtkTextIter
  * @count: number of times to move
  * 
@@ -3317,7 +3317,7 @@ gtk_text_iter_forward_visible_word_ends (GtkTextIter *iter,
 }
 
 /**
- * gtk_text_iter_backward_visible_word_starts
+ * gtk_text_iter_backward_visible_word_starts:
  * @iter: a #GtkTextIter
  * @count: number of times to move
  * 
@@ -4306,7 +4306,7 @@ matches_pred (GtkTextIter *iter,
 /**
  * gtk_text_iter_forward_find_char:
  * @iter: a #GtkTextIter
- * @pred: a function to be called on each character
+ * @pred: (scope call): a function to be called on each character
  * @user_data: user data for @pred
  * @limit: (allow-none): search limit, or %NULL for none 
  * 
@@ -4344,7 +4344,7 @@ gtk_text_iter_forward_find_char (GtkTextIter         *iter,
 /**
  * gtk_text_iter_backward_find_char:
  * @iter: a #GtkTextIter
- * @pred: function to be called on each character
+ * @pred: (scope call): function to be called on each character
  * @user_data: user data for @pred
  * @limit: (allow-none): search limit, or %NULL for none
  * 
@@ -4571,8 +4571,8 @@ strbreakup (const char *string,
  * @iter: start of search
  * @str: a search string
  * @flags: flags affecting how the search is done
- * @match_start: (allow-none): return location for start of match, or %NULL
- * @match_end: (allow-none): return location for end of match, or %NULL
+ * @match_start: (out caller-allocates) (allow-none): return location for start of match, or %NULL
+ * @match_end: (out caller-allocates) (allow-none): return location for end of match, or %NULL
  * @limit: (allow-none): bound for the search, or %NULL for the end of the buffer
  *
  * Searches forward for @str. Any match is returned by setting
@@ -4868,8 +4868,8 @@ lines_window_free (LinesWindow *win)
  * @iter: a #GtkTextIter where the search begins
  * @str: search string
  * @flags: bitmask of flags affecting the search
- * @match_start: (allow-none): return location for start of match, or %NULL
- * @match_end: (allow-none): return location for end of match, or %NULL
+ * @match_start: (out caller-allocates) (allow-none): return location for start of match, or %NULL
+ * @match_end: (out caller-allocates) (allow-none): return location for end of match, or %NULL
  * @limit: (allow-none): location of last possible @match_start, or %NULL for start of buffer
  *
  * Same as gtk_text_iter_forward_search(), but moves backward.

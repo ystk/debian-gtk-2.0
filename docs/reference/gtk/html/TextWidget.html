@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Text Widget Overview</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="index.html" title="GTK+ Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GTK+ 2 Reference Manual">
 <link rel="up" href="TextWidgetObjects.html" title="Multiline Text Editor">
 <link rel="prev" href="TextWidgetObjects.html" title="Multiline Text Editor">
-<link rel="next" href="gtk-GtkTextIter.html" title="GtkTextIter">
-<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<link rel="next" href="GtkTextIter.html" title="GtkTextIter">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -16,10 +16,10 @@
 <td><a accesskey="p" href="TextWidgetObjects.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
 <td><a accesskey="u" href="TextWidgetObjects.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
-<th width="100%" align="center">GTK+ Reference Manual</th>
-<td><a accesskey="n" href="gtk-GtkTextIter.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<th width="100%" align="center">GTK+ 2 Reference Manual</th>
+<td><a accesskey="n" href="GtkTextIter.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr></table>
-<div class="refentry" title="Text Widget Overview">
+<div class="refentry">
 <a name="TextWidget"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -28,8 +28,8 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsect1" title="Conceptual Overview">
-<a name="id366088"></a><h2>Conceptual Overview</h2>
+<div class="refsect1">
+<a name="id495746"></a><h2>Conceptual Overview</h2>
 <p>
 GTK+ has an extremely powerful framework for multiline text editing.  The
 primary objects involved in the process are <a class="link" href="GtkTextBuffer.html" title="GtkTextBuffer"><span class="type">GtkTextBuffer</span></a>, which represents the 
@@ -68,8 +68,8 @@ is convenient if you're creating tags on-the-fly).
 </p>
 <p>
 Most text manipulation is accomplished with <em class="firstterm">iterators</em>,
-represented by a <a class="link" href="gtk-GtkTextIter.html#GtkTextIter" title="GtkTextIter"><span class="type">GtkTextIter</span></a>. An iterator represents a position between two 
-characters in the text buffer. <a class="link" href="gtk-GtkTextIter.html#GtkTextIter" title="GtkTextIter"><span class="type">GtkTextIter</span></a> is a struct designed to be 
+represented by a <a class="link" href="GtkTextIter.html" title="GtkTextIter"><span class="type">GtkTextIter</span></a>. An iterator represents a position between two 
+characters in the text buffer. <a class="link" href="GtkTextIter.html" title="GtkTextIter"><span class="type">GtkTextIter</span></a> is a struct designed to be 
 allocated on the stack; it's guaranteed to be copiable by value and never 
 contain any heap-allocated data. Iterators are not valid indefinitely; 
 whenever the buffer is modified in a way that affects the number of characters 
@@ -97,7 +97,7 @@ boundary of the selection which is not the insertion point, respectively. If
 no text is selected, these two marks will be in the same position. You can 
 manipulate what is selected and where the cursor appears by moving these 
 marks around.
-<sup>[<a name="id627424" href="#ftn.id627424" class="footnote">2</a>]</sup>
+<sup>[<a name="id759096" href="#ftn.id759096" class="footnote">2</a>]</sup>
 </p>
 <p>
 Text buffers always contain at least one line, but may be empty (that
@@ -110,8 +110,8 @@ multiple bytes in UTF-8, and the two-character sequence "\r\n" is also
 considered a line separator.
 </p>
 </div>
-<div class="refsect1" title="Simple Example">
-<a name="id668778"></a><h2>Simple Example</h2>
+<div class="refsect1">
+<a name="id780853"></a><h2>Simple Example</h2>
 <p>
 The simplest usage of <a class="link" href="GtkTextView.html" title="GtkTextView"><span class="type">GtkTextView</span></a>  might look like this:
 </p>
@@ -132,8 +132,8 @@ The simplest usage of <a class="link" href="GtkTextView.html" title="GtkTextView
 11
 12
 13</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="normal"><a href="GtkWidget.html">GtkWidget</a> </span><span class="symbol">*</span><span class="normal">view</span><span class="symbol">;</span>
-<span class="normal"><a href="GtkTextBuffer.html">GtkTextBuffer</a> </span><span class="symbol">*</span><span class="normal">buffer</span><span class="symbol">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="usertype">GtkWidget</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">view</span><span class="symbol">;</span>
+<span class="usertype">GtkTextBuffer</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">buffer</span><span class="symbol">;</span>
 
 <span class="normal">view </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="GtkTextView.html#gtk-text-view-new">gtk_text_view_new</a></span><span class="normal"> </span><span class="symbol">();</span>
 
@@ -157,8 +157,8 @@ In many cases it's also convenient to first create the buffer with
 displays after the widget is created with <a class="link" href="GtkTextView.html#gtk-text-view-set-buffer" title="gtk_text_view_set_buffer ()"><code class="function">gtk_text_view_set_buffer()</code></a>.
 </p>
 </div>
-<div class="refsect1" title="Example of Changing Text Attributes">
-<a name="id668837"></a><h2>Example of Changing Text Attributes</h2>
+<div class="refsect1">
+<a name="id759139"></a><h2>Example of Changing Text Attributes</h2>
 <p>
 
 There are two ways to affect text attributes in <a class="link" href="GtkTextView.html" title="GtkTextView"><span class="type">GtkTextView</span></a>.
@@ -205,12 +205,12 @@ standard <a class="link" href="GtkWidget.html" title="GtkWidget"><span class="ty
 29
 30
 31</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="normal"><a href="GtkWidget.html">GtkWidget</a> </span><span class="symbol">*</span><span class="normal">view</span><span class="symbol">;</span>
-<span class="normal"><a href="GtkTextBuffer.html">GtkTextBuffer</a> </span><span class="symbol">*</span><span class="normal">buffer</span><span class="symbol">;</span>
-<span class="normal"><a href="gtk-GtkTextIter.html#GtkTextIter">GtkTextIter</a> start</span><span class="symbol">,</span><span class="normal"> end</span><span class="symbol">;</span>
-<span class="normal"><a href="/usr/share/gtk-doc/html/pango/pango-Fonts.html#PangoFontDescription">PangoFontDescription</a> </span><span class="symbol">*</span><span class="normal">font_desc</span><span class="symbol">;</span>
-<span class="normal"><a href="http://library.gnome.org/devel/gdk/unstable/gdk-Colormaps-and-Colors.html#GdkColor">GdkColor</a> color</span><span class="symbol">;</span>
-<span class="normal"><a href="GtkTextTag.html">GtkTextTag</a> </span><span class="symbol">*</span><span class="normal">tag</span><span class="symbol">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="usertype">GtkWidget</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">view</span><span class="symbol">;</span>
+<span class="usertype">GtkTextBuffer</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">buffer</span><span class="symbol">;</span>
+<span class="usertype">GtkTextIter</span><span class="normal"> start</span><span class="symbol">,</span><span class="normal"> end</span><span class="symbol">;</span>
+<span class="usertype">PangoFontDescription</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">font_desc</span><span class="symbol">;</span>
+<span class="usertype">GdkColor</span><span class="normal"> color</span><span class="symbol">;</span>
+<span class="usertype">GtkTextTag</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">tag</span><span class="symbol">;</span>
 
 <span class="normal">view </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="GtkTextView.html#gtk-text-view-new">gtk_text_view_new</a></span><span class="normal"> </span><span class="symbol">();</span>
 
@@ -224,7 +224,7 @@ standard <a class="link" href="GtkWidget.html" title="GtkWidget"><span class="ty
 <span class="function"><a href="/usr/share/gtk-doc/html/pango/pango-Fonts.html#pango-font-description-free">pango_font_description_free</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">font_desc</span><span class="symbol">);</span>
 
 <span class="comment">/* Change default color throughout the widget */</span>
-<span class="function"><a href="http://library.gnome.org/devel/gdk/unstable/gdk-Colormaps-and-Colors.html#gdk-color-parse">gdk_color_parse</a></span><span class="normal"> </span><span class="symbol">(</span><span class="string">"green"</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">color</span><span class="symbol">);</span>
+<span class="function"><a href="../gdk/gdk-Colormaps-and-Colors.html#gdk-color-parse">gdk_color_parse</a></span><span class="normal"> </span><span class="symbol">(</span><span class="string">"green"</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">color</span><span class="symbol">);</span>
 <span class="function"><a href="GtkWidget.html#gtk-widget-modify-text">gtk_widget_modify_text</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">view</span><span class="symbol">,</span><span class="normal"> <a href="gtk-Standard-Enumerations.html#GTK-STATE-NORMAL:CAPS">GTK_STATE_NORMAL</a></span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">color</span><span class="symbol">);</span>
 
 <span class="comment">/* Change left margin throughout the widget */</span>
@@ -232,7 +232,7 @@ standard <a class="link" href="GtkWidget.html" title="GtkWidget"><span class="ty
 
 <span class="comment">/* Use a tag to change the color for just one part of the widget */</span>
 <span class="normal">tag </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="GtkTextBuffer.html#gtk-text-buffer-create-tag">gtk_text_buffer_create_tag</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">buffer</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"blue_foreground"</span><span class="symbol">,</span>
-<span class="normal">	   		            </span><span class="string">"foreground"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"blue"</span><span class="symbol">,</span><span class="normal"> <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">);</span><span class="normal">  </span>
+<span class="normal">                        </span><span class="string">"foreground"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"blue"</span><span class="symbol">,</span><span class="normal"> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">);</span><span class="normal">  </span>
 <span class="function"><a href="GtkTextBuffer.html#gtk-text-buffer-get-iter-at-offset">gtk_text_buffer_get_iter_at_offset</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">buffer</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">start</span><span class="symbol">,</span><span class="normal"> </span><span class="number">7</span><span class="symbol">);</span>
 <span class="function"><a href="GtkTextBuffer.html#gtk-text-buffer-get-iter-at-offset">gtk_text_buffer_get_iter_at_offset</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">buffer</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">end</span><span class="symbol">,</span><span class="normal"> </span><span class="number">12</span><span class="symbol">);</span>
 <span class="function"><a href="GtkTextBuffer.html#gtk-text-buffer-apply-tag">gtk_text_buffer_apply_tag</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">buffer</span><span class="symbol">,</span><span class="normal"> tag</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">start</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">end</span><span class="symbol">);</span></pre></td>
@@ -251,7 +251,7 @@ GTK+ contains more example code for <a class="link" href="GtkTextView.html" titl
 </div>
 <div class="footnotes">
 <br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.id627424" href="#id627424" class="para">2</a>] </sup>
+<div class="footnote"><p><sup>[<a id="ftn.id759096" href="#id759096" class="para">2</a>] </sup>
 If you want to place the cursor in response to a user action, be sure to use
 <a class="link" href="GtkTextBuffer.html#gtk-text-buffer-place-cursor" title="gtk_text_buffer_place_cursor ()"><code class="function">gtk_text_buffer_place_cursor()</code></a>, which moves both at once without causing a 
 temporary selection (moving one then the other temporarily selects the range in 
@@ -261,6 +261,6 @@ between the old and new positions).
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.14</div>
+          Generated by GTK-Doc V1.18</div>
 </body>
 </html>

@@ -30,11 +30,14 @@
 #include <stdio.h>
 #include <math.h>
 
+#undef GTK_DISABLE_DEPRECATED
+
 #include <gdk/gdkkeysyms.h>
 #include "gtkmain.h"
 #include "gtkmarshalers.h"
 #include "gtkorientable.h"
 #include "gtkrange.h"
+#include "gtkscale.h"
 #include "gtkscrollbar.h"
 #include "gtkprivate.h"
 #include "gtkintl.h"
@@ -53,7 +56,8 @@ enum {
   PROP_UPPER_STEPPER_SENSITIVITY,
   PROP_SHOW_FILL_LEVEL,
   PROP_RESTRICT_TO_FILL_LEVEL,
-  PROP_FILL_LEVEL
+  PROP_FILL_LEVEL,
+  PROP_ROUND_DIGITS
 };
 
 enum {
@@ -75,6 +79,13 @@ typedef enum {
   MOUSE_WIDGET /* inside widget but not in any of the above GUI elements */
 } MouseLocation;
 
+typedef enum {
+  STEPPER_A,
+  STEPPER_B,
+  STEPPER_C,
+  STEPPER_D
+} Stepper;
+
 #define GTK_RANGE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_RANGE, GtkRangeLayout))
 
 struct _GtkRangeLayout
@@ -91,7 +102,7 @@ struct _GtkRangeLayout
   GdkRectangle slider;
 
   /* Layout-related state */
-  
+
   MouseLocation mouse_location;
   /* last mouse coords we got, or -1 if mouse is outside the range */
   gint mouse_x;
@@ -116,8 +127,8 @@ struct _GtkRangeLayout
   gdouble fill_level;
 
   GQuark slider_detail_quark;
-  GQuark stepper_detail_quark;
- 
+  GQuark stepper_detail_quark[4];
+
   gdouble *marks;
   gint *mark_pos;
   gint n_marks;
@@ -329,8 +340,8 @@ gtk_range_class_init (GtkRangeClass *class)
    *
    * The value parameter is unrounded.  An application that overrides
    * the ::change-value signal is responsible for clamping the value to
-   * the desired number of decimal digits; the default GTK+ handler 
-   * clamps the value based on @range->round_digits.
+   * the desired number of decimal digits; the default GTK+ handler
+   * clamps the value based on #GtkRange:round_digits.
    *
    * It is not possible to use delayed update policies in an overridden
    * ::change-value handler.
@@ -447,6 +458,24 @@ gtk_range_class_init (GtkRangeClass *class)
                                                         G_MAXDOUBLE,
                                                         GTK_PARAM_READWRITE));
 
+  /**
+   * GtkRange:round-digits:
+   *
+   * The number of digits to round the value to when
+   * it changes, or -1. See #GtkRange::change-value.
+   *
+   * Since: 2.24
+   */
+  g_object_class_install_property (gobject_class,
+                                   PROP_ROUND_DIGITS,
+                                   g_param_spec_int ("round-digits",
+                                                     P_("Round Digits"),
+                                                     P_("The number of digits to round the value to."),
+                                                     -1,
+                                                     G_MAXINT,
+                                                     -1,
+                                                     GTK_PARAM_READWRITE));
+
   gtk_widget_class_install_style_property (widget_class,
 					   g_param_spec_int ("slider-width",
 							     P_("Slider Width"),
@@ -504,6 +533,14 @@ gtk_range_class_init (GtkRangeClass *class)
 							     0,
 							     GTK_PARAM_READABLE));
 
+  /**
+   * GtkRange:activate-slider:
+   *
+   * When %TRUE, sliders will be drawn active and with shadow in
+   * while they are dragged.
+   *
+   * Deprecated: 2.22: This style property will be removed in GTK+ 3
+   */
   gtk_widget_class_install_style_property (widget_class,
 					   g_param_spec_boolean ("activate-slider",
                                                                  P_("Draw slider ACTIVE during drag"),
@@ -518,6 +555,8 @@ gtk_range_class_init (GtkRangeClass *class)
    * slider are drawn with different details.
    *
    * Since: 2.10
+   *
+   * Deprecated: 2.22: This style property will be removed in GTK+ 3
    */
   gtk_widget_class_install_style_property (widget_class,
                                            g_param_spec_boolean ("trough-side-details",
@@ -557,6 +596,23 @@ gtk_range_class_init (GtkRangeClass *class)
 							       0.0, 1.0, 0.5,
 							       GTK_PARAM_READABLE));
 
+  /**
+   * GtkRange:stepper-position-details:
+   *
+   * When %TRUE, the detail string for rendering the steppers will be
+   * suffixed with information about the stepper position.
+   *
+   * Since: 2.22
+   *
+   * Deprecated: 2.22: This style property will be removed in GTK+ 3
+   */
+  gtk_widget_class_install_style_property (widget_class,
+                                           g_param_spec_boolean ("stepper-position-details",
+                                                                 P_("Stepper Position Details"),
+                                                                 P_("When TRUE, the detail string for rendering the steppers is suffixed with position information"),
+                                                                 FALSE,
+                                                                 GTK_PARAM_READABLE));
+
   g_type_class_add_private (class, sizeof (GtkRangeLayout));
 }
 
@@ -574,7 +630,10 @@ gtk_range_set_property (GObject      *object,
       range->orientation = g_value_get_enum (value);
 
       range->layout->slider_detail_quark = 0;
-      range->layout->stepper_detail_quark = 0;
+      range->layout->stepper_detail_quark[0] = 0;
+      range->layout->stepper_detail_quark[1] = 0;
+      range->layout->stepper_detail_quark[2] = 0;
+      range->layout->stepper_detail_quark[3] = 0;
 
       gtk_widget_queue_resize (GTK_WIDGET (range));
       break;
@@ -601,6 +660,9 @@ gtk_range_set_property (GObject      *object,
       break;
     case PROP_FILL_LEVEL:
       gtk_range_set_fill_level (range, g_value_get_double (value));
+      break;
+    case PROP_ROUND_DIGITS:
+      gtk_range_set_round_digits (range, g_value_get_int (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -644,6 +706,9 @@ gtk_range_get_property (GObject      *object,
       break;
     case PROP_FILL_LEVEL:
       g_value_set_double (value, gtk_range_get_fill_level (range));
+      break;
+    case PROP_ROUND_DIGITS:
+      g_value_set_int (value, gtk_range_get_round_digits (range));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -693,7 +758,7 @@ gtk_range_init (GtkRange *range)
  * The return value does not have a reference added, so should not
  * be unreferenced.
  * 
- * Return value: a #GtkAdjustment
+ * Return value: (transfer none): a #GtkAdjustment
  **/
 GtkAdjustment*
 gtk_range_get_adjustment (GtkRange *range)
@@ -719,6 +784,9 @@ gtk_range_get_adjustment (GtkRange *range)
  * continuous. #GTK_UPDATE_DISCONTINUOUS means that the value will only
  * be updated when the user releases the button and ends the slider
  * drag operation.
+ *
+ * Deprecated: 2.24: There is no replacement. If you require delayed
+ *   updates, you need to code it yourself.
  **/
 void
 gtk_range_set_update_policy (GtkRange      *range,
@@ -740,6 +808,9 @@ gtk_range_set_update_policy (GtkRange      *range,
  * Gets the update policy of @range. See gtk_range_set_update_policy().
  *
  * Return value: the current update policy
+ *
+ * Deprecated: 2.24: There is no replacement. If you require delayed
+ *   updates, you need to code it yourself.
  **/
 GtkUpdateType
 gtk_range_get_update_policy (GtkRange *range)
@@ -988,7 +1059,7 @@ gtk_range_get_min_slider_size (GtkRange *range)
 /**
  * gtk_range_get_range_rect:
  * @range: a #GtkRange
- * @range_rect: return location for the range rectangle
+ * @range_rect: (out): return location for the range rectangle
  *
  * This function returns the area that contains the range's trough
  * and its steppers, in widget->window coordinates.
@@ -1012,8 +1083,10 @@ gtk_range_get_range_rect (GtkRange     *range,
 /**
  * gtk_range_get_slider_range:
  * @range: a #GtkRange
- * @slider_start: (allow-none): return location for the slider's start, or %NULL
- * @slider_end: (allow-none): return location for the slider's end, or %NULL
+ * @slider_start: (out) (allow-none): return location for the slider's
+ *     start, or %NULL
+ * @slider_end: (out) (allow-none): return location for the slider's
+ *     end, or %NULL
  *
  * This function returns sliders range along the long dimension,
  * in widget->window coordinates.
@@ -1371,7 +1444,7 @@ gtk_range_set_fill_level (GtkRange *range,
 
 /**
  * gtk_range_get_fill_level:
- * @range : A #GtkRange
+ * @range: A #GtkRange
  *
  * Gets the current position of the fill level indicator.
  *
@@ -1587,26 +1660,66 @@ gtk_range_get_slider_detail (GtkRange *range)
 }
 
 static const gchar *
-gtk_range_get_stepper_detail (GtkRange *range)
+gtk_range_get_stepper_detail (GtkRange *range,
+                              Stepper   stepper)
 {
   const gchar *stepper_detail;
+  gboolean need_orientation;
+  gboolean need_position;
 
-  if (range->layout->stepper_detail_quark)
-    return g_quark_to_string (range->layout->stepper_detail_quark);
+  if (range->layout->stepper_detail_quark[stepper])
+    return g_quark_to_string (range->layout->stepper_detail_quark[stepper]);
 
   stepper_detail = GTK_RANGE_GET_CLASS (range)->stepper_detail;
 
-  if (stepper_detail && stepper_detail[0] == 'X')
+  need_orientation = stepper_detail && stepper_detail[0] == 'X';
+
+  gtk_widget_style_get (GTK_WIDGET (range),
+                        "stepper-position-details", &need_position,
+                        NULL);
+
+  if (need_orientation || need_position)
     {
-      gchar *detail = g_strdup (stepper_detail);
+      gchar *detail;
+      const gchar *position = NULL;
 
-      detail[0] = range->orientation == GTK_ORIENTATION_HORIZONTAL ? 'h' : 'v';
+      if (need_position)
+        {
+          switch (stepper)
+            {
+            case STEPPER_A:
+              position = "_start";
+              break;
+            case STEPPER_B:
+              if (range->has_stepper_a)
+                position = "_middle";
+              else
+                position = "_start";
+              break;
+            case STEPPER_C:
+              if (range->has_stepper_d)
+                position = "_middle";
+              else
+                position = "_end";
+              break;
+            case STEPPER_D:
+              position = "_end";
+              break;
+            default:
+              g_assert_not_reached ();
+            }
+        }
 
-      range->layout->stepper_detail_quark = g_quark_from_string (detail);
+      detail = g_strconcat (stepper_detail, position, NULL);
+
+      if (need_orientation)
+        detail[0] = range->orientation == GTK_ORIENTATION_HORIZONTAL ? 'h' : 'v';
+
+      range->layout->stepper_detail_quark[stepper] = g_quark_from_string (detail);
 
       g_free (detail);
 
-      return g_quark_to_string (range->layout->stepper_detail_quark);
+      return g_quark_to_string (range->layout->stepper_detail_quark[stepper]);
     }
 
   return stepper_detail;
@@ -1614,7 +1727,7 @@ gtk_range_get_stepper_detail (GtkRange *range)
 
 static void
 draw_stepper (GtkRange     *range,
-              GdkRectangle *rect,
+              Stepper       stepper,
               GtkArrowType  arrow_type,
               gboolean      clicked,
               gboolean      prelighted,
@@ -1625,13 +1738,30 @@ draw_stepper (GtkRange     *range,
   GdkRectangle intersection;
   GtkWidget *widget = GTK_WIDGET (range);
   gfloat arrow_scaling;
-
+  GdkRectangle *rect;
   gint arrow_x;
   gint arrow_y;
   gint arrow_width;
   gint arrow_height;
-
   gboolean arrow_sensitive = TRUE;
+
+  switch (stepper)
+    {
+    case STEPPER_A:
+      rect = &range->layout->stepper_a;
+      break;
+    case STEPPER_B:
+      rect = &range->layout->stepper_b;
+      break;
+    case STEPPER_C:
+      rect = &range->layout->stepper_c;
+      break;
+    case STEPPER_D:
+      rect = &range->layout->stepper_d;
+      break;
+    default:
+      g_assert_not_reached ();
+    };
 
   /* More to get the right clip region than for efficiency */
   if (!gdk_rectangle_intersect (area, rect, &intersection))
@@ -1670,7 +1800,7 @@ draw_stepper (GtkRange     *range,
 		 widget->window,
 		 state_type, shadow_type,
 		 &intersection, widget,
-		 gtk_range_get_stepper_detail (range),
+		 gtk_range_get_stepper_detail (range, stepper),
 		 widget->allocation.x + rect->x,
 		 widget->allocation.y + rect->y,
 		 rect->width,
@@ -1698,9 +1828,9 @@ draw_stepper (GtkRange     *range,
   
   gtk_paint_arrow (widget->style,
                    widget->window,
-                   state_type, shadow_type, 
+                   state_type, shadow_type,
                    &intersection, widget,
-                   gtk_range_get_stepper_detail (range),
+                   gtk_range_get_stepper_detail (range, stepper),
                    arrow_type,
                    TRUE,
 		   arrow_x, arrow_y, arrow_width, arrow_height);
@@ -1981,28 +2111,28 @@ gtk_range_expose (GtkWidget      *widget,
     }
   
   if (range->has_stepper_a)
-    draw_stepper (range, &range->layout->stepper_a,
+    draw_stepper (range, STEPPER_A,
                   range->orientation == GTK_ORIENTATION_VERTICAL ? GTK_ARROW_UP : GTK_ARROW_LEFT,
                   range->layout->grab_location == MOUSE_STEPPER_A,
                   !touchscreen && range->layout->mouse_location == MOUSE_STEPPER_A,
                   &expose_area);
 
   if (range->has_stepper_b)
-    draw_stepper (range, &range->layout->stepper_b,
+    draw_stepper (range, STEPPER_B,
                   range->orientation == GTK_ORIENTATION_VERTICAL ? GTK_ARROW_DOWN : GTK_ARROW_RIGHT,
                   range->layout->grab_location == MOUSE_STEPPER_B,
                   !touchscreen && range->layout->mouse_location == MOUSE_STEPPER_B,
                   &expose_area);
 
   if (range->has_stepper_c)
-    draw_stepper (range, &range->layout->stepper_c,
+    draw_stepper (range, STEPPER_C,
                   range->orientation == GTK_ORIENTATION_VERTICAL ? GTK_ARROW_UP : GTK_ARROW_LEFT,
                   range->layout->grab_location == MOUSE_STEPPER_C,
                   !touchscreen && range->layout->mouse_location == MOUSE_STEPPER_C,
                   &expose_area);
 
   if (range->has_stepper_d)
-    draw_stepper (range, &range->layout->stepper_d,
+    draw_stepper (range, STEPPER_D,
                   range->orientation == GTK_ORIENTATION_VERTICAL ? GTK_ARROW_DOWN : GTK_ARROW_RIGHT,
                   range->layout->grab_location == MOUSE_STEPPER_D,
                   !touchscreen && range->layout->mouse_location == MOUSE_STEPPER_D,
@@ -2618,7 +2748,8 @@ gtk_range_adjustment_value_changed (GtkAdjustment *adjustment,
   gtk_range_calc_layout (range, range->adjustment->value);
   
   /* now check whether the layout changed  */
-  if (layout_changed (range->layout, &layout))
+  if (layout_changed (range->layout, &layout) ||
+      (GTK_IS_SCALE (range) && GTK_SCALE (range)->draw_value))
     {
       gtk_widget_queue_draw (GTK_WIDGET (range));
       /* setup a timer to ensure the range isn't lagging too much behind the scroll position */
@@ -3830,6 +3961,48 @@ _gtk_range_get_stop_positions (GtkRange  *range,
 
   return range->layout->n_marks;
 }
+
+/**
+ * gtk_range_set_round_digits:
+ * @range: a #GtkRange
+ * @round_digits: the precision in digits, or -1
+ *
+ * Sets the number of digits to round the value to when
+ * it changes. See #GtkRange::change-value.
+ *
+ * Since: 2.24
+ */
+void
+gtk_range_set_round_digits (GtkRange *range,
+                            gint      round_digits)
+{
+  g_return_if_fail (GTK_IS_RANGE (range));
+  g_return_if_fail (round_digits >= -1);
+
+  range->round_digits = round_digits;
+
+  g_object_notify (G_OBJECT (range), "round-digits");
+}
+
+/**
+ * gtk_range_get_round_digits:
+ * @range: a #GtkRange
+ *
+ * Gets the number of digits to round the value to when
+ * it changes. See #GtkRange::change-value.
+ *
+ * Return value: the number of digits to round to
+ *
+ * Since: 2.24
+ */
+gint
+gtk_range_get_round_digits (GtkRange *range)
+{
+  g_return_val_if_fail (GTK_IS_RANGE (range), -1);
+
+  return range->round_digits;
+}
+
 
 #define __GTK_RANGE_C__
 #include "gtkaliasdef.c"

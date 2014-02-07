@@ -1362,6 +1362,7 @@ shm_pixmap_info_destroy (gpointer data)
 }
 
 
+#ifdef USE_SHM
 /* Returns FALSE if we can't get a shm pixmap */
 static gboolean
 get_shm_pixmap_for_image (Display           *xdisplay,
@@ -1408,7 +1409,6 @@ get_shm_pixmap_for_image (Display           *xdisplay,
   return TRUE;
 }
 
-#ifdef USE_SHM
 /* Returns FALSE if drawing with ShmPixmaps is not possible */
 static gboolean
 draw_with_pixmaps (GdkDrawable       *drawable,
@@ -1584,7 +1584,7 @@ gdk_x11_ref_cairo_surface (GdkDrawable *drawable)
     {
       int width, height;
   
-      gdk_drawable_get_size (drawable, &width, &height);
+      gdk_drawable_get_size (impl->wrapper, &width, &height);
 
       impl->cairo_surface = _gdk_windowing_create_cairo_surface (drawable, width, height);
       

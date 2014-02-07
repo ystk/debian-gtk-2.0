@@ -9,10 +9,12 @@ GtkFileChooser
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -275,42 +277,32 @@ GtkFileChooser
 @name: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_get_filename ##### -->
+<!-- ##### MACRO gtk_file_chooser_get_filename ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_set_filename ##### -->
+<!-- ##### MACRO gtk_file_chooser_set_filename ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@filename: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_select_filename ##### -->
+<!-- ##### MACRO gtk_file_chooser_select_filename ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@filename: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_unselect_filename ##### -->
+<!-- ##### MACRO gtk_file_chooser_unselect_filename ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@filename: 
 
 
 <!-- ##### FUNCTION gtk_file_chooser_select_all ##### -->
@@ -329,32 +321,25 @@ GtkFileChooser
 @chooser: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_get_filenames ##### -->
+<!-- ##### MACRO gtk_file_chooser_get_filenames ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_set_current_folder ##### -->
+<!-- ##### MACRO gtk_file_chooser_set_current_folder ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@filename: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_get_current_folder ##### -->
+<!-- ##### MACRO gtk_file_chooser_get_current_folder ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gtk_file_chooser_get_uri ##### -->
@@ -477,13 +462,11 @@ GtkFileChooser
 @Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_get_preview_filename ##### -->
+<!-- ##### MACRO gtk_file_chooser_get_preview_filename ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gtk_file_chooser_get_preview_uri ##### -->
@@ -558,35 +541,25 @@ GtkFileChooser
 @Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_add_shortcut_folder ##### -->
+<!-- ##### MACRO gtk_file_chooser_add_shortcut_folder ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@folder: 
-@error: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_remove_shortcut_folder ##### -->
+<!-- ##### MACRO gtk_file_chooser_remove_shortcut_folder ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@folder: 
-@error: 
-@Returns: 
 
 
-<!-- ##### FUNCTION gtk_file_chooser_list_shortcut_folders ##### -->
+<!-- ##### MACRO gtk_file_chooser_list_shortcut_folders ##### -->
 <para>
 
 </para>
 
-@chooser: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gtk_file_chooser_add_shortcut_folder_uri ##### -->

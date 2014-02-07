@@ -91,9 +91,9 @@ EXPORTS
 	gdk_free_text_list
 	gdk_string_to_compound_text_for_display
 	gdk_text_property_to_text_list_for_display
+	gdk_utf8_to_compound_text_for_display
 	gdk_text_property_to_utf8_list_for_display
 	gdk_utf8_to_string_target
-	gdk_utf8_to_compound_text_for_display
 	gdk_rgb_dither_get_type 
 	gdk_drag_protocol_get_type 
 	gdk_input_source_get_type 
@@ -171,6 +171,7 @@ EXPORTS
 	gdk_cairo_set_source_color
 	gdk_cairo_set_source_pixbuf
 	gdk_cairo_set_source_pixmap
+	gdk_cairo_set_source_window
 	gdk_cairo_rectangle
 	gdk_cairo_region
 	gdk_colors_store
@@ -201,6 +202,7 @@ EXPORTS
 	gdk_colormap_query_color
 	gdk_colormap_get_screen
 	gdk_cursor_get_type 
+	gdk_cursor_get_cursor_type
 	gdk_cursor_new
 	gdk_cursor_ref
 	gdk_cursor_unref
@@ -212,7 +214,15 @@ EXPORTS
 	gdk_cursor_get_image
 	gdk_device_free_history
 	gdk_device_get_axis
+	gdk_device_get_axis_use
+	gdk_device_get_has_cursor
 	gdk_device_get_history
+	gdk_device_get_key
+	gdk_device_get_mode
+	gdk_device_get_name
+	gdk_device_get_n_axes
+	gdk_device_get_n_keys
+	gdk_device_get_source
 	gdk_device_get_type 
 	gdk_device_set_axis_use
 	gdk_device_set_key
@@ -231,6 +241,7 @@ EXPORTS
 	gdk_display_get_pointer
 	gdk_display_get_type 
 	gdk_display_get_window_at_pointer
+	gdk_display_is_closed
 	gdk_display_peek_event
 	gdk_display_put_event
 	gdk_display_set_pointer_hooks
@@ -282,6 +293,13 @@ EXPORTS
 	gdk_drag_status
 	gdk_drop_finish
 	gdk_drop_reply
+	gdk_drag_context_get_actions
+	gdk_drag_context_get_selected_action
+	gdk_drag_context_get_suggested_action
+	gdk_drag_context_list_targets
+	gdk_drag_context_get_source_window
+	gdk_drag_context_get_dest_window
+	gdk_drag_context_get_protocol
 	gdk_drag_find_window
 	gdk_drag_get_protocol
 	gdk_drawable_copy_to_image
@@ -294,14 +312,14 @@ EXPORTS
 	gdk_draw_string
 	gdk_draw_text
 	gdk_draw_text_wc
-	gdk_drawable_get_depth
 	gdk_drawable_get_display
-	gdk_drawable_get_image
 	gdk_drawable_get_screen
 	gdk_drawable_get_size
+	gdk_drawable_get_visual
+	gdk_drawable_get_depth
+	gdk_drawable_get_image
 	gdk_drawable_get_type 
 	gdk_drawable_get_visible_region
-	gdk_drawable_get_visual
 	gdk_drawable_set_colormap
 	gdk_draw_arc
 	gdk_draw_drawable
@@ -367,14 +385,19 @@ EXPORTS
 	gdk_window_move_resize
 	gdk_window_scroll
 	gdk_window_move_region
+	gdk_window_get_accept_focus
+	gdk_window_get_background_pattern
+	gdk_window_get_composited
+	gdk_window_get_cursor
+	gdk_window_get_deskrelative_origin
+	gdk_window_get_focus_on_map
+	gdk_window_get_geometry
+	gdk_window_get_modal_hint
+	gdk_window_get_origin
+	gdk_window_get_root_coords
 	gdk_window_set_background
 	gdk_window_set_back_pixmap
 	gdk_window_set_cursor
-	gdk_window_get_cursor
-	gdk_window_get_geometry
-	gdk_window_get_origin
-	gdk_window_get_root_coords
-	gdk_window_get_deskrelative_origin
 	gdk_window_shape_combine_mask
 	gdk_window_shape_combine_region
 	gdk_window_set_child_shapes
@@ -393,6 +416,9 @@ EXPORTS
 	gdk_window_clear_area
 	gdk_window_clear_area_e
 	gdk_window_constrain_size
+	gdk_window_coords_from_parent
+	gdk_window_coords_to_parent
+	gdk_window_create_similar_surface
 	gdk_window_destroy
 	gdk_window_end_paint
 	gdk_window_flush
@@ -402,18 +428,23 @@ EXPORTS
 	gdk_window_get_children
 	gdk_window_get_internal_paint_info
 	gdk_window_get_parent
+	gdk_window_get_effective_parent
 	gdk_window_get_pointer
 	gdk_window_get_position
 	gdk_window_get_state
 	gdk_window_get_toplevel
+	gdk_window_get_effective_toplevel
 	gdk_window_get_toplevels
 	gdk_window_get_update_area
 	gdk_window_get_user_data
 	gdk_window_get_window_type
-	gdk_window_is_destroyed
+	gdk_window_has_native
 	gdk_window_invalidate_maybe_recurse
 	gdk_window_invalidate_rect
 	gdk_window_invalidate_region
+	gdk_window_is_destroyed
+	gdk_window_is_input_only
+	gdk_window_is_shaped
 	gdk_window_is_viewable
 	gdk_window_is_visible
 	gdk_window_object_get_type 
@@ -432,6 +463,11 @@ EXPORTS
 	gdk_window_beep
 	gdk_window_geometry_changed
 	gdk_window_ensure_native
+	gdk_window_get_screen
+	gdk_window_get_display
+	gdk_window_get_visual
+	gdk_window_get_width
+	gdk_window_get_height
 	gdk_offscreen_window_get_pixmap
 	gdk_offscreen_window_set_embedder
 	gdk_offscreen_window_get_embedder
@@ -481,9 +517,19 @@ EXPORTS
 	gdk_window_begin_resize_drag
 	gdk_window_enable_synchronized_configure
 	gdk_window_configure_finished
+	gdk_image_get_bits_per_pixel
+	gdk_image_get_bytes_per_pixel
+	gdk_image_get_bytes_per_line
+	gdk_image_get_byte_order
+	gdk_image_get_depth
+	gdk_image_get_height
+	gdk_image_get_image_type
+	gdk_image_get_visual
+	gdk_image_get_width
 	gdk_image_ref
 	gdk_image_unref
 	gdk_image_get
+	gdk_image_get_pixels
 	gdk_image_set_colormap
 	gdk_image_get_colormap
 	gdk_image_new
@@ -523,7 +569,15 @@ EXPORTS
 	gdk_keyval_from_name
 	gdk_keyval_name 
 	gdk_list_visuals
+	gdk_visual_get_bits_per_rgb
+	gdk_visual_get_blue_pixel_details
+	gdk_visual_get_byte_order
+	gdk_visual_get_colormap_size
+	gdk_visual_get_depth
+	gdk_visual_get_green_pixel_details
+	gdk_visual_get_red_pixel_details
 	gdk_visual_get_system
+	gdk_visual_get_visual_type
 	gdk_query_depths
 	gdk_query_visual_types
 	gdk_visual_get_best
@@ -563,6 +617,7 @@ EXPORTS
 	gdk_pixmap_create_from_xpm
 	gdk_pixmap_colormap_create_from_xpm_d
 	gdk_pixmap_create_from_xpm_d
+	gdk_pixmap_get_size
 	gdk_pixmap_get_type 
 	gdk_pixmap_new
 	gdk_pixmap_foreign_new
@@ -661,6 +716,12 @@ EXPORTS
 	gdk_spawn_on_screen_with_pipes
 	gdk_synthesize_window_state
 	gdk_window_destroy_notify
+	gdk_win32_window_is_win32
+	gdk_win32_window_get_impl_hwnd
+	gdk_win32_begin_direct_draw_libgtk_only
+	gdk_win32_end_direct_draw_libgtk_only
+	gdk_win32_window_lookup_for_display
+	gdk_win32_window_foreign_new_for_display
 	gdk_win32_handle_table_lookup
 	gdk_win32_icon_to_pixbuf_libgtk_only
 	gdk_win32_pixbuf_to_hicon_libgtk_only

@@ -521,8 +521,8 @@ gdk_query_visual_types (GdkVisualType **visual_types,
  *
  * Call g_list_free() on the return value when you're finished with it.
  * 
- * Return value: a list of visuals; the list must be freed, but not its 
- * contents
+ * Return value: (transfer container) (element-type GdkVisual):
+ *     a list of visuals; the list must be freed, but not its contents
  *
  * Since: 2.2
  **/
@@ -551,8 +551,8 @@ gdk_screen_list_visuals (GdkScreen *screen)
  *
  * Looks up the #GdkVisual for a particular screen and X Visual ID.
  *
- * Returns: the #GdkVisual (owned by the screen object), or %NULL
- *   if the visual ID wasn't found.
+ * Returns: (transfer none): the #GdkVisual (owned by the screen
+ *   object), or %NULL if the visual ID wasn't found.
  *
  * Since: 2.2
  */
@@ -575,11 +575,13 @@ gdk_x11_screen_lookup_visual (GdkScreen *screen,
 /**
  * gdkx_visual_get:
  * @xvisualid: a X visual id.
- * 
+ *
  * Returns a #GdkVisual corresponding to a X visual. 
- * 
+ *
  * Return value: the #GdkVisual.
- **/
+ *
+ * Deprecated:2.24: Use gdk_x11_screen_lookup_visual() instead
+ */
 GdkVisual*
 gdkx_visual_get (VisualID xvisualid)
 {

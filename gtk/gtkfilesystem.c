@@ -272,6 +272,9 @@ read_bookmarks (GFile *file)
       if (!*lines[i])
 	continue;
 
+      if (!g_utf8_validate (lines[i], -1, NULL))
+	continue;
+
       bookmark = g_slice_new0 (GtkFileSystemBookmark);
 
       if ((space = strchr (lines[i], ' ')) != NULL)
@@ -297,23 +300,25 @@ save_bookmarks (GFile  *bookmarks_file,
 {
   GError *error = NULL;
   GString *contents;
+  GSList *l;
 
   contents = g_string_new ("");
 
-  while (bookmarks)
+  for (l = bookmarks; l; l = l->next)
     {
-      GtkFileSystemBookmark *bookmark;
+      GtkFileSystemBookmark *bookmark = l->data;
       gchar *uri;
 
-      bookmark = bookmarks->data;
       uri = g_file_get_uri (bookmark->file);
+      if (!uri)
+	continue;
+
       g_string_append (contents, uri);
 
       if (bookmark->label)
 	g_string_append_printf (contents, " %s", bookmark->label);
 
       g_string_append_c (contents, '\n');
-      bookmarks = bookmarks->next;
       g_free (uri);
     }
 
@@ -720,9 +725,22 @@ _gtk_file_system_parse (GtkFileSystem     *file_system,
   if (str[0] == '~' || g_path_is_absolute (str) || is_uri)
     file = g_file_parse_name (str);
   else
-    file = g_file_resolve_relative_path (base_file, str);
+    {
+      if (base_file)
+	file = g_file_resolve_relative_path (base_file, str);
+      else
+	{
+	  *folder = NULL;
+	  *file_part = NULL;
+	  g_set_error (error,
+		       GTK_FILE_CHOOSER_ERROR,
+		       GTK_FILE_CHOOSER_ERROR_BAD_FILENAME,
+		       _("Invalid path"));
+	  return FALSE;
+	}
+    }
 
-  if (g_file_equal (base_file, file))
+  if (base_file && g_file_equal (base_file, file))
     {
       /* this is when user types '.', could be the
        * beginning of a hidden file, ./ or ../
@@ -1345,6 +1363,8 @@ query_created_file_info_callback (GObject      *source_object,
       return;
     }
 
+  gdk_threads_enter ();
+
   folder = GTK_FOLDER (user_data);
   gtk_folder_add_file (folder, file, info);
 
@@ -1353,6 +1373,7 @@ query_created_file_info_callback (GObject      *source_object,
   g_slist_free (files);
 
   g_object_unref (info);
+  gdk_threads_leave ();
 }
 
 static void

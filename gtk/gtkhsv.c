@@ -70,9 +70,6 @@ typedef struct {
   /* Window for capturing events */
   GdkWindow *window;
   
-  /* GC for drawing */
-  GdkGC *gc;
-  
   /* Dragging mode */
   DragMode mode;
 
@@ -308,10 +305,6 @@ gtk_hsv_realize (GtkWidget *widget)
   gdk_window_set_user_data (priv->window, hsv);
   
   widget->style = gtk_style_attach (widget->style, widget->window);
-  
-  /* Create GC */
-  
-  priv->gc = gdk_gc_new (parent_window);
 }
 
 /* Unrealize handler for the HSV color selector */
@@ -328,9 +321,6 @@ gtk_hsv_unrealize (GtkWidget *widget)
   gdk_window_destroy (priv->window);
   priv->window = NULL;
   
-  g_object_unref (priv->gc);
-  priv->gc = NULL;
-
   GTK_WIDGET_CLASS (gtk_hsv_parent_class)->unrealize (widget);
 }
 
@@ -839,7 +829,7 @@ gtk_hsv_button_release (GtkWidget      *widget,
   } else
     g_assert_not_reached ();
   
-  gdk_display_pointer_ungrab (gdk_drawable_get_display (event->window),
+  gdk_display_pointer_ungrab (gdk_window_get_display (event->window),
 			      event->time);
   return TRUE;
 }
@@ -1416,9 +1406,9 @@ gtk_hsv_set_color (GtkHSV *hsv,
 /**
  * gtk_hsv_get_color:
  * @hsv: An HSV color selector
- * @h: Return value for the hue
- * @s: Return value for the saturation
- * @v: Return value for the value
+ * @h: (out): Return value for the hue
+ * @s: (out): Return value for the saturation
+ * @v: (out): Return value for the value
  *
  * Queries the current color in an HSV color selector.
  * Returned values will be in the [0.0, 1.0] range.
@@ -1486,8 +1476,8 @@ gtk_hsv_set_metrics (GtkHSV *hsv,
 /**
  * gtk_hsv_get_metrics:
  * @hsv: An HSV color selector
- * @size: Return value for the diameter of the hue ring
- * @ring_width: Return value for the width of the hue ring
+ * @size: (out): Return value for the diameter of the hue ring
+ * @ring_width: (out): Return value for the width of the hue ring
  *
  * Queries the size and ring width of an HSV color selector.
  *
@@ -1543,9 +1533,9 @@ gtk_hsv_is_adjusting (GtkHSV *hsv)
  * @h: Hue
  * @s: Saturation
  * @v: Value
- * @r: Return value for the red component
- * @g: Return value for the green component
- * @b: Return value for the blue component
+ * @r: (out): Return value for the red component
+ * @g: (out): Return value for the green component
+ * @b: (out): Return value for the blue component
  *
  * Converts a color from HSV space to RGB.
  * Input values must be in the [0.0, 1.0] range; 
@@ -1582,9 +1572,9 @@ gtk_hsv_to_rgb (gdouble  h,
  * @r: Red
  * @g: Green
  * @b: Blue
- * @h: Return value for the hue component
- * @s: Return value for the saturation component
- * @v: Return value for the value component
+ * @h: (out): Return value for the hue component
+ * @s: (out): Return value for the saturation component
+ * @v: (out): Return value for the value component
  *
  * Converts a color from RGB space to HSV.
  * Input values must be in the [0.0, 1.0] range;
