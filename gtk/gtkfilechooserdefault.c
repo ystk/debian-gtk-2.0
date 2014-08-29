@@ -235,6 +235,7 @@ enum {
 typedef enum {
   SHORTCUTS_SEARCH,
   SHORTCUTS_RECENT,
+  SHORTCUTS_CWD,
   SHORTCUTS_RECENT_SEPARATOR,
   SHORTCUTS_HOME,
   SHORTCUTS_DESKTOP,
@@ -272,15 +273,12 @@ static void     gtk_file_chooser_default_dispose      (GObject               *ob
 static void     gtk_file_chooser_default_show_all       (GtkWidget             *widget);
 static void     gtk_file_chooser_default_realize        (GtkWidget             *widget);
 static void     gtk_file_chooser_default_map            (GtkWidget             *widget);
-static void     gtk_file_chooser_default_unmap          (GtkWidget             *widget);
 static void     gtk_file_chooser_default_hierarchy_changed (GtkWidget          *widget,
 							    GtkWidget          *previous_toplevel);
 static void     gtk_file_chooser_default_style_set      (GtkWidget             *widget,
 							 GtkStyle              *previous_style);
 static void     gtk_file_chooser_default_screen_changed (GtkWidget             *widget,
 							 GdkScreen             *previous_screen);
-static void     gtk_file_chooser_default_size_allocate  (GtkWidget             *widget,
-							 GtkAllocation         *allocation);
 
 static gboolean       gtk_file_chooser_default_set_current_folder 	   (GtkFileChooser    *chooser,
 									    GFile             *folder,
@@ -392,7 +390,7 @@ static void remove_bookmark_button_clicked_cb (GtkButton             *button,
 
 static void update_cell_renderer_attributes (GtkFileChooserDefault *impl);
 
-static void load_remove_timer (GtkFileChooserDefault *impl);
+static void load_remove_timer (GtkFileChooserDefault *impl, LoadState new_load_state);
 static void browse_files_center_selected_row (GtkFileChooserDefault *impl);
 
 static void location_button_toggled_cb (GtkToggleButton *toggle,
@@ -412,6 +410,7 @@ static GSList  *search_get_selected_files    (GtkFileChooserDefault *impl);
 static void     search_entry_activate_cb     (GtkEntry              *entry, 
 					      gpointer               data);
 static void     settings_load                (GtkFileChooserDefault *impl);
+static void     settings_save                (GtkFileChooserDefault *impl);
 
 static void     recent_start_loading         (GtkFileChooserDefault *impl);
 static void     recent_stop_loading          (GtkFileChooserDefault *impl);
@@ -497,11 +496,9 @@ _gtk_file_chooser_default_class_init (GtkFileChooserDefaultClass *class)
   widget_class->show_all = gtk_file_chooser_default_show_all;
   widget_class->realize = gtk_file_chooser_default_realize;
   widget_class->map = gtk_file_chooser_default_map;
-  widget_class->unmap = gtk_file_chooser_default_unmap;
   widget_class->hierarchy_changed = gtk_file_chooser_default_hierarchy_changed;
   widget_class->style_set = gtk_file_chooser_default_style_set;
   widget_class->screen_changed = gtk_file_chooser_default_screen_changed;
-  widget_class->size_allocate = gtk_file_chooser_default_size_allocate;
 
   signals[LOCATION_POPUP] =
     g_signal_new_class_handler (I_("location-popup"),
@@ -1388,6 +1385,13 @@ shortcuts_update_count (GtkFileChooserDefault *impl,
 {
   switch (type)
     {
+      case SHORTCUTS_CWD:
+        if (value < 0)
+	  impl->has_cwd = FALSE;
+	else
+	  impl->has_cwd = TRUE;
+	break;
+	
       case SHORTCUTS_HOME:
 	if (value < 0)
 	  impl->has_home = FALSE;
@@ -1445,7 +1449,6 @@ get_file_info_finished (GCancellable *cancellable,
 			const GError *error,
 			gpointer      data)
 {
-  gint pos = -1;
   gboolean cancelled = g_cancellable_is_cancelled (cancellable);
   GdkPixbuf *pixbuf;
   GtkTreePath *path;
@@ -1458,7 +1461,6 @@ get_file_info_finished (GCancellable *cancellable,
     /* Handle doesn't exist anymore in the model */
     goto out;
 
-  pos = gtk_tree_path_get_indices (path)[0];
   gtk_tree_model_get_iter (GTK_TREE_MODEL (request->impl->shortcuts_model),
 			   &iter, path);
   gtk_tree_path_free (path);
@@ -1480,6 +1482,7 @@ get_file_info_finished (GCancellable *cancellable,
 
   if (!info)
     {
+      shortcuts_free_row_data (request->impl, &iter);
       gtk_list_store_remove (request->impl->shortcuts_model, &iter);
       shortcuts_update_count (request->impl, request->type, -1);
 
@@ -1755,6 +1758,45 @@ shortcuts_append_recent (GtkFileChooserDefault *impl)
     g_object_unref (pixbuf);
 }
 
+/* Appends the current working directory to the shortuts panel, but only if it is not equal to $HOME.
+ * This is so that the user can actually use the $CWD, for example, if running an application
+ * from the shell.
+ */
+static void
+shortcuts_append_cwd (GtkFileChooserDefault *impl)
+{
+  char *cwd;
+  const char *home;
+  GFile *cwd_file;
+  GFile *home_file;
+
+  impl->has_cwd = FALSE;
+
+  cwd = g_get_current_dir ();
+  if (cwd == NULL)
+    return;
+
+  home = g_get_home_dir ();
+  if (home == NULL)
+    {
+      g_free (cwd);
+      return;
+    }
+
+  cwd_file = g_file_new_for_path (cwd);
+  home_file = g_file_new_for_path (home);
+
+  if (!g_file_equal (cwd_file, home_file))
+    {
+      shortcuts_insert_file (impl, -1, SHORTCUT_TYPE_FILE, NULL, cwd_file, NULL, FALSE, SHORTCUTS_CWD);
+      impl->has_cwd = TRUE;
+    }
+
+  g_object_unref (cwd_file);
+  g_object_unref (home_file);
+  g_free (cwd);
+}
+
 /* Appends an item for the user's home directory to the shortcuts model */
 static void
 shortcuts_append_home (GtkFileChooserDefault *impl)
@@ -1832,7 +1874,7 @@ shortcuts_append_bookmarks (GtkFileChooserDefault *impl,
 
       file = bookmarks->data;
 
-      if (impl->local_only && !g_file_is_native (file))
+      if (impl->local_only && !_gtk_file_has_native_path (file))
 	continue;
 
       if (shortcut_find_position (impl, file) != -1)
@@ -1869,6 +1911,11 @@ shortcuts_get_index (GtkFileChooserDefault *impl,
     goto out;
 
   n += 1; /* we always have the recently-used item */
+
+  if (where == SHORTCUTS_CWD)
+    goto out;
+
+  n += impl->has_cwd ? 1 : 0;
 
   if (where == SHORTCUTS_RECENT_SEPARATOR)
     goto out;
@@ -1954,16 +2001,16 @@ shortcuts_add_volumes (GtkFileChooserDefault *impl)
 	  if (_gtk_file_system_volume_is_mounted (volume))
 	    {
 	      GFile *base_file;
-              gboolean base_is_native = TRUE;
+              gboolean base_has_native_path = FALSE;
 
 	      base_file = _gtk_file_system_volume_get_root (volume);
               if (base_file != NULL)
                 {
-                  base_is_native = g_file_is_native (base_file);
+                  base_has_native_path = _gtk_file_has_native_path (base_file);
                   g_object_unref (base_file);
                 }
 
-              if (!base_is_native)
+              if (!base_has_native_path)
                 continue;
 	    }
 	}
@@ -2171,6 +2218,7 @@ shortcuts_model_create (GtkFileChooserDefault *impl)
   
   if (impl->file_system)
     {
+      shortcuts_append_cwd (impl);
       shortcuts_append_home (impl);
       shortcuts_append_desktop (impl);
       shortcuts_add_volumes (impl);
@@ -3358,6 +3406,10 @@ shortcuts_build_popup_menu (GtkFileChooserDefault *impl)
   impl->browse_shortcuts_popup_menu_rename_item = item;
   g_signal_connect (item, "activate",
 		    G_CALLBACK (rename_shortcut_cb), impl);
+  gtk_widget_show (item);
+  gtk_menu_shell_append (GTK_MENU_SHELL (impl->browse_shortcuts_popup_menu), item);
+
+  item = gtk_separator_menu_item_new ();
   gtk_widget_show (item);
   gtk_menu_shell_append (GTK_MENU_SHELL (impl->browse_shortcuts_popup_menu), item);
 }
@@ -4958,7 +5010,7 @@ set_local_only (GtkFileChooserDefault *impl,
 	}
 
       if (local_only && impl->current_folder &&
-           !g_file_is_native (impl->current_folder))
+           !_gtk_file_has_native_path (impl->current_folder))
 	{
 	  /* If we are pointing to a non-local folder, make an effort to change
 	   * back to a local folder, but it's really up to the app to not cause
@@ -5525,18 +5577,6 @@ cancel_all_operations (GtkFileChooserDefault *impl)
 
   pending_select_files_free (impl);
 
-  /* cancel all pending operations */
-  if (impl->pending_cancellables)
-    {
-      for (l = impl->pending_cancellables; l; l = l->next)
-        {
-	  GCancellable *cancellable = G_CANCELLABLE (l->data);
-	  g_cancellable_cancel (cancellable);
-        }
-      g_slist_free (impl->pending_cancellables);
-      impl->pending_cancellables = NULL;
-    }
-
   if (impl->reload_icon_cancellables)
     {
       for (l = impl->reload_icon_cancellables; l; l = l->next)
@@ -5575,6 +5615,12 @@ cancel_all_operations (GtkFileChooserDefault *impl)
     {
       g_cancellable_cancel (impl->should_respond_get_info_cancellable);
       impl->should_respond_get_info_cancellable = NULL;
+    }
+
+  if (impl->file_exists_get_info_cancellable)
+    {
+      g_cancellable_cancel (impl->file_exists_get_info_cancellable);
+      impl->file_exists_get_info_cancellable = NULL;
     }
 
   if (impl->update_from_entry_cancellable)
@@ -5653,6 +5699,20 @@ toplevel_set_focus_cb (GtkWindow             *window,
   impl->toplevel_last_focus_widget = gtk_window_get_focus (window);
 }
 
+/* Callback used when the toplevel widget unmaps itself.  We don't do this in
+ * our own ::unmap() handler because in GTK+2, child widgets don't get
+ * unmapped.
+ */
+static void
+toplevel_unmap_cb (GtkWidget *widget,
+		   GtkFileChooserDefault *impl)
+{
+  settings_save (impl);
+
+  cancel_all_operations (impl);
+  impl->reload_state = RELOAD_EMPTY;
+}
+
 /* We monitor the focus widget on our toplevel to be able to know which widget
  * was last focused at the time our "should_respond" method gets called.
  */
@@ -5666,13 +5726,20 @@ gtk_file_chooser_default_hierarchy_changed (GtkWidget *widget,
   impl = GTK_FILE_CHOOSER_DEFAULT (widget);
   toplevel = gtk_widget_get_toplevel (widget);
 
-  if (previous_toplevel && 
-      impl->toplevel_set_focus_id != 0)
+  if (previous_toplevel)
     {
-      g_signal_handler_disconnect (previous_toplevel,
-                                   impl->toplevel_set_focus_id);
-      impl->toplevel_set_focus_id = 0;
-      impl->toplevel_last_focus_widget = NULL;
+      if (impl->toplevel_set_focus_id != 0)
+	{
+	  g_signal_handler_disconnect (previous_toplevel, impl->toplevel_set_focus_id);
+	  impl->toplevel_set_focus_id = 0;
+	  impl->toplevel_last_focus_widget = NULL;
+	}
+
+      if (impl->toplevel_unmapped_id != 0)
+	{
+	  g_signal_handler_disconnect (previous_toplevel, impl->toplevel_unmapped_id);
+	  impl->toplevel_unmapped_id = 0;
+	}
     }
 
   if (gtk_widget_is_toplevel (toplevel))
@@ -5681,6 +5748,10 @@ gtk_file_chooser_default_hierarchy_changed (GtkWidget *widget,
       impl->toplevel_set_focus_id = g_signal_connect (toplevel, "set-focus",
 						      G_CALLBACK (toplevel_set_focus_cb), impl);
       impl->toplevel_last_focus_widget = gtk_window_get_focus (GTK_WINDOW (toplevel));
+
+      g_assert (impl->toplevel_unmapped_id == 0);
+      impl->toplevel_unmapped_id = g_signal_connect (toplevel, "unmap",
+						     G_CALLBACK (toplevel_unmap_cb), impl);
     }
 }
 
@@ -5807,17 +5878,6 @@ gtk_file_chooser_default_screen_changed (GtkWidget *widget,
 }
 
 static void
-gtk_file_chooser_default_size_allocate (GtkWidget     *widget,
-					GtkAllocation *allocation)
-{
-  GtkFileChooserDefault *impl;
-
-  impl = GTK_FILE_CHOOSER_DEFAULT (widget);
-
-  GTK_WIDGET_CLASS (_gtk_file_chooser_default_parent_class)->size_allocate (widget, allocation);
-}
-
-static void
 set_sort_column (GtkFileChooserDefault *impl)
 {
   GtkTreeSortable *sortable;
@@ -5841,6 +5901,7 @@ settings_load (GtkFileChooserDefault *impl)
   gboolean show_size_column;
   gint sort_column;
   GtkSortType sort_order;
+  StartupMode startup_mode;
 
   settings = _gtk_file_chooser_settings_new ();
 
@@ -5849,6 +5910,7 @@ settings_load (GtkFileChooserDefault *impl)
   show_size_column = _gtk_file_chooser_settings_get_show_size_column (settings);
   sort_column = _gtk_file_chooser_settings_get_sort_column (settings);
   sort_order = _gtk_file_chooser_settings_get_sort_order (settings);
+  startup_mode = _gtk_file_chooser_settings_get_startup_mode (settings);
 
   g_object_unref (settings);
 
@@ -5865,6 +5927,8 @@ settings_load (GtkFileChooserDefault *impl)
    * created yet.  The individual functions that create and set the models will
    * call set_sort_column() themselves.
    */
+
+  impl->startup_mode = startup_mode;
 }
 
 static void
@@ -5888,21 +5952,8 @@ static void
 settings_save (GtkFileChooserDefault *impl)
 {
   GtkFileChooserSettings *settings;
-  char *current_folder_uri;
 
   settings = _gtk_file_chooser_settings_new ();
-
-  /* Current folder */
-
-  if (impl->current_folder)
-    current_folder_uri = g_file_get_uri (impl->current_folder);
-  else
-    current_folder_uri = "";
-
-  _gtk_file_chooser_settings_set_last_folder_uri (settings, current_folder_uri);
-
-  if (impl->current_folder)
-    g_free (current_folder_uri);
 
   /* All the other state */
 
@@ -5911,6 +5962,7 @@ settings_save (GtkFileChooserDefault *impl)
   _gtk_file_chooser_settings_set_show_size_column (settings, impl->show_size_column);
   _gtk_file_chooser_settings_set_sort_column (settings, impl->sort_column);
   _gtk_file_chooser_settings_set_sort_order (settings, impl->sort_order);
+  _gtk_file_chooser_settings_set_startup_mode (settings, impl->startup_mode);
 
   save_dialog_geometry (impl, settings);
 
@@ -5933,28 +5985,36 @@ gtk_file_chooser_default_realize (GtkWidget *widget)
   emit_default_size_changed (impl);
 }
 
-static GFile *
-get_file_for_last_folder_opened (GtkFileChooserDefault *impl)
+/* Changes the current folder to $CWD */
+static void
+switch_to_cwd (GtkFileChooserDefault *impl)
 {
-  char *last_folder_uri;
-  GFile *file;
-  GtkFileChooserSettings *settings;
+  char *current_working_dir;
 
-  settings = _gtk_file_chooser_settings_new ();
-  last_folder_uri = _gtk_file_chooser_settings_get_last_folder_uri (settings);
-  g_object_unref (settings);
+  current_working_dir = g_get_current_dir ();
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (impl), current_working_dir);
+  g_free (current_working_dir);
+}
 
-  /* If no last folder is set, we use the user's home directory, since
-   * this is the starting point for most documents.
-   */
-  if (last_folder_uri == NULL || last_folder_uri[0] == '\0')
-    file = g_file_new_for_path (g_get_home_dir ());
-  else
-    file = g_file_new_for_uri (last_folder_uri);
+/* Sets the file chooser to showing Recent Files or $CWD, depending on the
+ * user's settings.
+ */
+static void
+set_startup_mode (GtkFileChooserDefault *impl)
+{
+  switch (impl->startup_mode)
+    {
+    case STARTUP_MODE_RECENT:
+      recent_shortcut_handler (impl);
+      break;
 
-  g_free (last_folder_uri);
+    case STARTUP_MODE_CWD:
+      switch_to_cwd (impl);
+      break;
 
-  return file;
+    default:
+      g_assert_not_reached ();
+    }
 }
 
 /* GtkWidget::map method */
@@ -5969,12 +6029,14 @@ gtk_file_chooser_default_map (GtkWidget *widget)
 
   GTK_WIDGET_CLASS (_gtk_file_chooser_default_parent_class)->map (widget);
 
+  settings_load (impl);
+
   if (impl->operation_mode == OPERATION_MODE_BROWSE)
     {
       switch (impl->reload_state)
         {
         case RELOAD_EMPTY:
-	  recent_shortcut_handler (impl);
+	  set_startup_mode (impl);
           break;
         
         case RELOAD_HAS_FOLDER:
@@ -5990,25 +6052,7 @@ gtk_file_chooser_default_map (GtkWidget *widget)
 
   volumes_bookmarks_changed_cb (impl->file_system, impl);
 
-  settings_load (impl);
-
   profile_end ("end", NULL);
-}
-
-/* GtkWidget::unmap method */
-static void
-gtk_file_chooser_default_unmap (GtkWidget *widget)
-{
-  GtkFileChooserDefault *impl;
-
-  impl = GTK_FILE_CHOOSER_DEFAULT (widget);
-
-  settings_save (impl);
-
-  cancel_all_operations (impl);
-  impl->reload_state = RELOAD_EMPTY;
-
-  GTK_WIDGET_CLASS (_gtk_file_chooser_default_parent_class)->unmap (widget);
 }
 
 static void
@@ -6198,9 +6242,9 @@ load_setup_timer (GtkFileChooserDefault *impl)
   impl->load_state = LOAD_PRELOAD;
 }
 
-/* Removes the load timeout and switches to the LOAD_FINISHED state */
+/* Removes the load timeout; changes the impl->load_state to the specified value. */
 static void
-load_remove_timer (GtkFileChooserDefault *impl)
+load_remove_timer (GtkFileChooserDefault *impl, LoadState new_load_state)
 {
   if (impl->load_timeout_id != 0)
     {
@@ -6208,12 +6252,16 @@ load_remove_timer (GtkFileChooserDefault *impl)
 
       g_source_remove (impl->load_timeout_id);
       impl->load_timeout_id = 0;
-      impl->load_state = LOAD_EMPTY;
     }
   else
     g_assert (impl->load_state == LOAD_EMPTY ||
 	      impl->load_state == LOAD_LOADING ||
 	      impl->load_state == LOAD_FINISHED);
+
+  g_assert (new_load_state == LOAD_EMPTY ||
+	    new_load_state == LOAD_LOADING ||
+	    new_load_state == LOAD_FINISHED);
+  impl->load_state = new_load_state;
 }
 
 /* Selects the first row in the file list */
@@ -6286,8 +6334,13 @@ show_and_select_files (GtkFileChooserDefault *impl,
   gboolean selected_a_file;
   GSList *walk;
 
+  g_assert (impl->load_state == LOAD_FINISHED);
+  g_assert (impl->browse_files_model != NULL);
+
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (impl->browse_files_tree_view));
   fsmodel = GTK_FILE_SYSTEM_MODEL (gtk_tree_view_get_model (GTK_TREE_VIEW (impl->browse_files_tree_view)));
+
+  g_assert (fsmodel == impl->browse_files_model);
 
   enabled_hidden = impl->show_hidden;
   removed_filters = (impl->current_filter == NULL);
@@ -6423,7 +6476,7 @@ browse_files_model_finished_loading_cb (GtkFileSystemModel    *model,
 
   if (impl->load_state == LOAD_PRELOAD)
     {
-      load_remove_timer (impl);
+      load_remove_timer (impl, LOAD_FINISHED);
       load_set_model (impl);
     }
   else if (impl->load_state == LOAD_LOADING)
@@ -6456,7 +6509,7 @@ static void
 stop_loading_and_clear_list_model (GtkFileChooserDefault *impl,
                                    gboolean remove_from_treeview)
 {
-  load_remove_timer (impl); /* This changes the state to LOAD_EMPTY */
+  load_remove_timer (impl, LOAD_EMPTY);
   
   if (impl->browse_files_model)
     {
@@ -6705,7 +6758,11 @@ file_system_model_set (GtkFileSystemModel *model,
       if (info == NULL || _gtk_file_info_consider_as_directory (info))
         g_value_set_string (value, NULL);
       else
+#if GLIB_CHECK_VERSION(2,30,0)
+        g_value_take_string (value, g_format_size (g_file_info_get_size (info)));
+#else
         g_value_take_string (value, g_format_size_for_display (g_file_info_get_size (info)));
+#endif
       break;
     case MODEL_COL_MTIME:
     case MODEL_COL_MTIME_TEXT:
@@ -7184,7 +7241,7 @@ gtk_file_chooser_default_update_current_folder (GtkFileChooser    *chooser,
 
   operation_mode_set (impl, OPERATION_MODE_BROWSE);
 
-  if (impl->local_only && !g_file_is_native (file))
+  if (impl->local_only && !_gtk_file_has_native_path (file))
     {
       g_set_error_literal (error,
                            GTK_FILE_CHOOSER_ERROR,
@@ -7230,16 +7287,6 @@ gtk_file_chooser_default_get_current_folder (GtkFileChooser *chooser)
       impl->operation_mode == OPERATION_MODE_RECENT)
     return NULL;
  
-  if (impl->reload_state == RELOAD_EMPTY)
-    {
-      /* We are unmapped, or we had an error while loading the last folder.
-       * We'll return the folder used by the last invocation of the file chooser
-       * since once we get (re)mapped, we'll load *that* folder anyway unless
-       * the caller explicitly calls set_current_folder() on us.
-       */
-      return get_file_for_last_folder_opened (impl);
-    }
-
   if (impl->current_folder)
     return g_object_ref (impl->current_folder);
 
@@ -7759,6 +7806,9 @@ add_shortcut_get_info_cb (GCancellable *cancellable,
 
   shortcuts_insert_file (data->impl, pos, SHORTCUT_TYPE_FILE, NULL, data->file, NULL, FALSE, SHORTCUTS_SHORTCUTS);
 
+  /* need to call shortcuts_add_bookmarks to flush out any duplicates bug #577806 */
+  shortcuts_add_bookmarks (data->impl);
+
 out:
   g_object_unref (data->impl);
   g_object_unref (data->file);
@@ -7957,13 +8007,11 @@ find_good_size_from_style (GtkWidget *widget,
 			   gint      *width,
 			   gint      *height)
 {
-  GtkFileChooserDefault *impl;
   int font_size;
   GdkScreen *screen;
   double resolution;
 
   g_assert (widget->style != NULL);
-  impl = GTK_FILE_CHOOSER_DEFAULT (widget);
 
   screen = gtk_widget_get_screen (widget);
   if (screen)

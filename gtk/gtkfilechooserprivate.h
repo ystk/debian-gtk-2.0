@@ -85,17 +85,6 @@ struct _GtkFileChooserIface
 };
 
 GtkFileSystem *_gtk_file_chooser_get_file_system         (GtkFileChooser    *chooser);
-gboolean       _gtk_file_chooser_set_current_folder_file (GtkFileChooser    *chooser,
-							  GFile             *file,
-							  GError           **error);
-GFile *        _gtk_file_chooser_get_current_folder_file (GtkFileChooser    *chooser);
-gboolean       _gtk_file_chooser_select_file             (GtkFileChooser    *chooser,
-							  GFile             *file,
-							  GError           **error);
-void           _gtk_file_chooser_unselect_file           (GtkFileChooser    *chooser,
-							  GFile             *file);
-GSList *       _gtk_file_chooser_get_files               (GtkFileChooser    *chooser);
-GFile *        _gtk_file_chooser_get_preview_file        (GtkFileChooser    *chooser);
 gboolean       _gtk_file_chooser_add_shortcut_folder     (GtkFileChooser    *chooser,
 							  GFile             *folder,
 							  GError           **error);
@@ -152,6 +141,11 @@ typedef enum {
   OPERATION_MODE_RECENT
 } OperationMode;
 
+typedef enum {
+  STARTUP_MODE_RECENT,
+  STARTUP_MODE_CWD
+} StartupMode;
+
 struct _GtkFileChooserDefault
 {
   GtkVBox parent_instance;
@@ -190,8 +184,12 @@ struct _GtkFileChooserDefault
   GtkWidget *browse_select_a_folder_label;
   GtkWidget *browse_select_a_folder_icon;
 
+  gulong toplevel_unmapped_id;
+
   GtkFileSystemModel *browse_files_model;
   char *browse_files_last_selected_name;
+
+  StartupMode startup_mode;
 
   /* OPERATION_MODE_SEARCH */
   GtkWidget *search_hbox;
@@ -235,7 +233,6 @@ struct _GtkFileChooserDefault
   GCancellable *file_exists_get_info_cancellable;
   GCancellable *update_from_entry_cancellable;
   GCancellable *shortcuts_activate_iter_cancellable;
-  GSList *pending_cancellables;
 
   LoadState load_state;
   ReloadState reload_state;
@@ -295,6 +292,7 @@ struct _GtkFileChooserDefault
   guint list_sort_ascending : 1;
   guint changing_folder : 1;
   guint shortcuts_current_folder_active : 1;
+  guint has_cwd : 1;
   guint has_home : 1;
   guint has_desktop : 1;
   guint has_search : 1;

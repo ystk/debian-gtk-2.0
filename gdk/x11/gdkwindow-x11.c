@@ -776,15 +776,15 @@ _gdk_window_impl_new (GdkWindow     *window,
       g_object_ref (draw_impl->colormap);
     }
 
-  if (private->width > 65535 ||
-      private->height > 65535)
+  if (private->width > 32767 ||
+      private->height > 32767)
     {
-      g_warning ("Native Windows wider or taller than 65535 pixels are not supported");
+      g_warning ("Native Windows wider or taller than 32767 pixels are not supported");
       
-      if (private->width > 65535)
-	private->width = 65535;
-      if (private->height > 65535)
-	private->height = 65535;
+      if (private->width > 32767)
+	private->width = 32767;
+      if (private->height > 32767)
+	private->height = 32767;
     }
   
   xid = draw_impl->xid = XCreateWindow (xdisplay, xparent,
@@ -1319,6 +1319,14 @@ set_initial_hints (GdkWindow *window)
       atoms[i] = gdk_x11_get_xatom_by_name_for_display (display,
 							"_NET_WM_STATE_SKIP_PAGER");
       ++i;
+    }
+
+  if (private->state & GDK_WINDOW_STATE_ICONIFIED)
+    {
+      atoms[i] = gdk_x11_get_xatom_by_name_for_display (display,
+							"_NET_WM_STATE_HIDDEN");
+      ++i;
+      toplevel->have_hidden = TRUE;
     }
 
   if (i > 0)
@@ -4023,6 +4031,9 @@ gdk_window_iconify (GdkWindow *window)
       gdk_synthesize_window_state (window,
                                    0,
                                    GDK_WINDOW_STATE_ICONIFIED);
+      gdk_wmspec_change_state (TRUE, window,
+                               gdk_atom_intern_static_string ("_NET_WM_STATE_HIDDEN"),
+                               GDK_NONE);
     }
 }
 
@@ -4047,6 +4058,9 @@ gdk_window_deiconify (GdkWindow *window)
   if (GDK_WINDOW_IS_MAPPED (window))
     {  
       gdk_window_show (window);
+      gdk_wmspec_change_state (FALSE, window,
+                               gdk_atom_intern_static_string ("_NET_WM_STATE_HIDDEN"),
+                               GDK_NONE);
     }
   else
     {
@@ -4054,6 +4068,9 @@ gdk_window_deiconify (GdkWindow *window)
       gdk_synthesize_window_state (window,
                                    GDK_WINDOW_STATE_ICONIFIED,
                                    0);
+      gdk_wmspec_change_state (FALSE, window,
+                               gdk_atom_intern_static_string ("_NET_WM_STATE_HIDDEN"),
+                               GDK_NONE);
     }
 }
 

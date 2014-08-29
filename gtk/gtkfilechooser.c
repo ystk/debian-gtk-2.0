@@ -529,6 +529,98 @@
  * 	</variablelist>
  * </refsect3>
  * </refsect2>
+ * <refsect2 id="gtkfilechooser-configuration-options">
+ * <title>Configuration Options</title>
+ * <para>
+ * In GTK+ 2.x, the file chooser saves its state and configuration options in a
+ * <filename>gtk-2.0/gtkfilechooser.ini</filename> file under the directory that
+ * g_get_user_config_dir() returns.  (On Unix, this usually resolves to
+ * <filename>$HOME/username/.config/gtk-2.0/gtkfilechooser.ini</filename>.)  While some of
+ * the available options can be changed directly through the file chooser's user
+ * interface, a couple are only editable by hand or by third-party tools (such
+ * as <ulink
+ * url="https://wiki.gnome.org/action/show/Apps/GnomeTweakTool">gnome-tweak-tool</ulink>).
+ * This section describes the available options.
+ * </para>
+ * <para>
+ * This is a sample of the contents of a <filename>gtkfilechooser.ini</filename>
+ * file.  Note that all the following options go under a
+ * <literal>[Filechooser Settings]</literal> heading.
+ * </para>
+ * <programlisting>
+ * [Filechooser Settings]
+ * LocationMode=filename-entry
+ * ShowHidden=false
+ * ExpandFolders=true
+ * GeometryX=570
+ * GeometryY=273
+ * GeometryWidth=780
+ * GeometryHeight=585
+ * ShowSizeColumn=true
+ * SortColumn=name
+ * SortOrder=ascending
+ * StartupMode=recent
+ * </programlisting>
+ * <refsect3 id="gtkfilechooser-settings-location-mode">
+ * <title>LocationMode key</title>
+ * <para>
+ * The <literal>LocationMode</literal> key controls whether the file chooser
+ * shows just a path bar, or a visible entry for the filename as well, for the
+ * benefit of typing-oriented users.  The possible string values for these modes
+ * are <literal>path-bar</literal> and <literal>filename-entry</literal>,
+ * respectively.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-show-hidden">
+ * <title>ShowHidden key</title>
+ * <para>
+ * The <literal>ShowHidden</literal> key controls whether the file chooser shows
+ * hidden files or not.  The value can be be <literal>true</literal> or
+ * <literal>false</literal>.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-show-size-column">
+ * <title>ShowSizeColumn key</title>
+ * <para>
+ * The <literal>ShowSize</literal> key controls whether the file chooser shows
+ * a column with file sizes.  The value can be be <literal>true</literal> or
+ * <literal>false</literal>.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-geometry-keys">
+ * <title>Geometry keys</title>
+ * <para>
+ * The four keys <literal>GeometryX</literal>, <literal>GeometryY</literal>,
+ * <literal>GeometryWidth</literal>, <literal>GeometryHeight</literal> save the
+ * position and dimensions of the #GtkFileChooserDialog's window.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-sort-column">
+ * <title>SortColumn key</title>
+ * <para>
+ * The <literal>SortColumn</literal> key can be one of the strings
+ * <literal>name</literal>, <literal>modified</literal>, or
+ * <literal>size</literal>.  It controls which of the columns in the file
+ * chooser is used for sorting the list of files.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-sort-order">
+ * <title>SortOrder key</title>
+ * <para>
+ * The <literal>SortOrder</literal> key can be one of the strings
+ * <literal>ascending</literal> or <literal>descending</literal>.
+ * </para>
+ * </refsect3>
+ * <refsect3 id="gtkfilechooser-settings-startup-mode">
+ * <title>StartupMode key</title>
+ * <para>
+ * The <literal>StartupMode</literal> key controls whether the file chooser
+ * starts up showing the list of recently-used files, or the contents of the
+ * current working directory.  Respectively, the values can be
+ * <literal>recent</literal> or <literal>cwd</literal>.
+ * </para>
+ * </refsect3>
+ * </refsect2>
  */
 
 
@@ -934,6 +1026,10 @@ gtk_file_chooser_get_action (GtkFileChooser *chooser)
  * rather than the URI functions like
  * gtk_file_chooser_get_uri(),
  *
+ * On some systems non-native files may still be
+ * available using the native filesystem via a userspace
+ * filesystem (FUSE).
+ *
  * Since: 2.4
  **/
 void
@@ -1224,6 +1320,22 @@ files_to_strings (GSList  *files,
   return g_slist_reverse (strings);
 }
 
+static gchar *
+file_to_uri_with_native_path (GFile *file)
+{
+  gchar *result = NULL;
+  gchar *native;
+
+  native = g_file_get_path (file);
+  if (native)
+    {
+      result = g_filename_to_uri (native, NULL, NULL); /* NULL-GError */
+      g_free (native);
+    }
+
+  return result;
+}
+
 /**
  * gtk_file_chooser_get_filenames:
  * @chooser: a #GtkFileChooser
@@ -1368,7 +1480,9 @@ gtk_file_chooser_set_current_name  (GtkFileChooser *chooser,
  * folder.
  * 
  * Return value: The currently selected URI, or %NULL
- *  if no file is selected. Free with g_free()
+ *  if no file is selected. If gtk_file_chooser_set_local_only() is set to %TRUE
+ * (the default) a local URI will be returned for any FUSE locations.
+ * Free with g_free()
  *
  * Since: 2.4
  **/
@@ -1383,7 +1497,11 @@ gtk_file_chooser_get_uri (GtkFileChooser *chooser)
   file = gtk_file_chooser_get_file (chooser);
   if (file)
     {
-      result = g_file_get_uri (file);
+      if (gtk_file_chooser_get_local_only (chooser))
+	  result = file_to_uri_with_native_path (file);
+      else 
+          result = g_file_get_uri (file);
+
       g_object_unref (file);
     }
 
@@ -1554,7 +1672,11 @@ gtk_file_chooser_get_uris (GtkFileChooser *chooser)
 
   files = gtk_file_chooser_get_files (chooser);
 
-  result = files_to_strings (files, g_file_get_uri);
+  if (gtk_file_chooser_get_local_only (chooser))
+    result = files_to_strings (files, file_to_uri_with_native_path);
+  else
+    result = files_to_strings (files, g_file_get_uri);
+
   g_slist_foreach (files, (GFunc) g_object_unref, NULL);
   g_slist_free (files);
 

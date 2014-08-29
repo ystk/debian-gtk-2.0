@@ -38,7 +38,6 @@
 #include "gtkalias.h"
 
 #define SETTINGS_GROUP		"Filechooser Settings"
-#define LAST_FOLDER_URI_KEY     "LastFolderUri"
 #define LOCATION_MODE_KEY	"LocationMode"
 #define SHOW_HIDDEN_KEY		"ShowHidden"
 #define SHOW_SIZE_COLUMN_KEY    "ShowSizeColumn"
@@ -48,12 +47,16 @@
 #define GEOMETRY_HEIGHT_KEY	"GeometryHeight"
 #define SORT_COLUMN_KEY         "SortColumn"
 #define SORT_ORDER_KEY          "SortOrder"
+#define STARTUP_MODE_KEY        "StartupMode"
 
 #define COLUMN_NAME_STRING      "name"
 #define COLUMN_MTIME_STRING     "modified"
 #define COLUMN_SIZE_STRING      "size"
 #define SORT_ASCENDING_STRING   "ascending"
 #define SORT_DESCENDING_STRING  "descending"
+
+#define STARTUP_MODE_RECENT_STRING "recent"
+#define STARTUP_MODE_CWD_STRING    "cwd"
 
 #define MODE_PATH_BAR          "path-bar"
 #define MODE_FILENAME_ENTRY    "filename-entry"
@@ -113,6 +116,7 @@ ensure_settings_read (GtkFileChooserSettings *settings)
   GKeyFile *key_file;
   gchar *location_mode_str, *filename;
   gchar *sort_column, *sort_order;
+  gchar *startup_mode;
   gboolean value;
 
   if (settings->settings_read)
@@ -137,10 +141,6 @@ ensure_settings_read (GtkFileChooserSettings *settings)
 
   if (!g_key_file_has_group (key_file, SETTINGS_GROUP))
     goto out;
-
-  /* Last folder URI */
-
-  settings->last_folder_uri = g_key_file_get_string (key_file, SETTINGS_GROUP, LAST_FOLDER_URI_KEY, NULL);
 
   /* Location mode */
 
@@ -220,6 +220,23 @@ ensure_settings_read (GtkFileChooserSettings *settings)
       g_free (sort_order);
     }
 
+  /* Startup mode */
+
+  startup_mode = g_key_file_get_string (key_file, SETTINGS_GROUP,
+					STARTUP_MODE_KEY, NULL);
+  if (startup_mode)
+    {
+      if (EQ (STARTUP_MODE_RECENT_STRING, startup_mode))
+	settings->startup_mode = STARTUP_MODE_RECENT;
+      else if (EQ (STARTUP_MODE_CWD_STRING, startup_mode))
+	settings->startup_mode = STARTUP_MODE_CWD;
+      else
+	g_warning ("Unknown startup mode '%s' encountered in filechooser settings",
+		   startup_mode);
+
+      g_free (startup_mode);
+    }
+
  out:
 
   g_key_file_free (key_file);
@@ -238,7 +255,6 @@ _gtk_file_chooser_settings_class_init (GtkFileChooserSettingsClass *class)
 static void
 _gtk_file_chooser_settings_init (GtkFileChooserSettings *settings)
 {
-  settings->last_folder_uri = NULL;
   settings->location_mode = LOCATION_MODE_PATH_BAR;
   settings->sort_order = GTK_SORT_ASCENDING;
   settings->sort_column = FILE_LIST_COL_NAME;
@@ -248,25 +264,13 @@ _gtk_file_chooser_settings_init (GtkFileChooserSettings *settings)
   settings->geometry_y	    = -1;
   settings->geometry_width  = -1;
   settings->geometry_height = -1;
+  settings->startup_mode = STARTUP_MODE_RECENT;
 }
 
 GtkFileChooserSettings *
 _gtk_file_chooser_settings_new (void)
 {
   return g_object_new (GTK_FILE_CHOOSER_SETTINGS_TYPE, NULL);
-}
-
-char *
-_gtk_file_chooser_settings_get_last_folder_uri (GtkFileChooserSettings *settings)
-{
-  return g_strdup (settings->last_folder_uri);
-}
-
-void
-_gtk_file_chooser_settings_set_last_folder_uri (GtkFileChooserSettings *settings, const char *uri)
-{
-  g_free (settings->last_folder_uri);
-  settings->last_folder_uri = g_strdup (uri);
 }
 
 LocationMode
@@ -367,6 +371,20 @@ _gtk_file_chooser_settings_set_sort_order (GtkFileChooserSettings *settings,
   settings->sort_order = sort_order;
 }
 
+void
+_gtk_file_chooser_settings_set_startup_mode (GtkFileChooserSettings *settings,
+					     StartupMode             startup_mode)
+{
+  settings->startup_mode = startup_mode;
+}
+
+StartupMode
+_gtk_file_chooser_settings_get_startup_mode (GtkFileChooserSettings *settings)
+{
+  ensure_settings_read (settings);
+  return settings->startup_mode;
+}
+
 gboolean
 _gtk_file_chooser_settings_save (GtkFileChooserSettings *settings,
 				 GError                **error)
@@ -377,6 +395,7 @@ _gtk_file_chooser_settings_save (GtkFileChooserSettings *settings,
   gchar *contents;
   gchar *sort_column;
   gchar *sort_order;
+  gchar *startup_mode;
   gsize len;
   gboolean retval;
   GKeyFile *key_file;
@@ -432,13 +451,26 @@ _gtk_file_chooser_settings_save (GtkFileChooserSettings *settings,
       sort_order = NULL;
     }
 
+  switch (settings->startup_mode)
+    {
+    case STARTUP_MODE_RECENT:
+      startup_mode = STARTUP_MODE_RECENT_STRING;
+      break;
+
+    case STARTUP_MODE_CWD:
+      startup_mode = STARTUP_MODE_CWD_STRING;
+      break;
+
+    default:
+      g_assert_not_reached ();
+      startup_mode = NULL;
+    }
+
   key_file = g_key_file_new ();
 
   /* Initialise with the on-disk keyfile, so we keep unknown options */
   g_key_file_load_from_file (key_file, filename, 0, NULL);
 
-  g_key_file_set_string (key_file, SETTINGS_GROUP,
-			 LAST_FOLDER_URI_KEY, settings->last_folder_uri);
   g_key_file_set_string (key_file, SETTINGS_GROUP,
 			 LOCATION_MODE_KEY, location_mode_str);
   g_key_file_set_boolean (key_file, SETTINGS_GROUP,
@@ -457,6 +489,8 @@ _gtk_file_chooser_settings_save (GtkFileChooserSettings *settings,
 			 SORT_COLUMN_KEY, sort_column);
   g_key_file_set_string (key_file, SETTINGS_GROUP,
 			 SORT_ORDER_KEY, sort_order);
+  g_key_file_set_string (key_file, SETTINGS_GROUP,
+			 STARTUP_MODE_KEY, startup_mode);
 
   contents = g_key_file_to_data (key_file, &len, error);
   g_key_file_free (key_file);

@@ -3057,7 +3057,6 @@ gtk_tree_view_button_release (GtkWidget      *widget,
 
   if (event->button == 1)
     {
-      gtk_grab_remove (widget);
       if (tree_view->priv->button_pressed_node == tree_view->priv->prelight_node &&
           GTK_TREE_VIEW_FLAG_SET (tree_view, GTK_TREE_VIEW_ARROW_PRELIT))
 	{
@@ -3081,6 +3080,8 @@ gtk_tree_view_button_release (GtkWidget      *widget,
 
       tree_view->priv->button_pressed_tree = NULL;
       tree_view->priv->button_pressed_node = NULL;
+
+      gtk_grab_remove (widget);
     }
 
   return TRUE;
@@ -4287,7 +4288,7 @@ gtk_tree_view_draw_grid_lines (GtkTreeView    *tree_view,
     return;
 
   /* Only draw the lines for visible rows and columns */
-  for (list = tree_view->priv->columns; list; list = list->next, i++)
+  for (list = tree_view->priv->columns; list; list = list->next)
     {
       GtkTreeViewColumn *column = list->data;
 
@@ -4297,6 +4298,8 @@ gtk_tree_view_draw_grid_lines (GtkTreeView    *tree_view,
 
       if (! column->visible)
 	continue;
+
+      i++;
 
       current_x += column->width;
 
@@ -11863,7 +11866,13 @@ gtk_tree_view_expand_all (GtkTreeView *tree_view)
 static gboolean
 expand_collapse_timeout (gpointer data)
 {
-  return do_expand_collapse (data);
+  GtkTreeView *tree_view = GTK_TREE_VIEW (data);
+  gboolean retval = do_expand_collapse (data);
+
+  if (! retval)
+    remove_expand_collapse_timeout (tree_view);
+
+  return retval;
 }
 
 static void

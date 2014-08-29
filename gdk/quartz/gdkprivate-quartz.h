@@ -160,6 +160,8 @@ void       _gdk_quartz_window_debug_highlight       (GdkWindow *window,
 
 void       _gdk_quartz_window_set_needs_display_in_rect (GdkWindow    *window,
                                                          GdkRectangle *rect);
+void       _gdk_quartz_window_set_needs_display_in_region (GdkWindow    *window,
+                                                           GdkRegion    *region);
 
 void       _gdk_quartz_window_update_position           (GdkWindow    *window);
 
@@ -176,7 +178,7 @@ GdkEventMask _gdk_quartz_events_get_current_event_mask (void);
 GdkModifierType _gdk_quartz_events_get_current_keyboard_modifiers (void);
 GdkModifierType _gdk_quartz_events_get_current_mouse_modifiers    (void);
 
-void         _gdk_quartz_events_send_enter_notify_event (GdkWindow *window);
+void         _gdk_quartz_events_break_all_grabs         (guint32    time);
 
 /* Event loop */
 gboolean   _gdk_quartz_event_loop_check_pending (void);
@@ -196,6 +198,7 @@ GdkImage *_gdk_quartz_image_copy_to_image (GdkDrawable *drawable,
 /* Keys */
 GdkEventType _gdk_quartz_keys_event_type  (NSEvent   *event);
 gboolean     _gdk_quartz_keys_is_modifier (guint      keycode);
+void         _gdk_quartz_synthesize_null_key_event (GdkWindow *window);
 
 /* Drawable */
 void        _gdk_quartz_drawable_finish (GdkDrawable *drawable);
