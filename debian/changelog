@@ -1,3 +1,121 @@
+gtk+2.0 (2.24.24-1) unstable; urgency=medium
+
+  * New upstream release 2.24.24.
+  * debian/patches/099_format_security_fixes.patch: Drop, included in this
+    upstream release.
+  * update-icon-caches: Pass the new --include-image-data flag to preserve
+    compatibility.
+
+ -- Iain Lane <laney@debian.org>  Tue, 24 Jun 2014 11:43:22 +0100
+
+gtk+2.0 (2.24.23-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump Standards-Version to 3.9.5.
+  * Enable hardening build flags using /usr/share/dpkg/buildflags.mk.
+  * debian/patches/099_format_security_fixes.patch: Fix a format string
+    vulnerability in the pixbuf engine.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 04 Apr 2014 15:34:45 +0200
+
+gtk+2.0 (2.24.22-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 22 Oct 2013 23:33:46 +0200
+
+gtk+2.0 (2.24.21-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use the official field for udebs: Package-Type.
+  * Update 001_static-linking-dont-query-immodules.patch, follow upstream and
+    use immodules.cache instead of gtk.immodules.
+  * Install gtk-doc API documentation for gtk and gdk to the correct location
+    so it can be found by devhelp. Closes: #718360
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 21 Sep 2013 23:37:03 +0200
+
+gtk+2.0 (2.24.20-1) unstable; urgency=low
+
+  * New upstream release.
+  * Remove debian/patches/011_immodule-cache-dir.patch, upstream changed the
+    location and name of the cache file to be consistent what's used in
+    gtk+3.0. It's now in $libdir/gtk-2.0/2.10.0/immodules.cache.
+  * Update and simplify our trigger for gtk-query-immodules-2.0, use the new
+    --update-cache option instead of redirecting stdout.
+  * Update postrm to clean up the renamed immodules.cache file.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 06 Jul 2013 00:10:40 +0200
+
+gtk+2.0 (2.24.19-1) unstable; urgency=low
+
+  * New upstream release.
+  * Refresh patches.
+  * Update Vcs-* URLs.
+  * Bump Standards-Version to 3.9.4. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 28 Jun 2013 23:43:02 +0200
+
+gtk+2.0 (2.24.18-1) unstable; urgency=low
+
+  [ Josselin Mouette ]
+  * Switch to interest-noawait for triggers. They only affect IM 
+    modules, so this is not likely to cause upgrade problems.
+
+  [ Michael Biebl ]
+  * New upstream release.
+    - Fixes incorrect selection in file chooser button. Closes: #708618
+  * Drop debian/patches/041_ia32-libs.patch since we properly support
+    multiarch now and no longer need the biarch hack.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 17 May 2013 14:15:18 +0200
+
+gtk+2.0 (2.24.17-2) unstable; urgency=low
+
+  * Upload to unstable.
+  * Drop the unused opt flavor.
+  * Don't install the doc-base.in file for libgtk2.0-doc.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 07 May 2013 18:43:19 +0200
+
+gtk+2.0 (2.24.17-1) experimental; urgency=low
+
+  [ Iain Lane ]
+  * Remove dh_installdoc calls which install files that are supposed to be
+    symlinked to the -common package. These symlinks get overwritten later on
+    (by dh_compress), turning back into real files and breaking multiarch
+    coinstallability (LP: #1132881)
+  * Symlink AUTHORS files to -common too
+
+  [ Emilio Pozuelo Monfort ]
+  * New upstream release.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Mon, 04 Mar 2013 23:18:24 +0100
+
+gtk+2.0 (2.24.16-1) experimental; urgency=low
+
+  * New upstream release.
+    + debian/patches:
+      - Refreshed.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 24 Feb 2013 13:00:16 +0100
+
+gtk+2.0 (2.24.14-1) experimental; urgency=low
+
+  * New upstream release.
+  * Refresh patches.
+  * Remove a few no longer needed Replaces.
+  * Remove explicit Build-Depends on gir packages.
+  * Make libgtk2.0-dev depend on gir1.2-gtk-2.0.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 05 Jan 2013 07:32:25 +0100
+
+gtk+2.0 (2.24.13-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 03 Oct 2012 20:32:26 +0200
+
 gtk+2.0 (2.24.10-2) unstable; urgency=low
 
   [ Josselin Mouette ]

@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\gtk+.vsprops"
+			InheritedPropertySheets=".\gtk-build-defines.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -32,10 +32,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\gdk-pixbuf;..\..\..\gdk;..\..\..\gtk"
-				PreprocessorDefinitions="_DEBUG;G_ENABLE_DEBUG;$(GtkPrefixDefine)"
+				PreprocessorDefinitions="_DEBUG;G_ENABLE_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="2"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -55,7 +55,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\gtk+.vsprops"
+			InheritedPropertySheets=".\gtk-build-defines.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -65,7 +65,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\gdk-pixbuf;..\..\..\gdk;..\..\..\gtk"
-				PreprocessorDefinitions="_DEBUG;G_ENABLE_DEBUG;$(GtkPrefixDefine)"
+				PreprocessorDefinitions="_DEBUG;G_ENABLE_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -88,7 +88,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\gtk+.vsprops"
+			InheritedPropertySheets=".\gtk-build-defines.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -98,7 +98,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\gdk-pixbuf;..\..\..\gdk;..\..\..\gtk"
-				PreprocessorDefinitions="$(GtkPrefixDefine)"
+				PreprocessorDefinitions=""
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -121,7 +121,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\gtk+.vsprops"
+			InheritedPropertySheets=".\gtk-build-defines.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\gdk-pixbuf;..\..\..\gdk;..\..\..\gtk"
-				PreprocessorDefinitions="$(GtkPrefixDefine)"
+				PreprocessorDefinitions=""
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

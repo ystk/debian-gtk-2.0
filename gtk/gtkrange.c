@@ -2310,6 +2310,8 @@ gtk_range_button_press (GtkWidget      *widget,
 			GdkEventButton *event)
 {
   GtkRange *range = GTK_RANGE (widget);
+  gboolean primary_warps;
+  gint page_increment_button, warp_button;
   
   if (!gtk_widget_has_focus (widget))
     gtk_widget_grab_focus (widget);
@@ -2322,11 +2324,25 @@ gtk_range_button_press (GtkWidget      *widget,
   range->layout->mouse_y = event->y;
   if (gtk_range_update_mouse_location (range))
     gtk_widget_queue_draw (widget);
-    
-  if (range->layout->mouse_location == MOUSE_TROUGH  &&
-      event->button == 1)
+
+  g_object_get (gtk_widget_get_settings (widget),
+                "gtk-primary-button-warps-slider", &primary_warps,
+                NULL);
+  if (primary_warps)
     {
-      /* button 1 steps by page increment, as with button 2 on a stepper
+      warp_button = 1;
+      page_increment_button = 3;
+    }
+  else
+    {
+      warp_button = 2;
+      page_increment_button = 1;
+    }
+
+  if (range->layout->mouse_location == MOUSE_TROUGH  &&
+      event->button == page_increment_button)
+    {
+      /* this button steps by page increment, as with button 2 on a stepper
        */
       GtkScrollType scroll;
       gdouble click_value;
@@ -2369,18 +2385,17 @@ gtk_range_button_press (GtkWidget      *widget,
       return TRUE;
     }
   else if ((range->layout->mouse_location == MOUSE_TROUGH &&
-            event->button == 2) ||
+            event->button == warp_button) ||
            range->layout->mouse_location == MOUSE_SLIDER)
     {
       gboolean need_value_update = FALSE;
       gboolean activate_slider;
 
       /* Any button can be used to drag the slider, but you can start
-       * dragging the slider with a trough click using button 2;
-       * On button 2 press, we warp the slider to mouse position,
-       * then begin the slider drag.
+       * dragging the slider with a trough click using the warp button;
+       * we warp the slider to mouse position, then begin the slider drag.
        */
-      if (event->button == 2)
+      if (range->layout->mouse_location != MOUSE_SLIDER)
         {
           gdouble slider_low_value, slider_high_value, new_value;
           

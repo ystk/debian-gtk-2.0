@@ -105,13 +105,33 @@ static void
 gdk_pixmap_impl_win32_finalize (GObject *object)
 {
   GdkPixmapImplWin32 *impl = GDK_PIXMAP_IMPL_WIN32 (object);
-  GdkPixmap *wrapper = GDK_PIXMAP (GDK_DRAWABLE_IMPL_WIN32 (impl)->wrapper);
+  GdkDrawableImplWin32 *drawable_impl = GDK_DRAWABLE_IMPL_WIN32 (impl);
+  GdkPixmap *wrapper = GDK_PIXMAP (drawable_impl->wrapper);
 
   GDK_NOTE (PIXMAP, g_print ("gdk_pixmap_impl_win32_finalize: %p\n",
 			     GDK_PIXMAP_HBITMAP (wrapper)));
 
   if (!impl->is_foreign)
-    GDK_DRAWABLE_IMPL_WIN32 (impl)->hdc_count--;
+    {
+      /* Only decrement count if we did set the hdc */
+      if (drawable_impl->hdc)
+	drawable_impl->hdc_count--;
+
+      if (drawable_impl->cairo_surface)
+	{
+	  /* Tell outstanding owners that the surface is useless */
+	  cairo_surface_finish (drawable_impl->cairo_surface);
+
+	  /* Drop our reference */
+	  cairo_surface_destroy (drawable_impl->cairo_surface);
+	  drawable_impl->cairo_surface = NULL;
+	  if (impl->is_allocated)
+	    {
+	      GDI_CALL (DeleteDC, (drawable_impl->hdc));
+	      GDI_CALL (DeleteObject, (GDK_PIXMAP_HBITMAP (wrapper)));
+	    }
+	}
+    }
 
   _gdk_win32_drawable_finish (GDK_DRAWABLE (object));
 
@@ -211,7 +231,8 @@ _gdk_pixmap_new (GdkDrawable *drawable,
   if (depth != 15 && depth != 16)
     {
       dib_surface = cairo_win32_surface_create_with_dib (format, width, height);
-      if (dib_surface == NULL)
+      if (dib_surface == NULL ||
+	  cairo_surface_status (dib_surface) != CAIRO_STATUS_SUCCESS)
 	{
 	  g_object_unref ((GObject *) pixmap);
 	  return NULL;
@@ -224,7 +245,18 @@ _gdk_pixmap_new (GdkDrawable *drawable,
       /* Get the bitmap from the cairo hdc */
       hbitmap = GetCurrentObject (hdc, OBJ_BITMAP);
 
+      /* Cairo_win32_surface_get_image() returns NULL on failure, but
+	 this is likely an oversight and future versions will return a
+	 "nil" surface.
+       */
       image_surface = cairo_win32_surface_get_image (dib_surface);
+      if (image_surface == NULL ||
+	  cairo_surface_status (image_surface) != CAIRO_STATUS_SUCCESS)
+      {
+	cairo_surface_destroy (dib_surface);
+	g_object_unref ((GObject*) pixmap);
+	return NULL;
+      }
       bits = cairo_image_surface_get_data (image_surface);
     }
   else
@@ -271,15 +303,15 @@ _gdk_pixmap_new (GdkDrawable *drawable,
       bmi.u.bmiMasks[1] = visual->green_mask;
       bmi.u.bmiMasks[2] = visual->blue_mask;
 
-      hbitmap = CreateDIBSection (hdc, (BITMAPINFO *) &bmi,
-				  iUsage, (PVOID *) &bits, NULL, 0);
-      GDI_CALL (ReleaseDC, (hwnd, hdc));
-      if (hbitmap == NULL)
+      if ((hbitmap = CreateDIBSection (hdc, (BITMAPINFO *) &bmi,
+				       iUsage, (PVOID *) &bits, NULL, 0)) == NULL)
 	{
 	  WIN32_GDI_FAILED ("CreateDIBSection");
+	  GDI_CALL (ReleaseDC, (hwnd, hdc));
 	  g_object_unref ((GObject *) pixmap);
 	  return NULL;
 	}
+      GDI_CALL (ReleaseDC, (hwnd, hdc));
 
       dib_surface = cairo_image_surface_create_for_data (bits,
 							 format, width, height,
@@ -294,6 +326,7 @@ _gdk_pixmap_new (GdkDrawable *drawable,
 	}
 
       SelectObject (hdc, hbitmap);
+      pixmap_impl->is_allocated = TRUE;
     }
 
   /* We need to use the same hdc, because only one hdc

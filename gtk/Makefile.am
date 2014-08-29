@@ -51,6 +51,7 @@ INCLUDES =						\
 	-DGTK_DISABLE_DEPRECATED			\
 	-DGTK_FILE_SYSTEM_ENABLE_UNSUPPORTED		\
 	-DGTK_PRINT_BACKEND_ENABLE_UNSUPPORTED		\
+	$(GMODULE_CFLAGS)				\
 	$(GTK_DEBUG_FLAGS)				\
 	$(GTK_DEP_CFLAGS)				\
 	$(INCLUDED_IMMODULE_DEFINE)
@@ -120,6 +121,7 @@ endif
 libgtkincludedir = $(includedir)/gtk-2.0/gtk
 libadd =								\
 	$(top_builddir)/gdk/$(gdktargetlib)				\
+	$(GMODULE_LIBS) \
 	$(GTK_DEP_LIBS)
 deps =
 
@@ -951,7 +953,7 @@ dist-hook: ../build/win32/vs9/gtk.vcproj ../build/win32/vs10/gtk.vcxproj ../buil
 	done >libgtk.sourcefiles
 	$(CPP) -P - <$(top_srcdir)/build/win32/vs9/gtk.vcprojin >$@
 	rm libgtk.sourcefiles
-	
+
 ../build/win32/vs10/gtk.vcxproj: ../build/win32/vs10/gtk.vcxprojin
 	for F in $(gtk_base_c_sources) $(gtk_os_win32_c_sources) $(gtk_use_win32_c_sources); do \
 		case $$F in \
@@ -961,7 +963,7 @@ dist-hook: ../build/win32/vs9/gtk.vcproj ../build/win32/vs10/gtk.vcxproj ../buil
 	done >libgtk.vs10.sourcefiles
 	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/gtk.vcxprojin >$@
 	rm libgtk.vs10.sourcefiles
-	
+
 ../build/win32/vs10/gtk.vcxproj.filters: ../build/win32/vs10/gtk.vcxproj.filtersin
 	for F in $(gtk_base_c_sources) $(gtk_os_win32_c_sources) $(gtk_use_win32_c_sources); do \
 		case $$F in \
@@ -995,7 +997,7 @@ distclean-local:
 
 DEPS = $(gtktargetlib) $(top_builddir)/gdk/$(gdktargetlib)
 
-TEST_DEPS = $(DEPS) gtk.immodules
+TEST_DEPS = $(DEPS) immodules.cache
 
 LDADDS =								\
 	$(gtktargetlib)							\
@@ -1328,7 +1330,6 @@ GENERATED_ICONS = \
 	stock-icons/16/folder-remote.png 		\
 	stock-icons/16/user-home.png 			\
 	stock-icons/16/user-desktop.png 		\
-	stock-icons/16/text-x-generic.png 		\
 	stock-icons/24/go-previous-rtl.png 		\
 	stock-icons/24/go-next-rtl.png 			\
 	stock-icons/24/go-first-rtl.png 		\
@@ -1340,8 +1341,7 @@ GENERATED_ICONS = \
 	stock-icons/24/document-save.png 		\
 	stock-icons/24/folder-remote.png 		\
 	stock-icons/24/user-home.png 			\
-	stock-icons/24/user-desktop.png 		\
-	stock-icons/24/text-x-generic.png
+	stock-icons/24/user-desktop.png
 
 # need to copy the icons so that we can replace the generated ones with
 # symlinks, even in the readonly srcdir case
@@ -1394,6 +1394,7 @@ endif
 gtkbuiltincache.h: @REBUILD@ stamp-icons
 	$(MAKE) $(AM_MAKEFLAGS) gtk-update-icon-cache$(EXEEXT) $(GTK_UPDATE_ICON_CACHE_MANIFEST)
 	$(gtk_update_icon_cache_program) --force --ignore-theme-index		\
+	   --include-image-data							\
 	   --source builtin_icons stock-icons > gtkbuiltincache.h.tmp &&        \
 	mv gtkbuiltincache.h.tmp gtkbuiltincache.h
 

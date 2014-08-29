@@ -99,8 +99,9 @@ _gtk_get_libdir (void)
   if (gtk_libdir == NULL)
     {
       gchar *root = g_win32_get_package_installation_directory_of_module (gtk_dll);
-      gchar *slash = strrchr (root, '\\');
-      if (g_ascii_strcasecmp (slash + 1, ".libs") == 0)
+      gchar *slash = root ? strrchr (root, '\\') : NULL;
+      if (slash != NULL &&
+          g_ascii_strcasecmp (slash + 1, ".libs") == 0)
 	gtk_libdir = GTK_LIBDIR;
       else
 	gtk_libdir = g_build_filename (root, "lib", NULL);
@@ -1556,7 +1557,7 @@ gtk_main_do_event (GdkEvent *event)
        *  then we send the event to the original event widget.
        *  This is the key to implementing modality.
        */
-      if (gtk_widget_is_sensitive (event_widget) &&
+      if ((gtk_widget_is_sensitive (event_widget) || event->type == GDK_SCROLL) &&
 	  gtk_widget_is_ancestor (event_widget, grab_widget))
 	grab_widget = event_widget;
     }

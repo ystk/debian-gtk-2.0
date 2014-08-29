@@ -46,7 +46,7 @@
 static gboolean force_update = FALSE;
 static gboolean ignore_theme_index = FALSE;
 static gboolean quiet = FALSE;
-static gboolean index_only = FALSE;
+static gboolean index_only = TRUE;
 static gboolean validate = FALSE;
 static gchar *var_name = "-";
 
@@ -576,6 +576,23 @@ maybe_cache_icon_data (Image       *image,
     }
 }
 
+/**
+ * Finds all dir separators and replaces them with '/'.
+ * This makes sure that only /-separated paths are written in cache files,
+ * maintaining compatibility with theme index files that use slashes as
+ * directory separators on all platforms.
+ */
+static void
+replace_backslashes_with_slashes (gchar *path)
+{
+  size_t i;
+  if (path == NULL)
+    return;
+  for (i = 0; path[i]; i++)
+    if (G_IS_DIR_SEPARATOR (path[i]))
+      path[i] = '/';
+}
+
 static GList *
 scan_directory (const gchar *base_path, 
 		const gchar *subdir, 
@@ -590,7 +607,7 @@ scan_directory (const gchar *base_path,
   gboolean dir_added = FALSE;
   guint dir_index = 0xffff;
   
-  dir_path = g_build_filename (base_path, subdir, NULL);
+  dir_path = g_build_path ("/", base_path, subdir, NULL);
 
   /* FIXME: Use the gerror */
   dir = g_dir_open (dir_path, 0, NULL);
@@ -609,13 +626,14 @@ scan_directory (const gchar *base_path,
       gchar *basename, *dot;
 
       path = g_build_filename (dir_path, name, NULL);
+
       retval = g_file_test (path, G_FILE_TEST_IS_DIR);
       if (retval)
 	{
 	  gchar *subsubdir;
 
 	  if (subdir)
-	    subsubdir = g_build_filename (subdir, name, NULL);
+	    subsubdir = g_build_path ("/", subdir, name, NULL);
 	  else
 	    subsubdir = g_strdup (name);
 	  directories = scan_directory (base_path, subsubdir, files, 
@@ -1641,6 +1659,7 @@ static GOptionEntry args[] = {
   { "force", 'f', 0, G_OPTION_ARG_NONE, &force_update, N_("Overwrite an existing cache, even if up to date"), NULL },
   { "ignore-theme-index", 't', 0, G_OPTION_ARG_NONE, &ignore_theme_index, N_("Don't check for the existence of index.theme"), NULL },
   { "index-only", 'i', 0, G_OPTION_ARG_NONE, &index_only, N_("Don't include image data in the cache"), NULL },
+  { "include-image-data", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &index_only, N_("Include image data in the cache"), NULL },
   { "source", 'c', 0, G_OPTION_ARG_STRING, &var_name, N_("Output a C header file"), "NAME" },
   { "quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet, N_("Turn off verbose output"), NULL },
   { "validate", 'v', 0, G_OPTION_ARG_NONE, &validate, N_("Validate existing icon cache"), NULL },
@@ -1744,6 +1763,7 @@ main (int argc, char **argv)
     return 0;
 
   g_type_init ();
+  replace_backslashes_with_slashes (path);
   build_cache (path);
 
   if (strcmp (var_name, "-") != 0)

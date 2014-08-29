@@ -115,10 +115,15 @@
   switch ([event type])
     {
     case NSLeftMouseUp:
+    {
+      double time = ((double)[event timestamp]) * 1000.0;
+
+      _gdk_quartz_events_break_all_grabs (time);
       inManualMove = NO;
       inManualResize = NO;
       inMove = NO;
       break;
+    }
 
     case NSLeftMouseDragged:
       if ([self trackManualMove] || [self trackManualResize])
@@ -135,6 +140,39 @@
 -(BOOL)isInMove
 {
   return inMove;
+}
+
+-(void)checkSendEnterNotify
+{
+  GdkWindow *window = [[self contentView] gdkWindow];
+  GdkWindowObject *private = (GdkWindowObject *)window;
+  GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  /* When a new window has been created, and the mouse
+   * is in the window area, we will not receive an NSMouseEntered
+   * event.  Therefore, we synthesize an enter notify event manually.
+   */
+  if (!initialPositionKnown)
+    {
+      initialPositionKnown = YES;
+
+      if (NSPointInRect ([NSEvent mouseLocation], [self frame]))
+        {
+          NSEvent *event;
+
+          event = [NSEvent enterExitEventWithType: NSMouseEntered
+                                         location: [self mouseLocationOutsideOfEventStream]
+                                    modifierFlags: 0
+                                        timestamp: [[NSApp currentEvent] timestamp]
+                                     windowNumber: [impl->toplevel windowNumber]
+                                          context: NULL
+                                      eventNumber: 0
+                                   trackingNumber: [impl->view trackingRect]
+                                         userData: nil];
+
+          [NSApp postEvent:event atStart:NO];
+        }
+    }
 }
 
 -(void)windowDidMove:(NSNotification *)aNotification
@@ -154,6 +192,8 @@
   event->configure.height = private->height;
 
   _gdk_event_queue_append (gdk_display_get_default (), event);
+
+  [self checkSendEnterNotify];
 }
 
 -(void)windowDidResize:(NSNotification *)aNotification
@@ -184,6 +224,8 @@
   event->configure.height = private->height;
 
   _gdk_event_queue_append (gdk_display_get_default (), event);
+
+  [self checkSendEnterNotify];
 }
 
 -(id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag screen:(NSScreen *)screen
@@ -284,6 +326,8 @@
     [impl->toplevel orderFront:nil];
 
   inShowOrHide = NO;
+
+  [self checkSendEnterNotify];
 }
 
 - (void)hide
@@ -295,6 +339,8 @@
   inShowOrHide = YES;
   [impl->toplevel orderOut:nil];
   inShowOrHide = NO;
+
+  initialPositionKnown = NO;
 }
 
 - (BOOL)trackManualMove
@@ -381,6 +427,11 @@
   inTrackManualResize = NO;
 
   return YES;
+}
+
+-(BOOL)isInManualResize
+{
+  return inManualResize;
 }
 
 -(void)beginManualResize

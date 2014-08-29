@@ -3484,25 +3484,23 @@ gdk_window_flush_outstanding_moves (GdkWindow *window)
 {
   GdkWindowObject *private;
   GdkWindowObject *impl_window;
-  GList *l;
   GdkWindowRegionMove *move;
 
   private = (GdkWindowObject *) window;
 
   impl_window = gdk_window_get_impl_window (private);
 
-  for (l = impl_window->outstanding_moves; l != NULL; l = l->next)
+  while (impl_window->outstanding_moves)
     {
-      move = l->data;
+      move = impl_window->outstanding_moves->data;
+      impl_window->outstanding_moves = g_list_delete_link (impl_window->outstanding_moves,
+							   impl_window->outstanding_moves);
 
       do_move_region_bits_on_impl (impl_window,
 				   move->dest_region, move->dx, move->dy);
 
       gdk_window_region_move_free (move);
     }
-
-  g_list_free (impl_window->outstanding_moves);
-  impl_window->outstanding_moves = NULL;
 }
 
 /**
@@ -5244,6 +5242,15 @@ gdk_window_add_update_window (GdkWindow *window)
   GSList *prev = NULL;
   gboolean has_ancestor_in_list = FALSE;
 
+  /*  Check whether "window" is already in "update_windows" list.
+   *  It could be added during execution of gtk_widget_destroy() when
+   *  setting focus widget to NULL and redrawing old focus widget.
+   *  See bug 711552.
+   */
+  tmp = g_slist_find (update_windows, window);
+  if (tmp != NULL)
+    return;
+
   for (tmp = update_windows; tmp; tmp = tmp->next)
     {
       GdkWindowObject *parent = GDK_WINDOW_OBJECT (window)->parent;
@@ -5269,7 +5276,7 @@ gdk_window_add_update_window (GdkWindow *window)
 	      prev = tmp;
 	    }
 	  /* here, tmp got advanced past all lower stacked siblings */
-	  tmp = g_slist_prepend (tmp, window);
+	  tmp = g_slist_prepend (tmp, g_object_ref (window));
 	  if (prev)
 	    prev->next = tmp;
 	  else
@@ -5282,7 +5289,7 @@ gdk_window_add_update_window (GdkWindow *window)
        */
       if (has_ancestor_in_list && gdk_window_is_ancestor (tmp->data, window))
 	{
-	  tmp = g_slist_prepend (tmp, window);
+	  tmp = g_slist_prepend (tmp, g_object_ref (window));
 
 	  if (prev)
 	    prev->next = tmp;
@@ -5296,7 +5303,7 @@ gdk_window_add_update_window (GdkWindow *window)
        */
       if (! tmp->next && has_ancestor_in_list)
 	{
-	  tmp = g_slist_append (tmp, window);
+	  tmp = g_slist_append (tmp, g_object_ref (window));
 	  return;
 	}
 
@@ -5307,13 +5314,20 @@ gdk_window_add_update_window (GdkWindow *window)
    *  hierarchy than what is already in the list) or the list is
    *  empty, prepend
    */
-  update_windows = g_slist_prepend (update_windows, window);
+  update_windows = g_slist_prepend (update_windows, g_object_ref (window));
 }
 
 static void
 gdk_window_remove_update_window (GdkWindow *window)
 {
-  update_windows = g_slist_remove (update_windows, window);
+  GSList *link;
+
+  link = g_slist_find (update_windows, window);
+  if (link != NULL)
+    {
+      update_windows = g_slist_delete_link (update_windows, link);
+      g_object_unref (window);
+    }
 }
 
 static gboolean
@@ -5465,6 +5479,7 @@ gdk_window_process_updates_internal (GdkWindow *window)
   GdkWindowImplIface *impl_iface;
   gboolean save_region = FALSE;
   GdkRectangle clip_box;
+  int iteration;
 
   /* Ensure the window lives while updating it */
   g_object_ref (window);
@@ -5472,8 +5487,15 @@ gdk_window_process_updates_internal (GdkWindow *window)
   /* If an update got queued during update processing, we can get a
    * window in the update queue that has an empty update_area.
    * just ignore it.
+   *
+   * We run this multiple times if needed because on win32 the
+   * first run can cause new (synchronous) updates from
+   * gdk_window_flush_outstanding_moves(). However, we
+   * limit it to two iterations to avoid any potential loops.
    */
-  if (private->update_area)
+  iteration = 0;
+  while (private->update_area &&
+	 iteration++ < 2)
     {
       GdkRegion *update_area = private->update_area;
       private->update_area = NULL;
@@ -5680,8 +5702,6 @@ gdk_window_process_all_updates (void)
   update_idle = 0;
 
   _gdk_windowing_before_process_all_updates ();
-
-  g_slist_foreach (old_update_windows, (GFunc)g_object_ref, NULL);
 
   while (tmp_list)
     {
@@ -11237,6 +11257,8 @@ gdk_window_create_similar_surface (GdkWindow *     window,
  * Gets the #GdkScreen associated with a #GdkWindow.
  *
  * Return value: the #GdkScreen associated with @window
+ *
+ * Since: 2.24
  */
 GdkScreen*
 gdk_window_get_screen (GdkWindow *window)
